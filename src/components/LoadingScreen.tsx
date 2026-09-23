@@ -8,7 +8,7 @@ interface LoadingScreenProps {
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
-  durationMs = 9000,
+  durationMs = 500,
 }) => {
   const [percent, setPercent] = useState(0);
 

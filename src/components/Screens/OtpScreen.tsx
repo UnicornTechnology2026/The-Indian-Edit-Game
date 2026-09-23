@@ -10,7 +10,7 @@ import {
 import { sound } from "../../utils/audio";
 
 export const OtpScreen: React.FC = () => {
-  const { state, setOtpVerified, navigateTo } = useGame();
+  const { state, setOtpVerified, registerUser, navigateTo } = useGame();
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [timeLeft, setTimeLeft] = useState(45);
@@ -63,6 +63,7 @@ export const OtpScreen: React.FC = () => {
 
     sound.playSuccess();
     setOtpVerified(true);
+    registerUser();
     navigateTo("screen-welcome");
   };
 
