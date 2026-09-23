@@ -1,14 +1,14 @@
 export type ScreenId =
-  | 'screen-login'
-  | 'screen-otp'
-  | 'screen-welcome'
-  | 'screen-level-1'
-  | 'screen-level-2'
-  | 'screen-level-3'
-  | 'screen-result'
-  | 'screen-social'
-  | 'screen-upload'
-  | 'screen-scratch';
+  | "screen-login"
+  | "screen-otp"
+  | "screen-welcome"
+  | "screen-level-1"
+  | "screen-level-2"
+  | "screen-level-3"
+  | "screen-result"
+  | "screen-social"
+  | "screen-upload"
+  | "screen-scratch";
 
 export interface PersonalityType {
   id: string;
@@ -35,7 +35,13 @@ export interface RewardGift {
   icon?: string;
 }
 
-export type CityCategory = 'CITY' | 'CULTURE' | 'FOOD' | 'TECHNOLOGY' | 'LIFESTYLE' | 'FUTURE';
+export type CityCategory =
+  | "CITY"
+  | "CULTURE"
+  | "FOOD"
+  | "TECHNOLOGY"
+  | "LIFESTYLE"
+  | "FUTURE";
 
 export interface CityElementItem {
   id: number;
@@ -52,7 +58,7 @@ export interface GameState {
   userPhone: string;
   otpVerified: boolean;
   currentScreen: ScreenId;
-  
+
   // Legacy scoring fields (kept for computeMasterScore's baseline components;
   // the Harvest Rush and Zero Mile Map levels that used to populate these
   // have been removed from the flow)
