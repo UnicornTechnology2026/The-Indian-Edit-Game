@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" width="100%" height="100%">
+  <defs>
+    <linearGradient id="wasteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8a9ba8"/>
+      <stop offset="40%" stop-color="#556270"/>
+      <stop offset="100%" stop-color="#343d46"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(10, 10)">
+    <!-- Crumpled crushed plastic bottle and waste -->
+    <path d="M40,70 L25,40 L45,30 L60,50 L95,40 L120,65 L105,95 L145,105 L160,135 L125,150 L90,130 L70,145 L40,135 L55,100 Z" fill="url(#wasteGrad)" stroke="#232b32" stroke-width="2"/>
+
+    <!-- Plastic Creases & Crinkles -->
+    <path d="M45,30 L75,70 L60,110 L105,95 L125,150" stroke="#cfd8dc" stroke-width="2" fill="none"/>
+    <path d="M95,40 L90,80 L145,105" stroke="#eceff1" stroke-width="1.5" fill="none"/>
+    <path d="M40,70 L90,80 L70,145" stroke="#90a4ae" stroke-width="1.5" fill="none"/>
+
+    <!-- Crushed Plastic Cap hanging off -->
+    <rect x="18" y="24" width="22" height="18" rx="2" fill="#d32f2f" stroke="#8a1818" stroke-width="1.5" transform="rotate(-25 25 30)"/>
+
+    <!-- Discarded Waste Symbol -->
+    <circle cx="100" cy="85" r="26" fill="#c62828" stroke="#ffffff" stroke-width="2"/>
+    <text x="100" y="93" font-family="'Inter', sans-serif" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">✕</text>
+    <text x="100" y="165" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#e57373" text-anchor="middle" letter-spacing="1">PLASTIC WASTE</text>
+  </g>
+</svg>

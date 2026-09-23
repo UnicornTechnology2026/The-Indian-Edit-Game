@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #070403;
+    --bg-secondary: #130a05;
+    --bg-tertiary: #1f1008;
+    --bg-card: rgba(20, 10, 6, 0.88);
+    --bg-card-hover: rgba(32, 16, 10, 0.96);
+
+    --earth-brown: #2d160b;
+    --terracotta: #c2531a;
+    --terracotta-dark: #8c3210;
+    --orange-nagpur: #e58325;
+    --orange-glow: #f59e0b;
+    --ruby-accent: #8b151b;
+    --ruby-deep: #5a0a0e;
+
+    --gold-primary: #d4af37;
+    --gold-light: #f7e7a9;
+    --gold-shimmer: #fff3c4;
+    --gold-dark: #937119;
+    --gold-border: rgba(212, 175, 55, 0.35);
+    --gold-border-bright: rgba(212, 175, 55, 0.85);
+    --gold-glow: rgba(212, 175, 55, 0.3);
+
+    --cream-white: #faf5eb;
+    --warm-beige: #ebd9c0;
+    --muted-sand: #ab9580;
+    --dark-charcoal: #0a0503;
+    --text-muted: #a6907c;
+  }
+
+  body {
+    position: relative;
+    color: #faf5eb;
+    font-family:
+      "Montserrat",
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+    min-height: 100vh;
+    background-color: #070403; /* fallback while image loads */
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: url("assets/images/fullSize.png");
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+    opacity: 0.5;
+    /* the blur */
+    filter: blur(2px);
+
+    /* scale up slightly so blurred edges don't reveal transparent gaps at the viewport border */
+    transform: scale(1.1);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-serif {
+    font-family:
+      "Cinzel", "Cormorant Garamond", "Playfair Display", Georgia, serif;
+    letter-spacing: 0.05em;
+  }
+}
+
+/* Custom Glass & Gold Utilities matching the luxury bottle aesthetics */
+.gold-card {
+  background: rgba(20, 10, 6, 0.88);
+  border: 1px solid rgba(212, 175, 55, 0.38);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.75),
+    inset 0 0 20px rgba(212, 175, 55, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 1rem;
+}
+
+.gold-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gold-card-hover:hover {
+  border-color: rgba(212, 175, 55, 0.75);
+  box-shadow:
+    0 16px 45px rgba(0, 0, 0, 0.85),
+    0 0 25px rgba(212, 175, 55, 0.22);
+  transform: translateY(-2px);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(
+    135deg,
+    #fff3c4 0%,
+    #f7e7a9 30%,
+    #d4af37 70%,
+    #937119 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.orange-gradient-text,
+.amber-gradient-text {
+  background: linear-gradient(135deg, #ffc278 0%, #e58325 55%, #b84a20 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ruby-gradient-text {
+  background: linear-gradient(
+    135deg,
+    #f87171 0%,
+    #dc2626 40%,
+    #8b151b 80%,
+    #5a0a0e 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #f7e7a9 0%, #d4af37 50%, #b89126 100%);
+  color: #0d0603;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  box-shadow: 0 4px 22px rgba(212, 175, 55, 0.42);
+  transition: all 0.25s ease;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #fff3c4 0%, #f7e7a9 50%, #d4af37 100%);
+  box-shadow: 0 6px 30px rgba(212, 175, 55, 0.65);
+  transform: translateY(-1px);
+}
+
+.btn-gold:active {
+  transform: translateY(1px);
+}
+
+.btn-secondary-outline {
+  background: rgba(18, 9, 5, 0.75);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #f7e7a9;
+  font-weight: 600;
+  border-radius: 9999px;
+  transition: all 0.25s ease;
+}
+
+.btn-secondary-outline:hover {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: rgba(212, 175, 55, 0.85);
+  color: #fff3c4;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070403;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d160b;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(0.8deg);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3.5s ease-in-out infinite;
+}

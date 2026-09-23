@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 320" width="100%" height="100%">
+  <defs>
+    <linearGradient id="genericPlastic" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7a8794"/>
+      <stop offset="30%" stop-color="#b4c2ce"/>
+      <stop offset="70%" stop-color="#8c9aa8"/>
+      <stop offset="100%" stop-color="#5a6674"/>
+    </linearGradient>
+    <filter id="wrongShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#wrongShadow)">
+    <!-- Cheap Blue Plastic Cap -->
+    <rect x="52" y="15" width="36" height="28" rx="3" fill="#2d68c4" stroke="#1b427d" stroke-width="1.5"/>
+    <line x1="56" y1="24" x2="84" y2="24" stroke="#fff" opacity="0.4" stroke-width="1"/>
+    <line x1="56" y1="32" x2="84" y2="32" stroke="#fff" opacity="0.4" stroke-width="1"/>
+
+    <!-- Plastic Neck -->
+    <path d="M54,43 L86,43 L90,85 L50,85 Z" fill="url(#genericPlastic)" opacity="0.75" stroke="#485563" stroke-width="1.5"/>
+
+    <!-- Corrugated Cheap Plastic Body -->
+    <path d="M50,85 C35,105 28,125 28,150 L28,290 C28,298 34,304 42,304 L98,304 C106,304 112,298 112,290 L112,150 C112,125 105,105 90,85 Z" fill="url(#genericPlastic)" opacity="0.8" stroke="#485563" stroke-width="1.5"/>
+
+    <!-- Plastic Ribs -->
+    <path d="M28,145 Q70,152 112,145" stroke="#485563" stroke-width="2" fill="none"/>
+    <path d="M28,175 Q70,182 112,175" stroke="#485563" stroke-width="2" fill="none"/>
+    <path d="M28,235 Q70,242 112,235" stroke="#485563" stroke-width="2" fill="none"/>
+    <path d="M28,265 Q70,272 112,265" stroke="#485563" stroke-width="2" fill="none"/>
+
+    <!-- Generic Cheap Paper Label -->
+    <rect x="30" y="185" width="80" height="42" fill="#d9534f" stroke="#a9302a" stroke-width="1"/>
+    <text x="70" y="202" font-family="'Inter', sans-serif" font-size="8" font-weight="700" fill="#ffffff" text-anchor="middle">GENERIC</text>
+    <text x="70" y="214" font-family="'Inter', sans-serif" font-size="6" fill="#f8d7da" text-anchor="middle">NOT BRANDED</text>
+    <line x1="36" y1="218" x2="104" y2="218" stroke="#ffffff" stroke-width="0.8"/>
+
+    <!-- Red Disqualification Slash/Badge -->
+    <circle cx="70" cy="115" r="16" fill="rgba(220, 53, 69, 0.9)" stroke="#fff" stroke-width="1.5"/>
+    <line x1="60" y1="105" x2="80" y2="125" stroke="#fff" stroke-width="2.5"/>
+    <line x1="80" y1="105" x2="60" y2="125" stroke="#fff" stroke-width="2.5"/>
+  </g>
+</svg>

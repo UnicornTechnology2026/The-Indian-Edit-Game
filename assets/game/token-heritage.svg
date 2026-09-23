@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <radialGradient id="heritageCoinGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fff8d9"/>
+      <stop offset="25%" stop-color="#eec765"/>
+      <stop offset="60%" stop-color="#bf9124"/>
+      <stop offset="100%" stop-color="#694d12"/>
+    </radialGradient>
+    <filter id="tokenGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#ffd700" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#tokenGlow)">
+    <!-- Outer Rim with Indian Beaded Border -->
+    <circle cx="80" cy="80" r="70" fill="url(#heritageCoinGrad)" stroke="#4a360b" stroke-width="3"/>
+    <circle cx="80" cy="80" r="63" fill="none" stroke="#fff8d9" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <circle cx="80" cy="80" r="54" fill="#382208" stroke="#d4af37" stroke-width="2"/>
+
+    <!-- Ornate Indian Elephant Seal -->
+    <g fill="url(#heritageCoinGrad)">
+      <path d="M88,72 C88,64 84,60 80,60 C75,60 72,64 72,70 C70,74 67,77 64,74 L62,79 C68,82 72,78 74,74 L78,74 L78,80 L81,80 L81,74 L84,74 L84,80 L87,80 L87,74 L89,74 Z"/>
+      <!-- Crown / Chhatri -->
+      <polygon points="80,48 84,54 76,54"/>
+      <circle cx="80" cy="46" r="2" fill="#fff8d9"/>
+    </g>
+
+    <!-- Coin Inscription -->
+    <text x="80" y="98" font-family="'Cormorant Garamond', serif" font-size="9" font-weight="700" fill="#fff5d1" text-anchor="middle" letter-spacing="1">HERITAGE</text>
+    <text x="80" y="108" font-family="'Montserrat', sans-serif" font-size="6.5" font-weight="800" fill="#ffaa33" text-anchor="middle" letter-spacing="1.5">+15 PTS</text>
+  </g>
+</svg>

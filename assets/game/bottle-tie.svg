@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 920" width="100%" height="100%">
+  <defs>
+    <!-- Gold Gradients -->
+    <linearGradient id="tieGoldCap" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8a6921"/>
+      <stop offset="25%" stop-color="#eec765"/>
+      <stop offset="50%" stop-color="#fff6cc"/>
+      <stop offset="75%" stop-color="#d4a836"/>
+      <stop offset="100%" stop-color="#735212"/>
+    </linearGradient>
+    
+    <linearGradient id="tieGoldText" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff0b8"/>
+      <stop offset="40%" stop-color="#e8bf56"/>
+      <stop offset="70%" stop-color="#cf9f2e"/>
+      <stop offset="100%" stop-color="#916a13"/>
+    </linearGradient>
+
+    <radialGradient id="tieLiquidGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff9326" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#cc500d" stop-opacity="0.9"/>
+      <stop offset="75%" stop-color="#6e1f06" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#240a03" stop-opacity="1"/>
+    </radialGradient>
+
+    <linearGradient id="tieGlassReflect" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="6%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="15%" stop-color="#ffeedd" stop-opacity="0.02"/>
+      <stop offset="85%" stop-color="#ffeedd" stop-opacity="0.02"/>
+      <stop offset="94%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <linearGradient id="tieBevelL" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffaa44" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#551a08" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#180702" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="tieBevelR" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ffaa44" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#551a08" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#180702" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="tieRubyLabel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d42630"/>
+      <stop offset="50%" stop-color="#a61720"/>
+      <stop offset="100%" stop-color="#69090f"/>
+    </linearGradient>
+
+    <filter id="tieGoldShine" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+
+    <filter id="tieGlassGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#e27c1f" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#tieGlassGlow)">
+    <!-- ==================== CAP & CROWN ==================== -->
+    <g id="crownCap">
+      <!-- Top finial rim -->
+      <path d="M125,45 L135,18 L265,18 L275,45 Z" fill="url(#tieGoldCap)" stroke="#745112" stroke-width="1.5"/>
+      
+      <!-- Crown Facets Vertical Ridges -->
+      <path d="M135,18 L142,50 L125,50 Z" fill="#694b0e"/>
+      <path d="M142,18 L152,18 L160,50 L142,50 Z" fill="#a47a25"/>
+      <path d="M152,18 L170,18 L178,50 L160,50 Z" fill="#eed173"/>
+      <path d="M170,18 L190,18 L196,50 L178,50 Z" fill="#fff5d0"/>
+      <path d="M190,18 L210,18 L214,50 L196,50 Z" fill="#fff9dc"/>
+      <path d="M210,18 L230,18 L232,50 L214,50 Z" fill="#eed173"/>
+      <path d="M230,18 L248,18 L248,50 L232,50 Z" fill="#b98d2e"/>
+      <path d="M248,18 L258,18 L258,50 L248,50 Z" fill="#755113"/>
+      <path d="M258,18 L265,18 L275,50 L258,50 Z" fill="#583c0c"/>
+
+      <!-- Middle cap collar ring -->
+      <rect x="123" y="48" width="154" height="28" rx="3" fill="url(#tieGoldCap)" stroke="#684a0d" stroke-width="1.5"/>
+      <rect x="127" y="58" width="146" height="4" fill="#600f13"/>
+
+      <!-- Fluted Lower Cap Base -->
+      <path d="M125,76 L130,122 L270,122 L275,76 Z" fill="url(#tieGoldCap)" stroke="#684a0d" stroke-width="1.5"/>
+      <line x1="145" y1="76" x2="148" y2="122" stroke="#775412" stroke-width="2"/>
+      <line x1="165" y1="76" x2="167" y2="122" stroke="#eec662" stroke-width="1.5"/>
+      <line x1="185" y1="76" x2="186" y2="122" stroke="#fff4cc" stroke-width="2"/>
+      <line x1="200" y1="76" x2="200" y2="122" stroke="#fff" stroke-width="2.5"/>
+      <line x1="215" y1="76" x2="214" y2="122" stroke="#fff4cc" stroke-width="2"/>
+      <line x1="235" y1="76" x2="233" y2="122" stroke="#eec662" stroke-width="1.5"/>
+      <line x1="255" y1="76" x2="252" y2="122" stroke="#775412" stroke-width="2"/>
+    </g>
+
+    <!-- ==================== NECK & GOLD WRAP ==================== -->
+    <g id="neckSection">
+      <!-- Amber glass exposed neck -->
+      <rect x="130" y="122" width="140" height="15" fill="#381005"/>
+      <!-- Gold neck foil collar -->
+      <rect x="127" y="137" width="146" height="92" rx="2" fill="url(#tieGoldCap)" stroke="#6b4c10" stroke-width="1.5"/>
+      <!-- Red Accent stripes on foil -->
+      <rect x="127" y="142" width="146" height="4" fill="#9c151c"/>
+      <rect x="127" y="221" width="146" height="5" fill="#9c151c"/>
+      <rect x="127" y="217" width="146" height="2" fill="#d42630"/>
+
+      <!-- Collar Logo: THE INDIAN EDIT -->
+      <text x="200" y="167" font-family="'Cormorant Garamond', Georgia, serif" font-size="12" font-weight="600" fill="#751b18" text-anchor="middle" letter-spacing="3">THE</text>
+      <text x="200" y="191" font-family="'Cormorant Garamond', 'Playfair Display', Georgia, serif" font-size="24" font-weight="700" fill="#9c151c" text-anchor="middle" letter-spacing="3">INDIAN</text>
+      <line x1="148" y1="202" x2="175" y2="202" stroke="#9c151c" stroke-width="1"/>
+      <text x="200" y="206" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#9c151c" text-anchor="middle" letter-spacing="4">EDIT</text>
+      <line x1="225" y1="202" x2="252" y2="202" stroke="#9c151c" stroke-width="1"/>
+
+      <!-- Lower Glass Neck Swell -->
+      <path d="M129,229 C129,265 105,290 68,310 L332,310 C295,290 271,265 271,229 Z" fill="#2d0b03"/>
+      <path d="M136,233 C136,260 115,285 85,305 L315,305 C285,285 264,260 264,233 Z" fill="#8f2d09" opacity="0.8"/>
+    </g>
+
+    <!-- ==================== BOTTLE BODY & AMBER LIQUID ==================== -->
+    <g id="bottleBody">
+      <!-- Main glass container outer contour -->
+      <rect x="42" y="308" width="316" height="570" rx="14" fill="#1b0802" stroke="#521f07" stroke-width="2"/>
+
+      <!-- Deep amber / radiant whiskey liquid core -->
+      <rect x="46" y="312" width="308" height="540" rx="10" fill="url(#tieLiquidGlow)"/>
+
+      <!-- Left & Right Glass Bevel Edge Refractions -->
+      <rect x="46" y="312" width="40" height="540" fill="url(#tieBevelL)"/>
+      <rect x="314" y="312" width="40" height="540" fill="url(#tieBevelR)"/>
+
+      <!-- Heavy Crystal Base -->
+      <path d="M46,845 L354,845 L354,872 C354,878 348,882 342,882 L58,882 C52,882 46,878 46,872 Z" fill="#120501" stroke="#ffaa44" stroke-width="1.5" stroke-opacity="0.4"/>
+      <line x1="52" y1="850" x2="348" y2="850" stroke="#ffaa44" stroke-width="2" stroke-opacity="0.8"/>
+      <line x1="60" y1="872" x2="340" y2="872" stroke="#ff8800" stroke-width="2" stroke-opacity="0.6"/>
+      <line x1="80" y1="862" x2="320" y2="862" stroke="#ffddaa" stroke-width="1.2" stroke-opacity="0.4"/>
+
+      <!-- Embossed Glass Base Text: THE INDIAN -->
+      <text x="200" y="818" font-family="'Cormorant Garamond', 'Playfair Display', serif" font-size="28" font-weight="700" fill="#4d1606" stroke="#ff9436" stroke-width="1" stroke-opacity="0.75" text-anchor="middle" letter-spacing="9">THE INDIAN</text>
+
+      <!-- Glass Surface Specular Reflection Overlay -->
+      <rect x="46" y="312" width="308" height="555" rx="10" fill="url(#tieGlassReflect)" pointer-events="none"/>
+    </g>
+
+    <!-- ==================== BRANDING & CENTRAL EMBLEM ==================== -->
+    <g id="bottleBranding">
+      <!-- Top Gold Logo: THE INDIAN EDIT -->
+      <text x="200" y="390" font-family="'Cormorant Garamond', 'Playfair Display', serif" font-size="26" font-weight="700" fill="url(#tieGoldText)" filter="url(#tieGoldShine)" text-anchor="middle" letter-spacing="4">THE</text>
+      
+      <!-- Stylized "INDIAN" -->
+      <g transform="translate(200, 442)">
+        <text x="0" y="0" font-family="'Cormorant Garamond', 'Playfair Display', serif" font-size="56" font-weight="700" fill="url(#tieGoldText)" filter="url(#tieGoldShine)" text-anchor="middle" letter-spacing="4">INDIAN</text>
+        <path d="M12,-18 C16,-3 22,2 29,2" stroke="url(#tieGoldText)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <!-- EDIT with flanking gold accent bars -->
+      <line x1="90" y1="472" x2="165" y2="472" stroke="url(#tieGoldText)" stroke-width="2"/>
+      <text x="200" y="477" font-family="'Inter', sans-serif" font-size="16" font-weight="700" fill="url(#tieGoldText)" filter="url(#tieGoldShine)" text-anchor="middle" letter-spacing="8">EDIT</text>
+      <line x1="235" y1="472" x2="310" y2="472" stroke="url(#tieGoldText)" stroke-width="2"/>
+
+      <!-- ==================== RED DIAMOND LOZENGE EMBLEM ==================== -->
+      <g id="diamondEmblem" transform="translate(200, 620)">
+        <!-- Outer gold border diamond -->
+        <polygon points="0,-105 115,0 0,105 -115,0" fill="#4d090c" stroke="url(#tieGoldCap)" stroke-width="4" filter="url(#tieGoldShine)"/>
+        
+        <!-- Inner ruby red fill diamond -->
+        <polygon points="0,-98 107,0 0,98 -107,0" fill="url(#tieRubyLabel)"/>
+        <polygon points="0,-93 102,0 0,93 -102,0" fill="none" stroke="url(#tieGoldCap)" stroke-width="1.5" stroke-opacity="0.9"/>
+
+        <!-- Golden Elephant on Globe/Barrel -->
+        <ellipse cx="0" cy="-48" rx="8" ry="6" fill="url(#tieGoldText)"/>
+        <line x1="-8" y1="-48" x2="8" y2="-48" stroke="#801015" stroke-width="1"/>
+        <line x1="0" y1="-54" x2="0" y2="-42" stroke="#801015" stroke-width="1"/>
+        
+        <g fill="url(#tieGoldText)" transform="translate(0, -66)">
+          <path d="M-8,14 C-10,14 -12,12 -12,8 C-12,4 -8,0 -2,0 C3,0 10,2 12,6 C13,8 14,10 14,13 C14,14 13,15 12,15 C11,15 10,14 10,13 C10,9 6,6 2,6 C-1,6 -3,8 -3,11 C-3,13 -2,14 0,14 C1,14 2,15 2,16 C2,17 0,18 -2,18 C-4,18 -6,16 -6,14 Z"/>
+          <path d="M-12,8 C-15,8 -17,10 -17,14 L-17,19 L-14,19 L-14,15 C-13,12 -10,11 -9,11 Z"/>
+          <path d="M-8,12 L-8,19 L-5,19 L-5,14 Z"/>
+          <path d="M6,12 L6,19 L9,19 L9,14 Z"/>
+          <path d="M11,13 L11,19 L14,19 L14,14 Z"/>
+          <circle cx="8" cy="6" r="0.8" fill="#69090f"/>
+          <path d="M-4,3 L6,3 L5,7 L-3,7 Z" fill="#ffe994" stroke="#8a181d" stroke-width="0.5"/>
+        </g>
+
+        <!-- Filigree Swirls -->
+        <path d="M-55,-22 C-35,-32 -20,-12 -5,-25 C10,-12 25,-32 45,-22" fill="none" stroke="url(#tieGoldText)" stroke-width="2"/>
+        <circle cx="-55" cy="-22" r="3" fill="url(#tieGoldText)"/>
+        <circle cx="45" cy="-22" r="3" fill="url(#tieGoldText)"/>
+        <circle cx="0" cy="-25" r="2.5" fill="url(#tieGoldText)"/>
+
+        <!-- Label Main Text: SUPER PREMIUM WHISKY -->
+        <g transform="translate(0, -6)">
+          <rect x="-85" y="-12" width="170" height="22" rx="11" fill="#c41c26" stroke="url(#tieGoldText)" stroke-width="1.5"/>
+          <text x="0" y="3" font-family="'Cormorant Garamond', 'Playfair Display', serif" font-size="11" font-weight="800" fill="url(#tieGoldText)" text-anchor="middle" letter-spacing="1.5">SUPER PREMIUM WHISKY</text>
+        </g>
+
+        <!-- Blend Story Text -->
+        <text x="0" y="24" font-family="'Cormorant Garamond', serif" font-size="8.5" font-style="italic" font-weight="600" fill="#ffd9a6" text-anchor="middle">A blend of Indian Malt and Grain</text>
+        <text x="0" y="36" font-family="'Cormorant Garamond', serif" font-size="8.5" font-style="italic" font-weight="600" fill="#ffd9a6" text-anchor="middle">Spirits with the finest Scotch Malts.</text>
+
+        <!-- Lower Filigree Swirls -->
+        <path d="M-42,48 C-25,38 -15,55 0,46 C15,55 25,38 42,48" fill="none" stroke="url(#tieGoldText)" stroke-width="1.8"/>
+
+        <!-- CRAFTED IN INDIA -->
+        <text x="0" y="63" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="url(#tieGoldText)" text-anchor="middle" letter-spacing="2">CRAFTED</text>
+        <text x="0" y="72" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="url(#tieGoldText)" text-anchor="middle" letter-spacing="2">IN INDIA</text>
+        <circle cx="0" cy="81" r="5" fill="none" stroke="url(#tieGoldText)" stroke-width="1.2"/>
+        <circle cx="0" cy="81" r="2.2" fill="url(#tieGoldText)"/>
+      </g>
+    </g>
+  </g>
+</svg>

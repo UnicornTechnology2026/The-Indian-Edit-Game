@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Indian Edit — Decode the Bottle</title>
+  <meta name="description" content="A luxury brand interactive discovery game exploring the craftsmanship and design details of The Indian Edit Super Premium Whisky.">
+  <meta property="og:title" content="The Indian Edit — Decode the Bottle">
+  <meta property="og:description" content="Look closer. Every detail has a story. An interactive luxury whisky brand experience.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#070504">
+
+  <!-- Pure Custom Stylesheet (No External Frameworks) -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-root">
+    <!-- Ambient Background Filigree & Vignette -->
+    <div class="bg-filigree" aria-hidden="true"></div>
+    <div class="bg-vignette" aria-hidden="true"></div>
+
+    <!-- HTML5 Lightweight Canvas for Amber Embers & Discovery Sparks -->
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+    <!-- Global Floating Quick Controls (Sound & Leaderboard) -->
+    <header class="quick-controls">
+      <button id="btn-sound-toggle" class="icon-btn" aria-label="Toggle Sound Effects" title="Toggle Sound">
+        <span id="sound-icon">🔊</span>
+      </button>
+      <button id="btn-open-leaderboard" class="icon-btn" aria-label="View Leaderboard" title="Hall of Fame">
+        🏆
+      </button>
+    </header>
+
+    <!-- Detail Discovery Toast Notification -->
+    <div id="discovery-toast" class="discovery-toast" role="status" aria-live="polite">
+      <span class="toast-points">+50</span>
+      <span class="toast-text">DETAIL DISCOVERED</span>
+    </div>
+
+    <!-- ===================================================================
+         SCREEN 1: INTRO SCREEN
+         =================================================================== -->
+    <main id="screen-intro" class="screen active">
+      <header class="intro-header">
+        <div class="brand-badge">Super Premium Indian Whisky</div>
+        <h1 class="brand-title">THE INDIAN EDIT</h1>
+        <h2 class="brand-subtitle">DECODE THE BOTTLE</h2>
+        <p class="brand-tagline">"Look closer. Every detail has a story."</p>
+      </header>
+
+      <section class="intro-bottle-stage">
+        <div class="bottle-glow-halo" aria-hidden="true"></div>
+        <img
+          src="assets/bottle.jpg"
+          alt="The Indian Edit bottle"
+          class="intro-bottle-img"
+        />
+      </section>
+
+      <footer class="intro-footer">
+        <button id="btn-start" class="btn-primary" aria-label="Start Decoding Bottle Details">
+          START DECODING
+        </button>
+        <p class="intro-hint">Find all 5 details before time runs out.</p>
+        <button id="btn-intro-leaderboard" class="btn-outline" style="margin-top: 6px;">
+          View Leaderboard
+        </button>
+      </footer>
+    </main>
+
+    <!-- ===================================================================
+         SCREEN 2: GAME SCREEN
+         =================================================================== -->
+    <section id="screen-game" class="screen">
+      <!-- Top Bar -->
+      <nav class="game-top-bar" aria-label="Game stats">
+        <div class="top-bar-left">
+          <span class="top-bar-logo">THE INDIAN EDIT</span>
+          <span class="top-bar-sub">DECODE THE BOTTLE</span>
+        </div>
+
+        <div id="top-bar-timer" class="top-bar-center" aria-live="off">
+          <span class="timer-label">TIME</span>
+          <span id="timer-digits" class="timer-digits">00:30</span>
+        </div>
+
+        <div class="top-bar-right">
+          <div class="score-display">
+            <span class="score-label">SCORE</span>
+            <span id="score-value" class="score-value">0000</span>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Display Stage with Centered Bottle Photograph -->
+      <div class="game-main-stage">
+        <div class="bottle-display-pedestal">
+          <div id="pedestal-glow" class="bottle-pedestal-glow" aria-hidden="true"></div>
+
+          <!-- Interactive Responsive Bottle Container with 5 Hotspots -->
+          <div id="bottle-container" class="bottle-container floating">
+            <img
+              id="bottle-image"
+              src="assets/bottle.jpg"
+              class="bottle-image"
+              alt="The Indian Edit bottle"
+            />
+            <!-- 5 Dynamic percentage-positioned Hotspots injected via script.js -->
+          </div>
+        </div>
+
+        <!-- Zoom / Inspector Controls -->
+        <div class="inspector-controls" role="toolbar" aria-label="Bottle zoom controls">
+          <span class="inspector-label">INSPECT</span>
+          <button id="btn-zoom-in" class="zoom-btn" aria-label="Zoom in" title="Zoom in">+</button>
+          <button id="btn-zoom-out" class="zoom-btn" aria-label="Zoom out" title="Zoom out">−</button>
+          <button id="btn-zoom-reset" class="zoom-btn" aria-label="Reset zoom" title="Reset">⟲</button>
+        </div>
+      </div>
+
+      <!-- Bottom Progress Bar -->
+      <footer class="game-bottom-bar">
+        <div class="progress-section">
+          <div class="progress-meta">
+            <span class="progress-title">DETAILS DISCOVERED</span>
+            <span id="progress-count" class="progress-counter">0 / 5</span>
+          </div>
+          <div id="progress-indicators" class="progress-indicators-row" aria-label="Discovery progress">
+            <span class="indicator-dot" title="Detail 1"></span>
+            <span class="indicator-dot" title="Detail 2"></span>
+            <span class="indicator-dot" title="Detail 3"></span>
+            <span class="indicator-dot" title="Detail 4"></span>
+            <span class="indicator-dot" title="Detail 5"></span>
+          </div>
+        </div>
+        <span class="hint-badge">Hover or tap on glowing areas to inspect</span>
+      </footer>
+    </section>
+
+    <!-- ===================================================================
+         SCREEN 3: QUESTION MODAL (GLASSMORPHISM)
+         =================================================================== -->
+    <div id="question-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="modal-card" class="modal-card">
+        <header class="modal-header">
+          <span id="modal-tag" class="modal-tag">HOTSPOT 1 OF 5</span>
+          <h2 id="modal-title" class="modal-title">DETAIL DECODED</h2>
+          <p id="modal-hotspot-label" class="modal-hotspot-label">THE CROWN DETAIL</p>
+        </header>
+
+        <section class="modal-question-box">
+          <p id="question-text" class="question-text">
+            What does this detail contribute to the bottle's premium visual identity?
+          </p>
+        </section>
+
+        <!-- 4 Multiple Choice Option Buttons -->
+        <div id="options-grid" class="modal-options-grid">
+          <!-- Populated dynamically via script.js -->
+        </div>
+
+        <!-- Correct / Wrong Live Feedback Banner -->
+        <div id="modal-feedback" class="modal-feedback" role="status"></div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         SCREEN 4: COMPLETION SCREEN (VICTORY)
+         =================================================================== -->
+    <section id="screen-completion" class="screen">
+      <div class="completion-card">
+        <header class="completion-header">
+          <span class="completion-badge">Master Craftsmanship</span>
+          <h2 class="completion-title">DECODE COMPLETE</h2>
+          <p class="completion-tagline">"YOU FOUND THE STORY."</p>
+        </header>
+
+        <div class="completion-bottle-showcase">
+          <div class="completion-bottle-halo" aria-hidden="true"></div>
+          <img
+            src="assets/bottle.jpg"
+            alt="The Indian Edit decoded bottle"
+            class="completion-bottle-img"
+          />
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-box">
+            <div id="completion-score" class="metric-val">1000</div>
+            <div class="metric-title">FINAL SCORE</div>
+          </div>
+          <div class="metric-box">
+            <div id="completion-details" class="metric-val">5 / 5</div>
+            <div class="metric-title">DETAILS FOUND</div>
+          </div>
+          <div class="metric-box">
+            <div id="completion-time" class="metric-val">14s</div>
+            <div class="metric-title">TIME REMAINING</div>
+          </div>
+        </div>
+
+        <div class="completion-actions">
+          <button id="btn-play-again" class="btn-primary">
+            PLAY AGAIN
+          </button>
+          <button id="btn-completion-leaderboard" class="btn-outline">
+            VIEW SCORE & RANK
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCREEN 5: TIME-OUT SCREEN
+         =================================================================== -->
+    <section id="screen-timeout" class="screen">
+      <div class="timeout-card">
+        <h2 class="timeout-title">TIME'S UP</h2>
+        <p class="timeout-sub">HOW MUCH DID YOU DECODE?</p>
+
+        <div class="metrics-row" style="max-width: 360px;">
+          <div class="metric-box">
+            <div id="timeout-score" class="metric-val">0</div>
+            <div class="metric-title">SCORE</div>
+          </div>
+          <div class="metric-box">
+            <div id="timeout-details" class="metric-val">0 / 5</div>
+            <div class="metric-title">DETAILS FOUND</div>
+          </div>
+        </div>
+
+        <div class="completion-actions" style="margin-top: 14px;">
+          <button id="btn-try-again" class="btn-primary">
+            TRY AGAIN
+          </button>
+          <button id="btn-timeout-leaderboard" class="btn-outline">
+            LEADERBOARD
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCREEN 6: LEADERBOARD MODAL (LOCALSTORAGE)
+         =================================================================== -->
+    <aside id="leaderboard-modal" class="leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-heading">
+      <div class="leaderboard-card">
+        <header class="leaderboard-header">
+          <h2 id="leaderboard-heading" class="leaderboard-title">HALL OF DECODERS</h2>
+          <button id="btn-close-leaderboard" class="icon-btn" aria-label="Close Leaderboard" style="width: 34px; height: 34px; font-size: 0.9rem;">
+            ✕
+          </button>
+        </header>
+
+        <form id="form-submit-score" class="score-submission-form">
+          <label for="player-name" class="form-label">ENTER YOUR NAME TO RECORD SCORE</label>
+          <div class="form-input-group">
+            <input
+              type="text"
+              id="player-name"
+              class="input-name"
+              placeholder="Your Name (e.g. Royal Connoisseur)"
+              maxlength="20"
+              autocomplete="name"
+            />
+            <button type="submit" class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;">
+              SUBMIT
+            </button>
+          </div>
+        </form>
+
+        <div id="leaderboard-list" class="leaderboard-list">
+          <!-- Top 10 scores dynamically loaded from localStorage -->
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Pure Vanilla JavaScript Engine (No External Frameworks) -->
+  <script src="script.js"></script>
+</body>
+</html>

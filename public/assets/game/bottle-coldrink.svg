@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 380" width="100%" height="100%">
+  <defs>
+    <!-- Cold Drink Bottle Glass Gradient: Emerald Green Fizzy Soda Bottle -->
+    <linearGradient id="coldGlass" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#09381e"/>
+      <stop offset="25%" stop-color="#186b3e"/>
+      <stop offset="50%" stop-color="#28a745"/>
+      <stop offset="75%" stop-color="#186b3e"/>
+      <stop offset="100%" stop-color="#09381e"/>
+    </linearGradient>
+
+    <!-- Liquid Core with carbonation -->
+    <radialGradient id="coldLiquid" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#55d475" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#1f7a3f" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0a3318" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Red Metal Crown Cap -->
+    <linearGradient id="coldCapGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#800a0a"/>
+      <stop offset="35%" stop-color="#e62e2e"/>
+      <stop offset="50%" stop-color="#ff6666"/>
+      <stop offset="70%" stop-color="#e62e2e"/>
+      <stop offset="100%" stop-color="#800a0a"/>
+    </linearGradient>
+
+    <!-- Specular highlight streak -->
+    <linearGradient id="coldGleam" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
+      <stop offset="10%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="90%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Distractor / Avoid Glow Filter -->
+    <filter id="coldDropShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff3333" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#coldDropShadow)">
+    <!-- Fluted Red Crown Cap -->
+    <rect x="66" y="10" width="28" height="12" rx="2" fill="url(#coldCapGrad)" stroke="#4d0505" stroke-width="1.2"/>
+    <!-- Crown cap teeth / crimp -->
+    <path d="M64,22 L68,20 L72,22 L76,20 L80,22 L84,20 L88,22 L92,20 L96,22 Z" fill="#b31212"/>
+
+    <!-- Bottle Neck Glass Ring & Tapered Neck -->
+    <rect x="67" y="24" width="26" height="8" rx="2" fill="#14522c" stroke="#09381e" stroke-width="1"/>
+    
+    <!-- Long Slender Cold Drink Neck -->
+    <path d="M69,32 L91,32 L95,120 L65,120 Z" fill="url(#coldGlass)" stroke="#09381e" stroke-width="1.5"/>
+
+    <!-- Bottle Shoulders with embossed grip ridges -->
+    <path d="M65,120 C50,145 28,160 26,190 L24,335 C24,348 30,356 42,356 L118,356 C130,356 136,348 136,335 L134,190 C132,160 110,145 95,120 Z" fill="url(#coldLiquid)" stroke="#09381e" stroke-width="2"/>
+
+    <!-- Glass Highlights along body -->
+    <path d="M28,190 L26,332 L34,332 L36,190 Z" fill="url(#coldGleam)"/>
+    <path d="M132,190 L134,332 L126,332 L124,190 Z" fill="url(#coldGleam)"/>
+
+    <!-- Carbonation Fizz Bubbles -->
+    <circle cx="50" cy="220" r="3" fill="#ffffff" opacity="0.6"/>
+    <circle cx="85" cy="205" r="2" fill="#ffffff" opacity="0.7"/>
+    <circle cx="70" cy="245" r="3.5" fill="#ffffff" opacity="0.5"/>
+    <circle cx="108" cy="235" r="2" fill="#ffffff" opacity="0.6"/>
+    <circle cx="58" cy="280" r="2.5" fill="#ffffff" opacity="0.5"/>
+    <circle cx="95" cy="300" r="3" fill="#ffffff" opacity="0.7"/>
+    <circle cx="75" cy="325" r="2" fill="#ffffff" opacity="0.6"/>
+    <circle cx="80" cy="100" r="1.5" fill="#ffffff" opacity="0.7"/>
+    <circle cx="75" cy="70" r="1.5" fill="#ffffff" opacity="0.6"/>
+
+    <!-- Commercial Cold Drink Label Wrapper -->
+    <rect x="28" y="210" width="104" height="74" rx="3" fill="#d92525" stroke="#ffffff" stroke-width="1.8"/>
+    
+    <!-- White diagonal speed wave stripes -->
+    <path d="M28,230 Q80,215 132,235 L132,250 Q80,230 28,245 Z" fill="#ffffff" opacity="0.9"/>
+    <path d="M28,260 Q80,245 132,265 L132,270 Q80,250 28,265 Z" fill="#ffcc00" opacity="0.8"/>
+
+    <!-- Bold Label Typography -->
+    <text x="80" y="234" font-family="'Impact', 'Arial Black', sans-serif" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">COLD DRINK</text>
+    <text x="80" y="247" font-family="'Arial', sans-serif" font-size="8" font-weight="900" fill="#ffeb3b" text-anchor="middle" letter-spacing="2">FIZZY SODA</text>
+    
+    <!-- Red -5 penalty badge -->
+    <g transform="translate(80, 268)">
+      <rect x="-35" y="-9" width="70" height="15" rx="7" fill="#800a0a" stroke="#ffffff" stroke-width="1"/>
+      <text x="0" y="2" font-family="'Montserrat', sans-serif" font-size="8.5" font-weight="900" fill="#ffffff" text-anchor="middle">AVOID -5</text>
+    </g>
+
+    <!-- Thick Glass Base Foundation -->
+    <rect x="30" y="340" width="100" height="16" rx="3" fill="#0c4021" stroke="#186b3e" stroke-width="1"/>
+    <line x1="38" y1="346" x2="122" y2="346" stroke="#55d475" stroke-width="1.5" opacity="0.6"/>
+  </g>
+</svg>
