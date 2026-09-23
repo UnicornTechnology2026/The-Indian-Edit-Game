@@ -341,7 +341,7 @@ export const Level2MasterTheBlend: React.FC = () => {
                 </div>
               </div>
 
-              <div className="min-h-[18px] text-xs font-medium flex items-center">
+              <div className="min-h-4.5 text-xs font-medium flex items-center">
                 {feedback && (
                   <span
                     className={
@@ -406,7 +406,7 @@ export const Level2MasterTheBlend: React.FC = () => {
                       </div>
                     </div>
                     <div
-                      className={`w-[19px] h-[19px] rounded-full border border-[#d4af37]/25 flex items-center justify-center text-[10px] shrink-0 ${
+                      className={`w-4.75 h-4.75 rounded-full border border-[#d4af37]/25 flex items-center justify-center text-[10px] shrink-0 ${
                         isCollected
                           ? "bg-[#7ab08c] border-[#7ab08c] text-[#151013]"
                           : ""
@@ -441,7 +441,7 @@ export const Level2MasterTheBlend: React.FC = () => {
                 }}
                 onDragLeave={() => setVesselHover(false)}
                 onDrop={handleDrop}
-                className={`relative w-[190px] transition-[filter] duration-200 ${
+                className={`relative w-47.5 transition-[filter] duration-200 ${
                   vesselHover
                     ? "drop-shadow-[0_0_16px_rgba(212,175,55,0.5)]"
                     : ""
@@ -491,7 +491,7 @@ export const Level2MasterTheBlend: React.FC = () => {
             EDIT COMPLETE
           </h1>
 
-          <div className="gold-card px-9 py-7 min-w-[280px]">
+          <div className="gold-card px-9 py-7 min-w-70">
             <div className="text-[11px] tracking-wide text-[#a69383]">
               Your Blend Score
             </div>
@@ -564,7 +564,7 @@ export const Level2MasterTheBlend: React.FC = () => {
             &ldquo;Mastery requires patience and precision.&rdquo;
           </p>
 
-          <div className="gold-card px-9 py-7 min-w-[280px]">
+          <div className="gold-card px-9 py-7 min-w-70">
             <div className="text-[11px] tracking-wide text-[#a69383]">
               Points Recorded
             </div>

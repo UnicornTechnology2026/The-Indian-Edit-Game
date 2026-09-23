@@ -46,6 +46,7 @@ export const Level3HuntTheEdit: React.FC = () => {
   const [timeRemaining, setTimeRemaining] = useState<number>(30);
   const [roundStartTime, setRoundStartTime] = useState<number>(0);
   const [allFoundCount, setAllFoundCount] = useState<number>(0);
+  const [roundTimeTaken, setRoundTimeTaken] = useState<number>(0);
   const [bestRoundTime, setBestRoundTime] = useState<number>(() => {
     try {
       const saved = localStorage.getItem(BEST_TIME_KEY);
@@ -211,16 +212,19 @@ export const Level3HuntTheEdit: React.FC = () => {
         }
 
         const timeTaken = (Date.now() - roundStartTime) / 1000;
-        const speedBonus = Math.max(
-          0,
-          Math.floor(timeRemaining * SCORING.TIME_BONUS_PER_SEC),
-        );
+        const quickCompleteBonus =
+          timeTaken >= SCORING.QUICK_COMPLETE_TIME_LIMIT
+            ? 0
+            : SCORING.QUICK_COMPLETE_BONUS;
         const completionBonus = SCORING.ALL_FOUND_BONUS;
-        const finalRoundScore = newRoundPoints + speedBonus + completionBonus;
-        const finalTotalScore = newTotalPoints + speedBonus + completionBonus;
+        const finalRoundScore =
+          newRoundPoints + completionBonus + quickCompleteBonus;
+        const finalTotalScore =
+          newTotalPoints + completionBonus + quickCompleteBonus;
 
         setRoundScore(finalRoundScore);
         setScore(finalTotalScore);
+        setRoundTimeTaken(timeTaken);
         checkAndSaveBestScore(finalTotalScore, timeTaken);
         updateHuntScore(finalTotalScore, allFoundCount + 1, timeTaken);
 
@@ -374,7 +378,8 @@ export const Level3HuntTheEdit: React.FC = () => {
       {screenState === "roundComplete" && (
         <RoundComplete
           roundNumber={currentRound.id}
-          timeLeft={timeRemaining}
+          timeTaken={roundTimeTaken}
+          bottleCount={currentRound.bottles.length}
           roundScore={roundScore}
           totalScore={score}
           onNextRound={handleNextRound}
@@ -386,7 +391,13 @@ export const Level3HuntTheEdit: React.FC = () => {
         <TimesUpModal
           foundCount={foundBottleIds.length}
           totalCount={currentRound.bottles.length}
-          onTryAgain={() => startRound(currentRoundIdx)}
+          onTryAgain={() => {
+            // Time ran out -> restarting resets the score back to zero
+            setScore(0);
+            setRoundScore(0);
+            setAllFoundCount(0);
+            startRound(currentRoundIdx);
+          }}
           onContinue={handleNextRound}
         />
       )}
