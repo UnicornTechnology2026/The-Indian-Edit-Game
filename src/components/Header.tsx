@@ -79,8 +79,6 @@ export const Header: React.FC<HeaderProps> = ({ onShowIntroSplash }) => {
             </span>
             <span className="font-serif text-lg font-bold text-[#f7e7a9] tabular-nums">
               {(
-                state.scoreRush +
-                state.scoreZero +
                 state.decodeScore +
                 state.blendScore +
                 (state.huntScore || state.scoreCity || 0)
