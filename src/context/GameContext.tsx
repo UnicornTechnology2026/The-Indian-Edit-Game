@@ -1,17 +1,24 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { GameState, ScreenId, CityCategory, PersonalityType, RewardGift } from '../types';
-import { computeMasterScore, computePersonality } from '../data/personalities';
-import { REWARD_GIFTS } from '../data/rewards';
-import { sound } from '../utils/audio';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import {
+  GameState,
+  ScreenId,
+  CityCategory,
+  PersonalityType,
+  RewardGift,
+} from "../types";
+import { computeMasterScore, computePersonality } from "../data/personalities";
+import { REWARD_GIFTS } from "../data/rewards";
+import { sound } from "../utils/audio";
+import { supabaseInsert } from "../lib/supabaseClient";
 
-const STORAGE_KEY = 'the_indian_edit_state_v2';
+const STORAGE_KEY = "the_indian_edit_state_v2";
 
 const INITIAL_STATE: GameState = {
-  userName: '',
-  userCity: '',
-  userPhone: '',
+  userName: "",
+  userCity: "",
+  userPhone: "",
   otpVerified: false,
-  currentScreen: 'screen-login',
+  currentScreen: "screen-login",
 
   // Legacy fields (Harvest Rush / Zero Mile Map levels removed from the flow;
   // kept only as baseline inputs to computeMasterScore)
@@ -48,7 +55,7 @@ const INITIAL_STATE: GameState = {
     FOOD: 0,
     TECHNOLOGY: 0,
     LIFESTYLE: 0,
-    FUTURE: 0
+    FUTURE: 0,
   },
 
   // Final Master
@@ -59,7 +66,7 @@ const INITIAL_STATE: GameState = {
   scratchRevealed: false,
   selectedGift: null,
   rewardClaimed: false,
-  soundMuted: false
+  soundMuted: false,
 };
 
 interface GameContextType {
@@ -68,15 +75,41 @@ interface GameContextType {
   setUserCity: (city: string) => void;
   setUserPhone: (phone: string) => void;
   setOtpVerified: (verified: boolean) => void;
+  registerUser: () => void;
   navigateTo: (screen: ScreenId) => void;
   updateRushScore: (bottles: number, score: number, bonus: number) => void;
-  updateZeroScore: (score: number, userPin: { x: number; y: number } | null) => void;
-  updateDecodeScore: (score: number, detailsFound: number, completed: boolean) => void;
-  updateBlendScore: (score: number, base: number, speedBonus: number, attempts: number, completed: boolean) => void;
+  updateZeroScore: (
+    score: number,
+    userPin: { x: number; y: number } | null,
+  ) => void;
+  updateDecodeScore: (
+    score: number,
+    detailsFound: number,
+    completed: boolean,
+  ) => void;
+  updateBlendScore: (
+    score: number,
+    base: number,
+    speedBonus: number,
+    attempts: number,
+    completed: boolean,
+  ) => void;
   addCityElementCount: (category: CityCategory) => void;
   finishCityBuilding: (elementsPlacedCount: number) => void;
-  updateHuntScore: (score: number, bottlesFound: number, bestTime: number) => void;
-  finishHuntGame: (score: number, bottlesFound: number, bestTime: number) => void;
+  updateHuntScore: (
+    score: number,
+    bottlesFound: number,
+    bestTime: number,
+  ) => void;
+  finishHuntGame: (
+    score: number,
+    bottlesFound: number,
+    bestTime: number,
+  ) => void;
+  logSocialShare: (
+    action: "caption_copied" | "card_downloaded" | "card_shared",
+    caption?: string,
+  ) => void;
   setScreenshotUploaded: (url: string) => void;
   setScratchRevealed: (revealed: boolean) => void;
   selectReward: (gift: RewardGift) => void;
@@ -88,7 +121,9 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state, setState] = useState<GameState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -112,156 +147,248 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const navigateTo = (screen: ScreenId) => {
     sound.playClick();
-    setState(prev => {
+    setState((prev) => {
       // When navigating to result screen, calculate total score & personality
-      if (screen === 'screen-result') {
+      if (screen === "screen-result") {
         const total = computeMasterScore(prev);
         const pers = computePersonality(prev);
-        const gift = prev.selectedGift || REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
+        const gift =
+          prev.selectedGift ||
+          REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
+
+        // Save the finished run to Supabase for the live leaderboard.
+        // Fire-and-forget: never blocks navigation, never breaks the game
+        // if Supabase isn't configured or the request fails.
+        supabaseInsert("game_results", {
+          user_name: prev.userName || "VIP Guest",
+          user_city: prev.userCity || "Nagpur",
+          user_phone: prev.userPhone || null,
+          personality: pers?.name ?? null,
+          total_score: total,
+          decode_score: prev.decodeScore,
+          blend_score: prev.blendScore,
+          hunt_score: prev.huntScore,
+        }).catch((err) =>
+          console.error("Supabase save (game_results) failed:", err),
+        );
+
         return {
           ...prev,
           currentScreen: screen,
           totalScore: total,
           personality: pers,
-          selectedGift: gift
+          selectedGift: gift,
         };
       }
       return { ...prev, currentScreen: screen };
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const setUserName = (name: string) => setState(prev => ({ ...prev, userName: name }));
-  const setUserCity = (city: string) => setState(prev => ({ ...prev, userCity: city }));
-  const setUserPhone = (phone: string) => setState(prev => ({ ...prev, userPhone: phone }));
-  const setOtpVerified = (verified: boolean) => setState(prev => ({ ...prev, otpVerified: verified }));
+  const setUserName = (name: string) =>
+    setState((prev) => ({ ...prev, userName: name }));
+  const setUserCity = (city: string) =>
+    setState((prev) => ({ ...prev, userCity: city }));
+  const setUserPhone = (phone: string) =>
+    setState((prev) => ({ ...prev, userPhone: phone }));
+  const setOtpVerified = (verified: boolean) =>
+    setState((prev) => ({ ...prev, otpVerified: verified }));
+
+  const registerUser = () => {
+    setState((prev) => {
+      // Save the login/registration details to Supabase as soon as OTP is
+      // verified, rather than waiting for the player to finish the whole
+      // game. Fire-and-forget: never blocks navigation.
+      supabaseInsert("registrations", {
+        user_name: prev.userName || "VIP Guest",
+        user_city: prev.userCity || "Nagpur",
+        user_phone: prev.userPhone || "",
+      }).catch((err) =>
+        console.error("Supabase save (registrations) failed:", err),
+      );
+      return prev;
+    });
+  };
 
   const updateRushScore = (bottles: number, score: number, bonus: number) => {
-    setState(prev => {
+    setState((prev) => {
       const newScore = Math.max(prev.scoreRush, score);
       return {
         ...prev,
         bottlesCollected: bottles,
         scoreRush: newScore,
         scoreBottle: newScore,
-        bonusPoints: bonus
+        bonusPoints: bonus,
       };
     });
   };
 
-  const updateZeroScore = (score: number, userPin: { x: number; y: number } | null) => {
-    setState(prev => ({
+  const updateZeroScore = (
+    score: number,
+    userPin: { x: number; y: number } | null,
+  ) => {
+    setState((prev) => ({
       ...prev,
       scoreZero: Math.max(prev.scoreZero, score),
       nagpurGuessed: true,
       userCityGuessed: true,
-      userPinLocation: userPin
+      userPinLocation: userPin,
     }));
   };
 
-  const updateDecodeScore = (score: number, detailsFound: number, completed: boolean) => {
-    setState(prev => ({
+  const updateDecodeScore = (
+    score: number,
+    detailsFound: number,
+    completed: boolean,
+  ) => {
+    setState((prev) => ({
       ...prev,
       decodeScore: Math.max(prev.decodeScore, score),
       decodeDetailsFound: Math.max(prev.decodeDetailsFound, detailsFound),
-      decodeCompleted: prev.decodeCompleted || completed
+      decodeCompleted: prev.decodeCompleted || completed,
     }));
   };
 
-  const updateBlendScore = (score: number, base: number, speedBonus: number, attempts: number, completed: boolean) => {
-    setState(prev => ({
+  const updateBlendScore = (
+    score: number,
+    base: number,
+    speedBonus: number,
+    attempts: number,
+    completed: boolean,
+  ) => {
+    setState((prev) => ({
       ...prev,
       blendScore: Math.max(prev.blendScore, score),
       blendBaseScore: base,
       blendSpeedBonus: speedBonus,
       blendIncorrectAttempts: attempts,
-      blendCompleted: prev.blendCompleted || completed
+      blendCompleted: prev.blendCompleted || completed,
     }));
   };
 
   const addCityElementCount = (category: CityCategory) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       cityElements: {
         ...prev.cityElements,
-        [category]: (prev.cityElements[category] || 0) + 1
-      }
+        [category]: (prev.cityElements[category] || 0) + 1,
+      },
     }));
   };
 
   const finishCityBuilding = (elementsPlacedCount: number) => {
-    setState(prev => {
+    setState((prev) => {
       const cityScore = Math.min(3500, elementsPlacedCount * 180 + 1200);
       const updated = {
         ...prev,
-        scoreCity: cityScore
+        scoreCity: cityScore,
       };
       const total = computeMasterScore(updated);
       const pers = computePersonality(updated);
-      const gift = prev.selectedGift || REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
+      const gift =
+        prev.selectedGift ||
+        REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
       return {
         ...updated,
         totalScore: total,
         personality: pers,
-        selectedGift: gift
+        selectedGift: gift,
       };
     });
   };
 
-  const updateHuntScore = (score: number, bottlesFound: number, bestTime: number) => {
-    setState(prev => ({
+  const updateHuntScore = (
+    score: number,
+    bottlesFound: number,
+    bestTime: number,
+  ) => {
+    setState((prev) => ({
       ...prev,
       huntScore: Math.max(prev.huntScore || 0, score),
       huntBottlesFound: Math.max(prev.huntBottlesFound || 0, bottlesFound),
-      huntBestTime: prev.huntBestTime > 0 ? Math.min(prev.huntBestTime, bestTime) : bestTime
+      huntBestTime:
+        prev.huntBestTime > 0
+          ? Math.min(prev.huntBestTime, bestTime)
+          : bestTime,
     }));
   };
 
-  const finishHuntGame = (score: number, bottlesFound: number, bestTime: number) => {
-    setState(prev => {
+  const finishHuntGame = (
+    score: number,
+    bottlesFound: number,
+    bestTime: number,
+  ) => {
+    setState((prev) => {
       const updated = {
         ...prev,
         huntScore: Math.max(prev.huntScore || 0, score),
         huntBottlesFound: Math.max(prev.huntBottlesFound || 0, bottlesFound),
-        huntBestTime: prev.huntBestTime > 0 ? Math.min(prev.huntBestTime, bestTime) : bestTime,
+        huntBestTime:
+          prev.huntBestTime > 0
+            ? Math.min(prev.huntBestTime, bestTime)
+            : bestTime,
         huntCompleted: true,
-        scoreCity: Math.max(prev.scoreCity || 0, Math.min(3500, Math.round(score * 0.12)))
+        scoreCity: Math.max(
+          prev.scoreCity || 0,
+          Math.min(3500, Math.round(score * 0.12)),
+        ),
       };
       const total = computeMasterScore(updated);
       const pers = computePersonality(updated);
-      const gift = prev.selectedGift || REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
+      const gift =
+        prev.selectedGift ||
+        REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
       return {
         ...updated,
         totalScore: total,
         personality: pers,
-        selectedGift: gift
+        selectedGift: gift,
       };
     });
   };
 
+  const logSocialShare = (
+    action: "caption_copied" | "card_downloaded" | "card_shared",
+    caption?: string,
+  ) => {
+    setState((prev) => {
+      supabaseInsert("social_shares", {
+        user_name: prev.userName || null,
+        user_city: prev.userCity || null,
+        personality: prev.personality?.name ?? null,
+        total_score: prev.totalScore || null,
+        action,
+        caption: caption ?? null,
+      }).catch((err) =>
+        console.error("Supabase save (social_shares) failed:", err),
+      );
+      return prev;
+    });
+  };
+
   const setScreenshotUploaded = (url: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       screenshotUploaded: true,
-      uploadedScreenshotUrl: url
+      uploadedScreenshotUrl: url,
     }));
   };
 
   const setScratchRevealed = (revealed: boolean) => {
-    setState(prev => ({ ...prev, scratchRevealed: revealed }));
+    setState((prev) => ({ ...prev, scratchRevealed: revealed }));
   };
 
   const selectReward = (gift: RewardGift) => {
-    setState(prev => ({ ...prev, selectedGift: gift }));
+    setState((prev) => ({ ...prev, selectedGift: gift }));
   };
 
   const claimReward = () => {
-    setState(prev => ({ ...prev, rewardClaimed: true }));
+    setState((prev) => ({ ...prev, rewardClaimed: true }));
   };
 
   const toggleSound = () => {
     const muted = sound.toggleMute();
-    setState(prev => ({ ...prev, soundMuted: muted }));
+    setState((prev) => ({ ...prev, soundMuted: muted }));
     return muted;
   };
 
@@ -272,11 +399,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadDemoState = () => {
     const demo: GameState = {
-      userName: 'Aarav Sharma',
-      userCity: 'Nagpur',
-      userPhone: '9876543210',
+      userName: "Aarav Sharma",
+      userCity: "Nagpur",
+      userPhone: "9876543210",
       otpVerified: true,
-      currentScreen: 'screen-result',
+      currentScreen: "screen-result",
       scoreRush: 1850,
       scoreBottle: 1850,
       bottlesCollected: 14,
@@ -299,7 +426,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         FOOD: 4,
         TECHNOLOGY: 2,
         LIFESTYLE: 2,
-        FUTURE: 2
+        FUTURE: 2,
       },
       scoreCity: 3200,
       huntScore: 27850,
@@ -313,7 +440,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       scratchRevealed: false,
       selectedGift: REWARD_GIFTS[0],
       rewardClaimed: false,
-      soundMuted: false
+      soundMuted: false,
     };
     demo.personality = computePersonality(demo);
     setState(demo);
@@ -327,6 +454,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserCity,
         setUserPhone,
         setOtpVerified,
+        registerUser,
         navigateTo,
         updateRushScore,
         updateZeroScore,
@@ -336,13 +464,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         finishCityBuilding,
         updateHuntScore,
         finishHuntGame,
+        logSocialShare,
         setScreenshotUploaded,
         setScratchRevealed,
         selectReward,
         claimReward,
         toggleSound,
         resetGame,
-        loadDemoState
+        loadDemoState,
       }}
     >
       {children}
@@ -353,7 +482,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useGame = () => {
   const context = useContext(GameContext);
   if (!context) {
-    throw new Error('useGame must be used within a GameProvider');
+    throw new Error("useGame must be used within a GameProvider");
   }
   return context;
 };

@@ -131,32 +131,15 @@ export const LoginScreen: React.FC = () => {
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3.5 top-3 w-4 h-4 text-[#d4af37]" />
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#170f0a]/90 border border-[#d4af37]/40 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-sm text-[#faf6f0] transition-colors"
-                >
-                  {cityOptions.map((c) => (
-                    <option
-                      key={c}
-                      value={c}
-                      className="bg-[#170f0a] text-white"
-                    >
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {city === "Other" && (
                 <input
                   type="text"
-                  value={customCity}
-                  onChange={(e) => setCustomCity(e.target.value)}
-                  placeholder="Type your city name"
-                  className="mt-2 w-full px-4 py-2 rounded-xl bg-[#170f0a]/90 border border-[#d4af37]/40 text-sm text-[#faf6f0] placeholder-[#6d5746]"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Enter your City"
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#170f0a]/90 border border-[#d4af37]/40 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-sm text-[#faf6f0] placeholder-[#6d5746] transition-colors"
                 />
-              )}
+              </div>
             </div>
 
             {/* Mobile Number */}
@@ -176,7 +159,7 @@ export const LoginScreen: React.FC = () => {
                   placeholder="98765 43210"
                   maxLength={10}
                   required
-                  className="w-full pl-22 pr-4 py-2.5 rounded-xl bg-[#170f0a]/90 border border-[#d4af37]/40 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-sm text-[#faf6f0] placeholder-[#6d5746] font-mono transition-colors"
+                  className="w-full pl-18 pr-4 py-2.5 rounded-xl bg-[#170f0a]/90 border border-[#d4af37]/40 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-sm text-[#faf6f0] placeholder-[#6d5746] font-mono transition-colors"
                 />
               </div>
             </div>

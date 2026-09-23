@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight, X } from "lucide-react";
 import { sound } from "../utils/audio";
 import fullSizeImg from "../assets/images/fullSize.png";
+import newCreativeImg from "../assets/images/NewCreative.png";
 
 interface IntroHeroSplashProps {
   onEnter: () => void;
@@ -20,13 +21,13 @@ export const IntroHeroSplash: React.FC<IntroHeroSplashProps> = ({
       id="intro-hero-splash"
       className="fixed inset-0 z-50 overflow-hidden bg-[#070403] animate-fade-in"
     >
-      {/* Full-screen image, never cropped */}
+      {/* Full-screen image, never cropped: NewCreative on mobile/tablet, fullSize on desktop */}
       <picture>
-        <source media="(orientation: portrait)" srcSet={fullSizeImg} />
+        <source media="(min-width: 1024px)" srcSet={fullSizeImg} />
         <img
-          src={fullSizeImg}
+          src={newCreativeImg}
           alt="The Indian Edit Super Premium Whisky"
-          className="absolute inset-0 w-full h-full object-contain opacity-85"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
         />
       </picture>
 
