@@ -5,19 +5,25 @@ import { sound } from "../../utils/audio";
 
 interface RoundCompleteProps {
   roundNumber: number;
-  timeLeft: number;
+  timeTaken: number;
+  bottleCount: number;
   roundScore: number;
   totalScore: number;
   onNextRound: () => void;
 }
 
+const QUICK_COMPLETE_TIME_LIMIT = 10;
+const QUICK_COMPLETE_BONUS = 50;
+
 export const RoundComplete: React.FC<RoundCompleteProps> = ({
   roundNumber,
-  timeLeft,
+  timeTaken,
+  bottleCount,
   roundScore,
   totalScore,
   onNextRound,
 }) => {
+  const isQuickComplete = timeTaken <= QUICK_COMPLETE_TIME_LIMIT;
   const handleNext = () => {
     sound.playClick();
     onNextRound();
@@ -41,19 +47,21 @@ export const RoundComplete: React.FC<RoundCompleteProps> = ({
         <div className="my-6 grid grid-cols-2 gap-3 p-4 rounded-2xl bg-[#0e0603]/80 border border-[#d4af37]/30">
           <div className="text-left border-r border-[#d4af37]/20 pr-3">
             <span className="text-[10px] font-mono tracking-widest text-[#ab9580] uppercase block">
-              TIME REMAINING
+              TIME COMPLETED
             </span>
             <span className="font-mono text-xl sm:text-2xl font-bold text-[#faf5eb]">
-              {timeLeft.toFixed(1)}s
+              {timeTaken.toFixed(1)}s
             </span>
-            <span className="text-[10px] text-[#d4af37] block mt-0.5">
-              +{Math.round(timeLeft * 100)} speed bonus
-            </span>
+            {isQuickComplete && (
+              <span className="text-[10px] text-[#d4af37] block mt-0.5">
+                +{QUICK_COMPLETE_BONUS} quick-find bonus
+              </span>
+            )}
           </div>
 
           <div className="text-left pl-3">
             <span className="text-[10px] font-mono tracking-widest text-[#ab9580] uppercase block">
-              ROUND SCORE
+              ROUND SCORE ({bottleCount} BOTTLES)
             </span>
             <span className="font-mono text-xl sm:text-2xl font-bold text-[#f7e7a9]">
               {roundScore.toLocaleString()}

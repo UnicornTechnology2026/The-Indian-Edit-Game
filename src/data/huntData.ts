@@ -224,10 +224,11 @@ export const HUNT_ROUNDS: HuntRound[] = [
 ];
 
 export const SCORING = {
-  BOTTLE_FOUND: 1000,
-  WRONG_TAP: -100,
-  TIME_BONUS_PER_SEC: 100,
-  ALL_FOUND_BONUS: 2000,
+  BOTTLE_FOUND: 100,
+  WRONG_TAP: -50,
+  ALL_FOUND_BONUS: 0,
+  QUICK_COMPLETE_TIME_LIMIT: 10, // seconds
+  QUICK_COMPLETE_BONUS: 50,
 };
 
 export const DEBUG_MODE = false;

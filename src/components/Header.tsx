@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({ onShowIntroSplash }) => {
               {(
                 state.decodeScore +
                 state.blendScore +
-                (state.huntScore || state.scoreCity || 0)
+                state.huntScore
               ).toLocaleString()}
             </span>
           </div>

@@ -15,7 +15,7 @@ export const LoginScreen: React.FC = () => {
     useGame();
 
   const [name, setName] = useState(state.userName || "");
-  const [city, setCity] = useState(state.userCity || "Nagpur");
+  const [city, setCity] = useState(state.userCity);
   const [customCity, setCustomCity] = useState("");
   const [phone, setPhone] = useState(state.userPhone || "");
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(true);
