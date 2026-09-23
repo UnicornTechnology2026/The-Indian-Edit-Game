@@ -29,6 +29,47 @@ export async function supabaseInsert<T extends object>(
   }
 }
 
+// Insert a row and return the inserted row(s), so the caller can capture
+// the generated `id` (needed later to PATCH the same row via supabaseUpdate).
+export async function supabaseInsertReturning<
+  T extends object,
+  R = Record<string, unknown>,
+>(table: string, row: T): Promise<R[]> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: { ...baseHeaders, Prefer: "return=representation" },
+    body: JSON.stringify(row),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase insert failed (${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
+// Update (PATCH) an existing row identified by its primary key `id`.
+// This is what was missing: without it, nothing written after the initial
+// insert (score revisions, scratch-card reveal, reward claim, etc.) could
+// ever reach Supabase.
+export async function supabaseUpdate<T extends object>(
+  table: string,
+  id: number | string,
+  patch: T,
+): Promise<void> {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(String(id))}`,
+    {
+      method: "PATCH",
+      headers: { ...baseHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify(patch),
+    },
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase update failed (${res.status}): ${text}`);
+  }
+}
+
 // Select rows from a table, ordered by a column, limited to `limit` rows
 export async function supabaseSelect<T>(
   table: string,

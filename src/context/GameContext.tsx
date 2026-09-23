@@ -147,41 +147,44 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const navigateTo = (screen: ScreenId) => {
     sound.playClick();
-    setState((prev) => {
-      // When navigating to result screen, calculate total score & personality
-      if (screen === "screen-result") {
-        const total = computeMasterScore(prev);
-        const pers = computePersonality(prev);
-        const gift =
-          prev.selectedGift ||
-          REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
 
-        // Save the finished run to Supabase for the live leaderboard.
-        // Fire-and-forget: never blocks navigation, never breaks the game
-        // if Supabase isn't configured or the request fails.
-        supabaseInsert("game_results", {
-          user_name: prev.userName || "VIP Guest",
-          user_city: prev.userCity || "Nagpur",
-          user_phone: prev.userPhone || null,
-          personality: pers?.name ?? null,
-          total_score: total,
-          decode_score: prev.decodeScore,
-          blend_score: prev.blendScore,
-          hunt_score: prev.huntScore,
-        }).catch((err) =>
-          console.error("Supabase save (game_results) failed:", err),
-        );
+    // When navigating to result screen, calculate total score & personality
+    // and save the run to Supabase. Done here, using `state` directly,
+    // rather than inside the setState updater below — React 18 Strict Mode
+    // (dev only) invokes updater functions twice to help catch side
+    // effects, so a supabaseInsert placed inside one fires twice and
+    // creates duplicate rows.
+    if (screen === "screen-result") {
+      const total = computeMasterScore(state);
+      const pers = computePersonality(state);
+      const gift =
+        state.selectedGift ||
+        REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
 
-        return {
-          ...prev,
-          currentScreen: screen,
-          totalScore: total,
-          personality: pers,
-          selectedGift: gift,
-        };
-      }
-      return { ...prev, currentScreen: screen };
-    });
+      supabaseInsert("game_results", {
+        user_name: state.userName || "VIP Guest",
+        user_city: state.userCity || "Nagpur",
+        user_phone: state.userPhone || null,
+        personality: pers?.name ?? null,
+        total_score: total,
+        decode_score: state.decodeScore,
+        blend_score: state.blendScore,
+        hunt_score: state.huntScore,
+      }).catch((err) =>
+        console.error("Supabase save (game_results) failed:", err),
+      );
+
+      setState((prev) => ({
+        ...prev,
+        currentScreen: screen,
+        totalScore: total,
+        personality: pers,
+        selectedGift: gift,
+      }));
+    } else {
+      setState((prev) => ({ ...prev, currentScreen: screen }));
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -195,19 +198,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     setState((prev) => ({ ...prev, otpVerified: verified }));
 
   const registerUser = () => {
-    setState((prev) => {
-      // Save the login/registration details to Supabase as soon as OTP is
-      // verified, rather than waiting for the player to finish the whole
-      // game. Fire-and-forget: never blocks navigation.
-      supabaseInsert("registrations", {
-        user_name: prev.userName || "VIP Guest",
-        user_city: prev.userCity || "Nagpur",
-        user_phone: prev.userPhone || "",
-      }).catch((err) =>
-        console.error("Supabase save (registrations) failed:", err),
-      );
-      return prev;
-    });
+    // Same reasoning as navigateTo above: read from `state` directly
+    // instead of inside a setState updater, so this only ever fires once.
+    supabaseInsert("registrations", {
+      user_name: state.userName || "VIP Guest",
+      user_city: state.userCity || "Nagpur",
+      user_phone: state.userPhone || "",
+    }).catch((err) =>
+      console.error("Supabase save (registrations) failed:", err),
+    );
   };
 
   const updateRushScore = (bottles: number, score: number, bonus: number) => {
