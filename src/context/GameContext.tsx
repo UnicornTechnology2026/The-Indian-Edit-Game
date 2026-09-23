@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import {
   GameState,
   ScreenId,
@@ -137,6 +143,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     return INITIAL_STATE;
   });
 
+  // Guard refs — prevent the same Supabase row being inserted twice, whether
+  // from a StrictMode double-invoke, a double-click, or a re-triggered
+  // navigation to the same screen. Reset in resetGame() for the next playthrough.
+  const hasRegisteredRef = useRef(false);
+  const hasLoggedResultRef = useRef(false);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -148,31 +160,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const navigateTo = (screen: ScreenId) => {
     sound.playClick();
 
-    // When navigating to result screen, calculate total score & personality
-    // and save the run to Supabase. Done here, using `state` directly,
-    // rather than inside the setState updater below — React 18 Strict Mode
-    // (dev only) invokes updater functions twice to help catch side
-    // effects, so a supabaseInsert placed inside one fires twice and
-    // creates duplicate rows.
     if (screen === "screen-result") {
+      // Compute the derived values once, from the state we already have —
+      // no need to read them back out of a setState updater.
       const total = computeMasterScore(state);
       const pers = computePersonality(state);
       const gift =
         state.selectedGift ||
         REWARD_GIFTS[Math.floor(Math.random() * REWARD_GIFTS.length)];
-
-      supabaseInsert("game_results", {
-        user_name: state.userName || "VIP Guest",
-        user_city: state.userCity || "Nagpur",
-        user_phone: state.userPhone || null,
-        personality: pers?.name ?? null,
-        total_score: total,
-        decode_score: state.decodeScore,
-        blend_score: state.blendScore,
-        hunt_score: state.huntScore,
-      }).catch((err) =>
-        console.error("Supabase save (game_results) failed:", err),
-      );
 
       setState((prev) => ({
         ...prev,
@@ -181,6 +176,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         personality: pers,
         selectedGift: gift,
       }));
+
+      // Side effect lives OUTSIDE the updater (StrictMode double-invokes
+      // updaters in dev to catch exactly this) and is guarded so it can
+      // only ever fire once per completed run.
+      if (!hasLoggedResultRef.current) {
+        hasLoggedResultRef.current = true;
+        supabaseInsert("game_results", {
+          user_name: state.userName || "VIP Guest",
+          user_city: state.userCity || "Nagpur",
+          user_phone: state.userPhone || null,
+          personality: pers?.name ?? null,
+          total_score: total,
+          decode_score: state.decodeScore,
+          blend_score: state.blendScore,
+          hunt_score: state.huntScore,
+        }).catch((err) =>
+          console.error("Supabase save (game_results) failed:", err),
+        );
+      }
     } else {
       setState((prev) => ({ ...prev, currentScreen: screen }));
     }
@@ -198,8 +212,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     setState((prev) => ({ ...prev, otpVerified: verified }));
 
   const registerUser = () => {
-    // Same reasoning as navigateTo above: read from `state` directly
-    // instead of inside a setState updater, so this only ever fires once.
+    // Guarded + moved outside setState — this is a one-time side effect per
+    // playthrough, not a state transition, so it doesn't belong in an updater.
+    if (hasRegisteredRef.current) return;
+    hasRegisteredRef.current = true;
+
     supabaseInsert("registrations", {
       user_name: state.userName || "VIP Guest",
       user_city: state.userCity || "Nagpur",
@@ -350,19 +367,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     action: "caption_copied" | "card_downloaded" | "card_shared",
     caption?: string,
   ) => {
-    setState((prev) => {
-      supabaseInsert("social_shares", {
-        user_name: prev.userName || null,
-        user_city: prev.userCity || null,
-        personality: prev.personality?.name ?? null,
-        total_score: prev.totalScore || null,
-        action,
-        caption: caption ?? null,
-      }).catch((err) =>
-        console.error("Supabase save (social_shares) failed:", err),
-      );
-      return prev;
-    });
+    // No state change here at all — this was only ever wrapped in setState
+    // to read `prev`, but `state` is already in scope. Call it directly.
+    supabaseInsert("social_shares", {
+      user_name: state.userName || null,
+      user_city: state.userCity || null,
+      personality: state.personality?.name ?? null,
+      total_score: state.totalScore || null,
+      action,
+      caption: caption ?? null,
+    }).catch((err) =>
+      console.error("Supabase save (social_shares) failed:", err),
+    );
   };
 
   const setScreenshotUploaded = (url: string) => {
@@ -393,6 +409,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const resetGame = () => {
     localStorage.removeItem(STORAGE_KEY);
+    hasRegisteredRef.current = false;
+    hasLoggedResultRef.current = false;
     setState(INITIAL_STATE);
   };
 
