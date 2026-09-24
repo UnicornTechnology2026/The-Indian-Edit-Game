@@ -1,8 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useGame } from "../../context/GameContext";
-import { ZoomIn, ZoomOut, CheckCircle2, X } from "lucide-react";
+import { ZoomIn, ZoomOut, CheckCircle2, X, Timer } from "lucide-react";
 import { sound } from "../../utils/audio";
 import NewBottle from "../../assets/images/NewBottle.png";
+
+// Total time the player has to solve all 5 hotspots, in seconds.
+const TOTAL_TIME = 30;
+// Countdown value (seconds remaining) below which the timer turns red.
+const TIMER_DANGER_THRESHOLD = 15;
+
+// Extra points awarded based on how fast (in elapsed seconds) the player
+// solves all 5 hotspots. First threshold that matches (in order) wins.
+const TIME_BONUS_TIERS: { maxElapsedSeconds: number; bonus: number }[] = [
+  { maxElapsedSeconds: 10, bonus: 30 },
+  { maxElapsedSeconds: 15, bonus: 20 },
+  { maxElapsedSeconds: 20, bonus: 10 },
+];
+
+function getTimeBonus(elapsedSeconds: number): number {
+  const tier = TIME_BONUS_TIERS.find(
+    (t) => elapsedSeconds <= t.maxElapsedSeconds,
+  );
+  return tier ? tier.bonus : 0;
+}
 
 interface Hotspot {
   id: string;
@@ -19,9 +39,6 @@ const HOTSPOTS: Hotspot[] = [
     id: "cap",
     number: 1,
     label: "THE CROWN DETAIL",
-    // Positions are percentages of the bottle IMAGE itself (see the
-    // inline-block wrapper around <img> below), so they track the real
-    // photo regardless of surrounding container padding.
     top: "10%",
     left: "46%",
     question:
@@ -114,7 +131,6 @@ function shuffleAnswers(answers: Hotspot["answers"]): Hotspot["answers"] {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-  // Reassign A/B/C/D labels to match the new, shuffled order
   return copy.map((ans, idx) => ({
     ...ans,
     key: String.fromCharCode(65 + idx),
@@ -129,6 +145,10 @@ export const Level1DecodeTheBottle: React.FC = () => {
     [],
   );
   const [solvedHotspots, setSolvedHotspots] = useState<string[]>([]);
+  // Hotspots where the player has given ONE wrong answer. Once a hotspot
+  // lands here, the question is permanently closed — no further attempts,
+  // shown in red on the bottle pin & checklist.
+  const [closedHotspots, setClosedHotspots] = useState<string[]>([]);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [score, setScore] = useState(state.decodeScore || 0);
   const [feedback, setFeedback] = useState<{
@@ -136,6 +156,24 @@ export const Level1DecodeTheBottle: React.FC = () => {
     isCorrect: boolean;
   } | null>(null);
   const [useIframe, setUseIframe] = useState(false);
+
+  // 30-second level timer. Counts down once; stops the moment all 5
+  // hotspots are solved (so the elapsed time can be used for the bonus),
+  // or when it hits 0, whichever happens first.
+  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [timerRunning, setTimerRunning] = useState(true);
+  const [timeUp, setTimeUp] = useState(false);
+
+  useEffect(() => {
+    if (!timerRunning) return;
+    if (timeLeft <= 0) {
+      setTimerRunning(false);
+      setTimeUp(true);
+      return;
+    }
+    const tick = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
+    return () => clearTimeout(tick);
+  }, [timeLeft, timerRunning]);
 
   // Listen for postMessage events from iframe if player toggled to iframe mode
   useEffect(() => {
@@ -171,17 +209,42 @@ export const Level1DecodeTheBottle: React.FC = () => {
     correct: boolean;
   }) => {
     if (!activeHotspot) return;
+    // Question is already closed (a wrong answer was given earlier),
+    // already solved, or time has run out — no further attempts allowed.
+    if (
+      closedHotspots.includes(activeHotspot.id) ||
+      solvedHotspots.includes(activeHotspot.id) ||
+      timeUp
+    ) {
+      return;
+    }
 
     if (answer.correct) {
       sound.playSuccess();
-      setFeedback({ message: "Correct! +200 Craft Points", isCorrect: true });
-      if (!solvedHotspots.includes(activeHotspot.id)) {
-        const newSolved = [...solvedHotspots, activeHotspot.id];
-        setSolvedHotspots(newSolved);
-        const newScore = score + 200;
-        setScore(newScore);
-        updateDecodeScore(newScore, newSolved.length, newSolved.length >= 5);
+      const newSolved = [...solvedHotspots, activeHotspot.id];
+      setSolvedHotspots(newSolved);
+      let newScore = score + 50;
+      const justCompleted = newSolved.length >= 5;
+
+      if (justCompleted) {
+        // Stop the clock and work out the time bonus from elapsed seconds.
+        setTimerRunning(false);
+        const elapsedSeconds = TOTAL_TIME - timeLeft;
+        const bonus = getTimeBonus(elapsedSeconds);
+        newScore += bonus;
+        setFeedback({
+          message:
+            bonus > 0
+              ? `Correct! +50 Craft Points (+${bonus} Time Bonus!)`
+              : "Correct! +50 Craft Points",
+          isCorrect: true,
+        });
+      } else {
+        setFeedback({ message: "Correct! +50 Craft Points", isCorrect: true });
       }
+
+      setScore(newScore);
+      updateDecodeScore(newScore, newSolved.length, justCompleted);
       setTimeout(() => {
         setFeedback(null);
         setActiveHotspot(null);
@@ -189,13 +252,23 @@ export const Level1DecodeTheBottle: React.FC = () => {
     } else {
       sound.playWrong();
       setFeedback({
-        message: "Incorrect. Re-examine the bottle detail and try again.",
+        message: "Incorrect. This question is now closed.",
         isCorrect: false,
       });
+      // Permanently close this question — no more attempts on it.
+      setClosedHotspots((prev) =>
+        prev.includes(activeHotspot.id) ? prev : [...prev, activeHotspot.id],
+      );
+      setTimeout(() => {
+        setFeedback(null);
+        setActiveHotspot(null);
+      }, 1400);
     }
   };
 
   const isCompleted = solvedHotspots.length >= 5 || state.decodeCompleted;
+  const isTimerDanger = timeLeft <= TIMER_DANGER_THRESHOLD;
+  const timerLabel = `00:${String(timeLeft).padStart(2, "0")}`;
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6 animate-fade-in">
@@ -206,13 +279,29 @@ export const Level1DecodeTheBottle: React.FC = () => {
             Decode The Bottle
           </h2>
           <p className="text-xs text-[#faf6f0] mt-1">
-            Inspect all 5 artisanal details of The Indian Edit bespoke bottle to
-            earn up to 1,000 craft points.
+            Inspect all 5 artisanal details of The Indian Edit bespoke bottle in
+            30 seconds — earn 50 craft points per detail, plus a speed bonus
+            (+30 within 10s, +20 within 15s, +10 within 20s).
           </p>
         </div>
 
-        {/* Progress & Score Pill */}
+        {/* Timer, Progress & Score Pills */}
         <div className="flex items-center gap-3">
+          <div
+            className={`flex items-center gap-2 rounded-xl border px-4 py-2 shadow-lg transition-colors ${
+              isTimerDanger
+                ? "bg-red-950/40 border-red-600 text-red-400"
+                : "bg-[#22160f] border-[#d4af37]/40 text-[#f5d77f]"
+            }`}
+          >
+            <Timer
+              className={`w-4 h-4 ${isTimerDanger ? "animate-pulse" : ""}`}
+            />
+            <span className="font-mono text-lg font-bold tabular-nums">
+              {timerLabel}
+            </span>
+          </div>
+
           <div className="bg-[#22160f] border border-[#d4af37]/40 rounded-xl px-4 py-2 shadow-lg text-center">
             <span className="text-[10px] text-[#a69383] uppercase font-bold">
               DISCOVERED
@@ -284,6 +373,8 @@ export const Level1DecodeTheBottle: React.FC = () => {
                 {/* 5 Pulsing Interactive Hotspots, anchored to the image */}
                 {HOTSPOTS.map((spot) => {
                   const isSolved = solvedHotspots.includes(spot.id);
+                  const isClosed = closedHotspots.includes(spot.id);
+                  const isLockedByTime = timeUp && !isSolved;
                   return (
                     <button
                       key={spot.id}
@@ -296,7 +387,9 @@ export const Level1DecodeTheBottle: React.FC = () => {
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-lg ${
                           isSolved
                             ? "bg-green-600 text-white border-2 border-green-300"
-                            : "bg-[#d4af37] text-[#170f0a] border-2 border-[#fff1b8] animate-bounce"
+                            : isClosed || isLockedByTime
+                              ? "bg-red-600 text-white border-2 border-red-300"
+                              : "bg-[#d4af37] text-[#170f0a] border-2 border-[#fff1b8] animate-bounce"
                         }`}
                       >
                         {isSolved ? "✓" : spot.number}
@@ -327,6 +420,9 @@ export const Level1DecodeTheBottle: React.FC = () => {
             <div className="mt-4 space-y-2.5">
               {HOTSPOTS.map((spot) => {
                 const isSolved = solvedHotspots.includes(spot.id);
+                const isClosed = closedHotspots.includes(spot.id);
+                const isLockedByTime = timeUp && !isSolved;
+                const isRed = isClosed || isLockedByTime;
                 return (
                   <button
                     key={spot.id}
@@ -334,7 +430,9 @@ export const Level1DecodeTheBottle: React.FC = () => {
                     className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isSolved
                         ? "bg-green-950/30 border-green-600/50 text-[#faf6f0]"
-                        : "bg-[#1e130d] border-[#3d261a] hover:border-[#d4af37]/50 hover:bg-[#2e1e15]"
+                        : isRed
+                          ? "bg-red-950/30 border-red-600/50 text-[#faf6f0]"
+                          : "bg-[#1e130d] border-[#3d261a] hover:border-[#d4af37]/50 hover:bg-[#2e1e15]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -342,7 +440,9 @@ export const Level1DecodeTheBottle: React.FC = () => {
                         className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                           isSolved
                             ? "bg-green-600 text-white"
-                            : "bg-[#2e1e15] border border-[#d4af37]/60 text-[#f5d77f]"
+                            : isRed
+                              ? "bg-red-600 text-white"
+                              : "bg-[#2e1e15] border border-[#d4af37]/60 text-[#f5d77f]"
                         }`}
                       >
                         {isSolved ? "✓" : spot.number}
@@ -353,7 +453,13 @@ export const Level1DecodeTheBottle: React.FC = () => {
                     </div>
 
                     <span className="text-[10px] font-mono font-bold text-[#d4af37]">
-                      {isSolved ? "+200 pts" : "200 pts"}
+                      {isSolved
+                        ? "+50 pts"
+                        : isClosed
+                          ? "closed"
+                          : isLockedByTime
+                            ? "time's up"
+                            : "50 pts"}
                     </span>
                   </button>
                 );
@@ -428,22 +534,35 @@ export const Level1DecodeTheBottle: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-4 space-y-2.5">
-              {shuffledAnswers.map((ans) => (
-                <button
-                  key={ans.text}
-                  onClick={() => handleSelectAnswer(ans)}
-                  className="w-full p-3 rounded-xl bg-[#170f0a] border border-[#3d261a] hover:border-[#d4af37] text-left text-xs text-[#faf6f0] hover:bg-[#2e1e15] flex items-center gap-3 transition-colors group cursor-pointer"
-                >
-                  <span className="w-6 h-6 rounded-md bg-[#2e1e15] border border-[#d4af37]/40 text-[#f5d77f] font-mono font-bold flex items-center justify-center text-xs group-hover:border-[#d4af37]">
-                    {ans.key}
-                  </span>
-                  <span className="group-hover:text-[#f5d77f] transition-colors">
-                    {ans.text}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {!solvedHotspots.includes(activeHotspot.id) &&
+            (closedHotspots.includes(activeHotspot.id) || timeUp) ? (
+              // Either answered incorrectly once, or the 30s timer ran out —
+              // either way, this question can no longer be attempted.
+              <div className="mt-4 p-4 rounded-xl bg-red-950/30 border border-red-600/50 text-center">
+                <p className="text-xs text-red-200">
+                  {timeUp
+                    ? "Time's up! The 30-second timer ran out, so this question is closed."
+                    : "This question is closed. You already gave an incorrect answer, so it can't be attempted again."}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 space-y-2.5">
+                {shuffledAnswers.map((ans) => (
+                  <button
+                    key={ans.text}
+                    onClick={() => handleSelectAnswer(ans)}
+                    className="w-full p-3 rounded-xl bg-[#170f0a] border border-[#3d261a] hover:border-[#d4af37] text-left text-xs text-[#faf6f0] hover:bg-[#2e1e15] flex items-center gap-3 transition-colors group cursor-pointer"
+                  >
+                    <span className="w-6 h-6 rounded-md bg-[#2e1e15] border border-[#d4af37]/40 text-[#f5d77f] font-mono font-bold flex items-center justify-center text-xs group-hover:border-[#d4af37]">
+                      {ans.key}
+                    </span>
+                    <span className="group-hover:text-[#f5d77f] transition-colors">
+                      {ans.text}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="mt-5 text-right">
               <button

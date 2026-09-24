@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Indian Edit — Decode the Bottle</title>
-  <meta name="description" content="A luxury brand interactive discovery game exploring the craftsmanship and design details of The Indian Edit Super Premium Whisky.">
+  <meta name="description"
+    content="A luxury brand interactive discovery game exploring the craftsmanship and design details of The Indian Edit Super Premium Whisky.">
   <meta property="og:title" content="The Indian Edit — Decode the Bottle">
-  <meta property="og:description" content="Look closer. Every detail has a story. An interactive luxury whisky brand experience.">
+  <meta property="og:description"
+    content="Look closer. Every detail has a story. An interactive luxury whisky brand experience.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#070504">
 
   <!-- Pure Custom Stylesheet (No External Frameworks) -->
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div id="app-root">
     <!-- Ambient Background Filigree & Vignette -->
@@ -34,7 +38,7 @@
 
     <!-- Detail Discovery Toast Notification -->
     <div id="discovery-toast" class="discovery-toast" role="status" aria-live="polite">
-      <span class="toast-points">+50</span>
+      <span class="toast-points">✦</span>
       <span class="toast-text">DETAIL DISCOVERED</span>
     </div>
 
@@ -51,11 +55,7 @@
 
       <section class="intro-bottle-stage">
         <div class="bottle-glow-halo" aria-hidden="true"></div>
-        <img
-          src="assets/bottle.jpg"
-          alt="The Indian Edit bottle"
-          class="intro-bottle-img"
-        />
+        <img src="assets/bottle.jpg" alt="The Indian Edit bottle" class="intro-bottle-img" />
       </section>
 
       <footer class="intro-footer">
@@ -100,12 +100,7 @@
 
           <!-- Interactive Responsive Bottle Container with 5 Hotspots -->
           <div id="bottle-container" class="bottle-container floating">
-            <img
-              id="bottle-image"
-              src="assets/bottle.jpg"
-              class="bottle-image"
-              alt="The Indian Edit bottle"
-            />
+            <img id="bottle-image" src="assets/bottle.jpg" class="bottle-image" alt="The Indian Edit bottle" />
             <!-- 5 Dynamic percentage-positioned Hotspots injected via script.js -->
           </div>
         </div>
@@ -178,11 +173,7 @@
 
         <div class="completion-bottle-showcase">
           <div class="completion-bottle-halo" aria-hidden="true"></div>
-          <img
-            src="assets/bottle.jpg"
-            alt="The Indian Edit decoded bottle"
-            class="completion-bottle-img"
-          />
+          <img src="assets/bottle.jpg" alt="The Indian Edit decoded bottle" class="completion-bottle-img" />
         </div>
 
         <div class="metrics-row">
@@ -244,11 +235,13 @@
     <!-- ===================================================================
          SCREEN 6: LEADERBOARD MODAL (LOCALSTORAGE)
          =================================================================== -->
-    <aside id="leaderboard-modal" class="leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-heading">
+    <aside id="leaderboard-modal" class="leaderboard-modal" role="dialog" aria-modal="true"
+      aria-labelledby="leaderboard-heading">
       <div class="leaderboard-card">
         <header class="leaderboard-header">
           <h2 id="leaderboard-heading" class="leaderboard-title">HALL OF DECODERS</h2>
-          <button id="btn-close-leaderboard" class="icon-btn" aria-label="Close Leaderboard" style="width: 34px; height: 34px; font-size: 0.9rem;">
+          <button id="btn-close-leaderboard" class="icon-btn" aria-label="Close Leaderboard"
+            style="width: 34px; height: 34px; font-size: 0.9rem;">
             ✕
           </button>
         </header>
@@ -256,14 +249,8 @@
         <form id="form-submit-score" class="score-submission-form">
           <label for="player-name" class="form-label">ENTER YOUR NAME TO RECORD SCORE</label>
           <div class="form-input-group">
-            <input
-              type="text"
-              id="player-name"
-              class="input-name"
-              placeholder="Your Name (e.g. Royal Connoisseur)"
-              maxlength="20"
-              autocomplete="name"
-            />
+            <input type="text" id="player-name" class="input-name" placeholder="Your Name (e.g. Royal Connoisseur)"
+              maxlength="20" autocomplete="name" />
             <button type="submit" class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;">
               SUBMIT
             </button>
@@ -280,4 +267,5 @@
   <!-- Pure Vanilla JavaScript Engine (No External Frameworks) -->
   <script src="script.js"></script>
 </body>
+
 </html>
