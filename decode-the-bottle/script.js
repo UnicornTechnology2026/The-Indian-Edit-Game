@@ -575,38 +575,50 @@
   // ===================================================================
 
   function updateScore(delta) {
-    const prevScore = gameState.score;
-    gameState.score = Math.max(0, Math.min(GAME_CONFIG.maxScore, gameState.score + delta));
+  const prevScore = gameState.score;
+  // No lower bound: wrong answers can push the score below zero
+  gameState.score = Math.min(GAME_CONFIG.maxScore, gameState.score + delta);
 
-    // Show floating score notification
-    showScorePop(delta);
+  // Show floating score notification
+  showScorePop(delta);
 
-    // Animate score ticker counting
-    animateScoreCount(prevScore, gameState.score);
-  }
+  // Animate score ticker counting
+  animateScoreCount(prevScore, gameState.score);
+}
+
+function formatScore(value) {
+  const abs = String(Math.abs(value)).padStart(4, '0');
+  return value < 0 ? '-' + abs : abs;
+}
+
+function setScoreText(value) {
+  if (!DOM.scoreValue) return;
+  DOM.scoreValue.textContent = formatScore(value);
+  DOM.scoreValue.classList.toggle('negative', value < 0);
+}
 
   function animateScoreCount(from, to) {
-    if (!DOM.scoreValue) return;
-    if (gameState.scoreAnimationId) {
-      cancelAnimationFrame(gameState.scoreAnimationId);
+   if (!DOM.scoreValue) return;
+  if (gameState.scoreAnimationId) {
+    cancelAnimationFrame(gameState.scoreAnimationId);
     }
 
     const duration = 500;
     const startTime = performance.now();
 
-    function step(timestamp) {
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const current = Math.round(from + (to - from) * progress);
-      DOM.scoreValue.textContent = String(current).padStart(4, '0');
+  function step(timestamp) {
+    const progress = Math.min((timestamp - startTime) / duration, 1);
+    const current = Math.round(from + (to - from) * progress);
+    setScoreText(current);
 
-      if (progress < 1) {
-        gameState.scoreAnimationId = requestAnimationFrame(step);
-      } else {
-        DOM.scoreValue.textContent = String(to).padStart(4, '0');
-      }
+    if (progress < 1) {
+      gameState.scoreAnimationId = requestAnimationFrame(step);
+    } else {
+      setScoreText(to);
     }
-    gameState.scoreAnimationId = requestAnimationFrame(step);
   }
+  gameState.scoreAnimationId = requestAnimationFrame(step);
+}
 
   function showScorePop(delta) {
     const parent = document.querySelector('.score-display');
@@ -694,7 +706,6 @@
     }
 
     // Award +50 discovery points
-    updateScore(GAME_CONFIG.pointsDiscovery);
     updateProgress();
 
     // Show discovery toast notification
@@ -710,8 +721,12 @@
     if (!DOM.discoveryToast) return;
     const textEl = DOM.discoveryToast.querySelector('.toast-text');
     if (textEl) {
-      textEl.textContent = `${label} DISCOVERED`;
-    }
+  textEl.textContent = `${label} DISCOVERED`;
+}
+const pointsEl = DOM.discoveryToast.querySelector('.toast-points');
+if (pointsEl) {
+  pointsEl.textContent = '✦';
+}
     DOM.discoveryToast.classList.add('show');
     setTimeout(() => {
       DOM.discoveryToast.classList.remove('show');
@@ -778,11 +793,11 @@
     // Show correct feedback
     if (DOM.modalFeedback) {
       DOM.modalFeedback.className = 'modal-feedback show-correct';
-      DOM.modalFeedback.textContent = '✓ CORRECT (+100 POINTS)';
+      DOM.modalFeedback.textContent = `✓ CORRECT (+${GAME_CONFIG.pointsCorrect + GAME_CONFIG.pointsDiscovery} POINTS)`;
     }
 
     // Award +100 points
-    updateScore(GAME_CONFIG.pointsCorrect);
+    updateScore(GAME_CONFIG.pointsCorrect + GAME_CONFIG.pointsDiscovery);
 
     // Complete the hotspot
     completeDetail(hotspot);
@@ -940,7 +955,7 @@
     gameState.gameOver = false;
     gameState.zoomLevel = 1.0;
 
-    if (DOM.scoreValue) DOM.scoreValue.textContent = '0000';
+    setScoreText(0);
     updateProgress();
     renderHotspots();
     setZoom(1.0);

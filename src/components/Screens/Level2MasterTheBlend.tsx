@@ -74,7 +74,7 @@ const INGREDIENTS: Ingredient[] = [
 ];
 
 const REQUIRED = ["indian-malt", "indian-grain", "scotch-malt"];
-const ROUND_SECONDS = 30;
+const ROUND_SECONDS = 15;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -176,9 +176,10 @@ export const Level2MasterTheBlend: React.FC = () => {
     if (ing.correct) {
       sound.playFound();
       const nextCollected = [...collectedIds, ing.id];
-      const nextScore = score + 100;
+      const nextScore = score + 100; // e.g. -25 + 100 = 75
       setCollectedIds(nextCollected);
       setScore(nextScore);
+      showFeedback(`${ing.name} added! (+100) Score: ${nextScore}`, true);
 
       if (REQUIRED.every((id) => nextCollected.includes(id))) {
         const elapsed = Math.min(
@@ -201,7 +202,8 @@ export const Level2MasterTheBlend: React.FC = () => {
       }
     } else {
       sound.playWrong();
-      setScore((s) => Math.max(0, s - 25));
+      // No floor at 0: a wrong pick can push the score negative
+      setScore((s) => s - 25);
       setIncorrectAttempts((a) => a + 1);
       showFeedback(`${ing.name} is not part of this edit. (-25)`, false);
       setShakeId(ing.id);
@@ -336,7 +338,11 @@ export const Level2MasterTheBlend: React.FC = () => {
                 <div className="text-[11px] tracking-wide text-[#a69383] mb-1">
                   Blend Score
                 </div>
-                <div className="font-serif text-2xl text-[#f5d77f]">
+                <div
+                  className={`font-serif text-2xl ${
+                    score < 0 ? "text-[#f87171]" : "text-[#f5d77f]"
+                  }`}
+                >
                   {score}
                 </div>
               </div>
@@ -568,7 +574,11 @@ export const Level2MasterTheBlend: React.FC = () => {
             <div className="text-[11px] tracking-wide text-[#a69383]">
               Points Recorded
             </div>
-            <div className="font-serif text-4xl text-[#f5d77f] my-1.5">
+            <div
+              className={`font-serif text-4xl my-1.5 ${
+                timeoutScore < 0 ? "text-[#f87171]" : "text-[#f5d77f]"
+              }`}
+            >
               {timeoutScore} pts
             </div>
             <p className="text-xs text-[#e5d8cb] mt-2 leading-relaxed">
