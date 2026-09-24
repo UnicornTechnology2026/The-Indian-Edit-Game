@@ -3,26 +3,12 @@ import { useGame } from "../../context/GameContext";
 import { ZoomIn, ZoomOut, CheckCircle2, X, Timer } from "lucide-react";
 import { sound } from "../../utils/audio";
 import NewBottle from "../../assets/images/NewBottle.png";
+import { DecodeTheBottleIntro } from "./DecodeTheBottleIntro";
 
-// Total time the player has to solve all 5 hotspots, in seconds.
-const TOTAL_TIME = 30;
-// Countdown value (seconds remaining) below which the timer turns red.
-const TIMER_DANGER_THRESHOLD = 15;
-
-// Extra points awarded based on how fast (in elapsed seconds) the player
-// solves all 5 hotspots. First threshold that matches (in order) wins.
-const TIME_BONUS_TIERS: { maxElapsedSeconds: number; bonus: number }[] = [
-  { maxElapsedSeconds: 10, bonus: 30 },
-  { maxElapsedSeconds: 15, bonus: 20 },
-  { maxElapsedSeconds: 20, bonus: 10 },
-];
-
-function getTimeBonus(elapsedSeconds: number): number {
-  const tier = TIME_BONUS_TIERS.find(
-    (t) => elapsedSeconds <= t.maxElapsedSeconds,
-  );
-  return tier ? tier.bonus : 0;
-}
+// Seconds the player gets to answer EACH question.
+const QUESTION_TIME = 10;
+// Seconds remaining at or below which the modal timer turns red.
+const QUESTION_DANGER_THRESHOLD = 3;
 
 interface Hotspot {
   id: string;
@@ -137,7 +123,7 @@ function shuffleAnswers(answers: Hotspot["answers"]): Hotspot["answers"] {
   }));
 }
 
-export const Level1DecodeTheBottle: React.FC = () => {
+export const DecodeTheBottleGame: React.FC = () => {
   const { state, updateDecodeScore, navigateTo } = useGame();
 
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
@@ -145,10 +131,15 @@ export const Level1DecodeTheBottle: React.FC = () => {
     [],
   );
   const [solvedHotspots, setSolvedHotspots] = useState<string[]>([]);
-  // Hotspots where the player has given ONE wrong answer. Once a hotspot
-  // lands here, the question is permanently closed — no further attempts,
-  // shown in red on the bottle pin & checklist.
+  // Hotspots where the player gave ONE wrong answer. Permanently closed.
   const [closedHotspots, setClosedHotspots] = useState<string[]>([]);
+  // Hotspots where the 10-second timer ran out before an answer was given.
+  // Permanently closed as well.
+  const [timedOutHotspots, setTimedOutHotspots] = useState<string[]>([]);
+  // Remaining seconds for each question. A question's clock only runs while
+  // its modal is open, and it resumes from where it stopped if the modal is
+  // dismissed and reopened (so closing/reopening can't reset the 10 seconds).
+  const [timeLeftById, setTimeLeftById] = useState<Record<string, number>>({});
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [score, setScore] = useState(state.decodeScore || 0);
   const [feedback, setFeedback] = useState<{
@@ -157,23 +148,37 @@ export const Level1DecodeTheBottle: React.FC = () => {
   } | null>(null);
   const [useIframe, setUseIframe] = useState(false);
 
-  // 30-second level timer. Counts down once; stops the moment all 5
-  // hotspots are solved (so the elapsed time can be used for the bonus),
-  // or when it hits 0, whichever happens first.
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
-  const [timerRunning, setTimerRunning] = useState(true);
-  const [timeUp, setTimeUp] = useState(false);
+  // ---- Per-question timer -------------------------------------------------
+  const activeId = activeHotspot?.id ?? null;
+  const activeIsOpen =
+    !!activeId &&
+    !solvedHotspots.includes(activeId) &&
+    !closedHotspots.includes(activeId) &&
+    !timedOutHotspots.includes(activeId);
+  const questionTimeLeft = activeId
+    ? (timeLeftById[activeId] ?? QUESTION_TIME)
+    : QUESTION_TIME;
 
   useEffect(() => {
-    if (!timerRunning) return;
-    if (timeLeft <= 0) {
-      setTimerRunning(false);
-      setTimeUp(true);
+    if (!activeId || !activeIsOpen) return;
+
+    // Time ran out with no answer -> this question is now closed.
+    if (questionTimeLeft <= 0) {
+      sound.playWrong();
+      setTimedOutHotspots((prev) =>
+        prev.includes(activeId) ? prev : [...prev, activeId],
+      );
       return;
     }
-    const tick = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
+
+    const tick = setTimeout(() => {
+      setTimeLeftById((prev) => ({
+        ...prev,
+        [activeId]: (prev[activeId] ?? QUESTION_TIME) - 1,
+      }));
+    }, 1000);
     return () => clearTimeout(tick);
-  }, [timeLeft, timerRunning]);
+  }, [activeId, activeIsOpen, questionTimeLeft]);
 
   // Listen for postMessage events from iframe if player toggled to iframe mode
   useEffect(() => {
@@ -195,6 +200,22 @@ export const Level1DecodeTheBottle: React.FC = () => {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
+  // The level is finished once every question is resolved, whether it was
+  // answered correctly, answered wrongly, or timed out. Without this, a
+  // closed question would leave the player unable to reach the next level.
+  const resolvedCount = new Set([
+    ...solvedHotspots,
+    ...closedHotspots,
+    ...timedOutHotspots,
+  ]).size;
+  const allResolved = resolvedCount >= HOTSPOTS.length;
+
+  useEffect(() => {
+    if (allResolved && !state.decodeCompleted) {
+      updateDecodeScore(score, solvedHotspots.length, true);
+    }
+  }, [allResolved]);
+
   // Opens a hotspot's question with a freshly shuffled answer order every time
   const openHotspot = (spot: Hotspot) => {
     sound.playClick();
@@ -209,12 +230,13 @@ export const Level1DecodeTheBottle: React.FC = () => {
     correct: boolean;
   }) => {
     if (!activeHotspot) return;
-    // Question is already closed (a wrong answer was given earlier),
-    // already solved, or time has run out — no further attempts allowed.
+    // Already closed (wrong answer), already solved, or timed out —
+    // no further attempts allowed.
     if (
       closedHotspots.includes(activeHotspot.id) ||
       solvedHotspots.includes(activeHotspot.id) ||
-      timeUp
+      timedOutHotspots.includes(activeHotspot.id) ||
+      questionTimeLeft <= 0
     ) {
       return;
     }
@@ -223,28 +245,11 @@ export const Level1DecodeTheBottle: React.FC = () => {
       sound.playSuccess();
       const newSolved = [...solvedHotspots, activeHotspot.id];
       setSolvedHotspots(newSolved);
-      let newScore = score + 50;
-      const justCompleted = newSolved.length >= 5;
+      const newScore = score + 50;
 
-      if (justCompleted) {
-        // Stop the clock and work out the time bonus from elapsed seconds.
-        setTimerRunning(false);
-        const elapsedSeconds = TOTAL_TIME - timeLeft;
-        const bonus = getTimeBonus(elapsedSeconds);
-        newScore += bonus;
-        setFeedback({
-          message:
-            bonus > 0
-              ? `Correct! +50 Craft Points (+${bonus} Time Bonus!)`
-              : "Correct! +50 Craft Points",
-          isCorrect: true,
-        });
-      } else {
-        setFeedback({ message: "Correct! +50 Craft Points", isCorrect: true });
-      }
-
+      setFeedback({ message: "Correct! +50 Craft Points", isCorrect: true });
       setScore(newScore);
-      updateDecodeScore(newScore, newSolved.length, justCompleted);
+      updateDecodeScore(newScore, newSolved.length, newSolved.length >= 5);
       setTimeout(() => {
         setFeedback(null);
         setActiveHotspot(null);
@@ -266,42 +271,18 @@ export const Level1DecodeTheBottle: React.FC = () => {
     }
   };
 
-  const isCompleted = solvedHotspots.length >= 5 || state.decodeCompleted;
-  const isTimerDanger = timeLeft <= TIMER_DANGER_THRESHOLD;
-  const timerLabel = `00:${String(timeLeft).padStart(2, "0")}`;
+  const isCompleted = allResolved || state.decodeCompleted;
+  const isTimerDanger = questionTimeLeft <= QUESTION_DANGER_THRESHOLD;
+  const timerLabel = `00:${String(Math.max(questionTimeLeft, 0)).padStart(2, "0")}`;
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6 animate-fade-in">
       {/* Level Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] sm:text-3xl font-bold gold-gradient-text mt-1">
-            Decode The Bottle
-          </h2>
-          <p className="text-xs text-[#faf6f0] mt-1">
-            Inspect all 5 artisanal details of The Indian Edit bespoke bottle in
-            30 seconds — earn 50 craft points per detail, plus a speed bonus
-            (+30 within 10s, +20 within 15s, +10 within 20s).
-          </p>
-        </div>
+        <div></div>
 
-        {/* Timer, Progress & Score Pills */}
+        {/* Progress & Score Pills */}
         <div className="flex items-center gap-3">
-          <div
-            className={`flex items-center gap-2 rounded-xl border px-4 py-2 shadow-lg transition-colors ${
-              isTimerDanger
-                ? "bg-red-950/40 border-red-600 text-red-400"
-                : "bg-[#22160f] border-[#d4af37]/40 text-[#f5d77f]"
-            }`}
-          >
-            <Timer
-              className={`w-4 h-4 ${isTimerDanger ? "animate-pulse" : ""}`}
-            />
-            <span className="font-mono text-lg font-bold tabular-nums">
-              {timerLabel}
-            </span>
-          </div>
-
           <div className="bg-[#22160f] border border-[#d4af37]/40 rounded-xl px-4 py-2 shadow-lg text-center">
             <span className="text-[10px] text-[#a69383] uppercase font-bold">
               DISCOVERED
@@ -373,8 +354,9 @@ export const Level1DecodeTheBottle: React.FC = () => {
                 {/* 5 Pulsing Interactive Hotspots, anchored to the image */}
                 {HOTSPOTS.map((spot) => {
                   const isSolved = solvedHotspots.includes(spot.id);
-                  const isClosed = closedHotspots.includes(spot.id);
-                  const isLockedByTime = timeUp && !isSolved;
+                  const isRed =
+                    closedHotspots.includes(spot.id) ||
+                    timedOutHotspots.includes(spot.id);
                   return (
                     <button
                       key={spot.id}
@@ -387,7 +369,7 @@ export const Level1DecodeTheBottle: React.FC = () => {
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-lg ${
                           isSolved
                             ? "bg-green-600 text-white border-2 border-green-300"
-                            : isClosed || isLockedByTime
+                            : isRed
                               ? "bg-red-600 text-white border-2 border-red-300"
                               : "bg-[#d4af37] text-[#170f0a] border-2 border-[#fff1b8] animate-bounce"
                         }`}
@@ -421,8 +403,8 @@ export const Level1DecodeTheBottle: React.FC = () => {
               {HOTSPOTS.map((spot) => {
                 const isSolved = solvedHotspots.includes(spot.id);
                 const isClosed = closedHotspots.includes(spot.id);
-                const isLockedByTime = timeUp && !isSolved;
-                const isRed = isClosed || isLockedByTime;
+                const isTimedOut = timedOutHotspots.includes(spot.id);
+                const isRed = isClosed || isTimedOut;
                 return (
                   <button
                     key={spot.id}
@@ -457,7 +439,7 @@ export const Level1DecodeTheBottle: React.FC = () => {
                         ? "+50 pts"
                         : isClosed
                           ? "closed"
-                          : isLockedByTime
+                          : isTimedOut
                             ? "time's up"
                             : "50 pts"}
                     </span>
@@ -474,8 +456,9 @@ export const Level1DecodeTheBottle: React.FC = () => {
                   <span>Level 03 Completed!</span>
                 </div>
                 <p className="text-xs text-[#warm-beige]">
-                  You decoded all 5 artisanal bottle details and secured maximum
-                  craft provenance points.
+                  {solvedHotspots.length >= 5
+                    ? "You decoded all 5 artisanal bottle details and secured maximum craft provenance points."
+                    : `You decoded ${solvedHotspots.length} of 5 artisanal bottle details and earned ${score} craft points.`}
                 </p>
 
                 <button
@@ -509,12 +492,45 @@ export const Level1DecodeTheBottle: React.FC = () => {
                   {activeHotspot.label}
                 </h4>
               </div>
-              <button
-                onClick={() => setActiveHotspot(null)}
-                className="p-1 rounded-lg text-[#a69383] hover:text-[#faf6f0] transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
+              <div className="flex items-center gap-3">
+                {/* Per-question countdown */}
+                <div
+                  className={`flex items-center gap-1.5 rounded-lg border px-3 py-1 transition-colors ${
+                    isTimerDanger
+                      ? "bg-red-950/40 border-red-600 text-red-400"
+                      : "bg-[#170f0a] border-[#d4af37]/40 text-[#f5d77f]"
+                  }`}
+                >
+                  <Timer
+                    className={`w-4 h-4 ${
+                      isTimerDanger && activeIsOpen ? "animate-pulse" : ""
+                    }`}
+                  />
+                  <span className="font-mono text-sm font-bold tabular-nums">
+                    {timerLabel}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setActiveHotspot(null)}
+                  className="p-1 rounded-lg text-[#a69383] hover:text-[#faf6f0] transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Countdown progress bar */}
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#170f0a] overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ease-linear ${
+                  isTimerDanger ? "bg-red-500" : "bg-[#d4af37]"
+                }`}
+                style={{
+                  width: `${(Math.max(questionTimeLeft, 0) / QUESTION_TIME) * 100}%`,
+                }}
+              />
             </div>
 
             <p className="mt-4 text-sm font-medium text-[#e5d8cb]">
@@ -535,13 +551,14 @@ export const Level1DecodeTheBottle: React.FC = () => {
             )}
 
             {!solvedHotspots.includes(activeHotspot.id) &&
-            (closedHotspots.includes(activeHotspot.id) || timeUp) ? (
-              // Either answered incorrectly once, or the 30s timer ran out —
+            (closedHotspots.includes(activeHotspot.id) ||
+              timedOutHotspots.includes(activeHotspot.id)) ? (
+              // Either answered incorrectly once, or the 10s timer ran out —
               // either way, this question can no longer be attempted.
               <div className="mt-4 p-4 rounded-xl bg-red-950/30 border border-red-600/50 text-center">
                 <p className="text-xs text-red-200">
-                  {timeUp
-                    ? "Time's up! The 30-second timer ran out, so this question is closed."
+                  {timedOutHotspots.includes(activeHotspot.id)
+                    ? `Time's up! You didn't answer within ${QUESTION_TIME} seconds, so this question is closed.`
                     : "This question is closed. You already gave an incorrect answer, so it can't be attempted again."}
                 </p>
               </div>
@@ -577,4 +594,21 @@ export const Level1DecodeTheBottle: React.FC = () => {
       )}
     </div>
   );
+};
+
+// Level 1 entry point: shows the intro page first, then the game.
+export const Level1DecodeTheBottle: React.FC = () => {
+  const [started, setStarted] = useState(false);
+
+  if (!started) {
+    return (
+      <DecodeTheBottleIntro
+        questionTime={QUESTION_TIME}
+        totalQuestions={HOTSPOTS.length}
+        onStart={() => setStarted(true)}
+      />
+    );
+  }
+
+  return <DecodeTheBottleGame />;
 };

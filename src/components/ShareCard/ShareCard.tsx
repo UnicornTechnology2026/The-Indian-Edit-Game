@@ -37,7 +37,7 @@ export const ShareCard: React.FC = () => {
     personality?.tagline ??
     personality?.quote?.replace(/^"|"$/g, "") ??
     "Elegance is the quiet harmony of craft and provenance.";
-  const totalScore = state.totalScore > 0 ? state.totalScore : 7200;
+  const totalScore = state.totalScore > 0 ? state.totalScore : 0;
   const scoreMax = 10000;
 
   const firstName = (state.userName || "VIP Guest").split(" ")[0];

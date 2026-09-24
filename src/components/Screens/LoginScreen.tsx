@@ -18,7 +18,7 @@ export const LoginScreen: React.FC = () => {
   const [city, setCity] = useState(state.userCity);
   const [customCity, setCustomCity] = useState("");
   const [phone, setPhone] = useState(state.userPhone || "");
-  const [isAgeConfirmed, setIsAgeConfirmed] = useState(true);
+  const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [error, setError] = useState("");
 
   const cityOptions = [
@@ -166,12 +166,12 @@ export const LoginScreen: React.FC = () => {
 
             {/* Legal Age Checkbox */}
             <div className="pt-2">
-              <label className="flex items-start gap-2.5 text-xs text-[#a69383] cursor-pointer">
+              <label className="flex items-start gap-3 text-sm leading-relaxed text-[#a69383] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isAgeConfirmed}
                   onChange={(e) => setIsAgeConfirmed(e.target.checked)}
-                  className="mt-0.5 rounded border-[#d4af37]/60 text-[#d4af37] focus:ring-[#d4af37] bg-[#170f0a]"
+                  className="mt-3.5 h-4 w-4 shrink-0 rounded border-[#d4af37]/60 text-[#d4af37] focus:ring-[#d4af37] bg-[#170f0a]"
                 />
                 <span>
                   I confirm that I am 25 years of age or older, and agree to
@@ -184,9 +184,9 @@ export const LoginScreen: React.FC = () => {
             <div className="pt-3">
               <button
                 type="submit"
-                className="w-full py-3.5 px-6 btn-gold text-sm font-bold flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full py-3.5 px-6 btn-gold normal-case tracking-normal text-sm font-bold flex items-center justify-center gap-2 group cursor-pointer"
               >
-                <span>Verify & Unlock The Experience</span>
+                <span>Verify & Unlock the Experience</span>
               </button>
             </div>
           </form>
