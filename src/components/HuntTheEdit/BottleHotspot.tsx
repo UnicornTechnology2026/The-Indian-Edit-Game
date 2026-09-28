@@ -28,7 +28,7 @@ export const BottleHotspot: React.FC<BottleHotspotProps> = ({
   const hitWidth = bottle.width + hitPaddingX * 2;
   const hitHeight = bottle.height + hitPaddingY * 2;
 
-  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isFound) return;
     onBottleClick(e, bottle);
@@ -87,7 +87,6 @@ export const BottleHotspot: React.FC<BottleHotspotProps> = ({
           tabIndex={0}
           aria-label={`Hidden bottle near ${bottle.hint}`}
           onClick={handleClick}
-          onTouchStart={handleClick}
           className={`absolute z-20 cursor-pointer rounded-lg select-none outline-none focus:outline-none ${
             DEBUG_MODE
               ? "bg-red-500/20 border-2 border-red-500 text-[10px] text-white font-mono p-1 flex items-center justify-center"

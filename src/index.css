@@ -212,3 +212,163 @@
 .animate-pulse-glow {
   animation: pulseGlow 3.5s ease-in-out infinite;
 }
+
+/* ========== THE INDIAN EDIT — CINEMATIC ANIMATIONS ========== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmerGold {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes bottleFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(1.5deg);
+  }
+}
+
+@keyframes goldPulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(212, 175, 55, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+  }
+}
+
+@keyframes particleRise {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) scale(1.1);
+  }
+}
+
+@keyframes softGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 22px rgba(212, 175, 55, 0.7));
+  }
+}
+
+@keyframes typeReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bottle-float {
+  animation: bottleFloat 6s ease-in-out infinite;
+}
+
+.animate-gold-pulse {
+  animation: goldPulseRing 2.4s ease-out infinite;
+}
+
+.animate-soft-glow {
+  animation: softGlow 3.2s ease-in-out infinite;
+}
+
+.gold-shimmer-text {
+  background: linear-gradient(
+    110deg,
+    #937119 0%,
+    #d4af37 25%,
+    #fff3c4 50%,
+    #d4af37 75%,
+    #937119 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerGold 4s linear infinite;
+}
+
+/* Stagger helpers */
+.stagger-1 {
+  animation-delay: 0.08s;
+}
+.stagger-2 {
+  animation-delay: 0.16s;
+}
+.stagger-3 {
+  animation-delay: 0.24s;
+}
+.stagger-4 {
+  animation-delay: 0.32s;
+}
+.stagger-5 {
+  animation-delay: 0.4s;
+}
+
+/* Luxury button hover lift */
+.btn-gold {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-gold:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 36px rgba(212, 175, 55, 0.55);
+}
+.btn-gold:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Hunt The Edit: on short landscape phones, hide the site header during a round
+   so the board can use the full screen height. */
+@media (orientation: landscape) and (max-height: 500px) {
+  body.hunt-playing header {
+    display: none;
+  }
+}

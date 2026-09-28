@@ -80,6 +80,14 @@ export const Level3HuntTheEdit: React.FC = () => {
     }
   }, [currentRoundIdx]);
 
+  // Flag the body while a round is live so CSS can hide the site header on
+  // short landscape phones and give the board the full screen height.
+  useEffect(() => {
+    if (screenState !== "round") return;
+    document.body.classList.add("hunt-playing");
+    return () => document.body.classList.remove("hunt-playing");
+  }, [screenState]);
+
   // Start a specific round
   const startRound = useCallback((roundIdx: number) => {
     const roundObj = HUNT_ROUNDS[roundIdx];
@@ -286,7 +294,7 @@ export const Level3HuntTheEdit: React.FC = () => {
           {/* Top Bar Header */}
 
           {/* Subheader Status / Found Counter */}
-          <div className="w-full max-w-5xl mx-auto px-4 pt-3 flex items-center justify-between">
+          <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 pt-2 sm:pt-3 flex items-center justify-between gap-2">
             <div className="hidden sm:block">
               <span className="text-xs font-mono tracking-widest  uppercase">
                 {currentRound.subtitle} ({currentRound.difficulty})
@@ -298,10 +306,10 @@ export const Level3HuntTheEdit: React.FC = () => {
               totalCount={currentRound.bottles.length}
             />
 
-            <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
+            <div className="flex items-center justify-end shrink-0 gap-1.5 sm:gap-4">
               {/* Timer Display */}
               <div
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border transition-all duration-300 ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-xl border transition-all duration-300 ${
                   isCritical
                     ? "bg-[#8b151b]/30 border-[#e53e3e] text-[#feb2b2] animate-pulse shadow-[0_0_15px_rgba(229,62,62,0.4)]"
                     : isUrgent
@@ -324,8 +332,8 @@ export const Level3HuntTheEdit: React.FC = () => {
               </div>
 
               {/* Score Counter */}
-              <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-[#140a05] border border-[#d4af37]/40">
-                <span className="text-[10px] font-mono tracking-widest text-[#ab9580] uppercase">
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1 rounded-xl bg-[#140a05] border border-[#d4af37]/40">
+                <span className="hidden sm:inline text-[10px] font-mono tracking-widest text-[#ab9580] uppercase">
                   SCORE
                 </span>
                 <span className="font-mono text-sm sm:text-base font-bold text-[#faf5eb]">

@@ -56,7 +56,7 @@ export const InstructionsScreen: React.FC<InstructionsScreenProps> = ({
           </h3>
           <p className="text-sm text-[#ab9580] leading-relaxed">
             Tap a hidden bottle when you spot it. Precision matters: correct
-            taps reward +1000, while misses cost -100.
+            taps reward +10, while misses cost -5.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export const InstructionsScreen: React.FC<InstructionsScreenProps> = ({
           </h3>
           <p className="text-sm text-[#ab9580] leading-relaxed">
             Find all 5 before time runs out. Remaining seconds turn into
-            generous speed bonus points (+100/sec).
+            generous speed bonus points.
           </p>
         </div>
       </div>
@@ -86,9 +86,9 @@ export const InstructionsScreen: React.FC<InstructionsScreenProps> = ({
           type="button"
           id="btn-start-round-1"
           onClick={handleStart}
-          className="px-10 py-4 rounded-xl bg-linear-to-b from-[#1c0e07] to-[#0a0402] border border-[#d4af37] text-sm sm:text-base font-bold tracking-[0.2em] text-[#faf5eb] uppercase cursor-pointer shadow-[0_10px_35px_rgba(212,175,55,0.35)] hover:shadow-[0_15px_45px_rgba(212,175,55,0.55)] hover:border-[#fff3c4] transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 inline-flex items-center justify-center gap-3"
+          className="px-10 py-4 rounded-xl btn-gold uppercase cursor-pointer shadow-[0_10px_35px_rgba(212,175,55,0.35)] hover:shadow-[0_15px_45px_rgba(212,175,55,0.55)] hover:border-[#fff3c4] transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 inline-flex items-center justify-center gap-3"
         >
-          <span className="text-[#fff3c4]">START ROUND 1</span>
+          <span className="text-[#0d0603]">START ROUND 1</span>
         </button>
       </div>
     </div>

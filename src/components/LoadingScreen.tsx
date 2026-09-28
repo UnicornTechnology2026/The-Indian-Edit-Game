@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { BottleLoader } from "./BottleLoader";
 
 interface LoadingScreenProps {
@@ -8,9 +9,10 @@ interface LoadingScreenProps {
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
-  durationMs = 500,
+  durationMs = 1800,
 }) => {
   const [percent, setPercent] = useState(0);
+  const [phase, setPhase] = useState<"loading" | "reveal">("loading");
 
   useEffect(() => {
     const start = performance.now();
@@ -24,8 +26,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       if (next < 100) {
         raf = requestAnimationFrame(tick);
       } else {
-        const t = setTimeout(() => onComplete(), 500);
-        return () => clearTimeout(t);
+        setPhase("reveal");
+        setTimeout(() => onComplete(), 900);
       }
     };
 
@@ -34,12 +36,63 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   }, [durationMs, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#070403]">
-      <BottleLoader percent={percent} className="h-[58vh] max-h-130" />
-      <p className="mt-8 font-serif text-sm tracking-[0.2em] uppercase text-[#f7e7a9]/80">
-        {percent < 100 ? "It Start Here" : "The Indian Edit"}
-      </p>
-    </div>
+    <motion.div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#070403]"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.6 } }}
+    >
+      {/* Soft ambient gold glow behind bottle */}
+      <motion.div
+        className="absolute w-64 h-64 rounded-full bg-[#d4af37]/15 blur-[80px]"
+        animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.55, 0.3] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 40, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        className="relative"
+      >
+        <BottleLoader
+          percent={percent}
+          className="h-[52vh] max-h-120 animate-soft-glow"
+        />
+      </motion.div>
+
+      <AnimatePresence mode="wait">
+        {phase === "loading" ? (
+          <motion.p
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="mt-10 font-serif text-sm tracking-[0.28em] uppercase text-[#f7e7a9]/80"
+          >
+            Crafting the experience…
+          </motion.p>
+        ) : (
+          <motion.p
+            key="ready"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-10 font-serif text-base tracking-[0.22em] uppercase gold-shimmer-text"
+          >
+            The Indian Edit
+          </motion.p>
+        )}
+      </AnimatePresence>
+
+      {/* Thin gold progress line */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-48 h-0.5 bg-[#2d160b] rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-linear-to-r from-[#937119] via-[#d4af37] to-[#fff3c4]"
+          initial={{ width: "0%" }}
+          animate={{ width: `${percent}%` }}
+          transition={{ ease: "linear" }}
+        />
+      </div>
+    </motion.div>
   );
 };
 

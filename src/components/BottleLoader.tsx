@@ -21,7 +21,7 @@ export const BottleLoader: React.FC<BottleLoaderProps> = ({
 
   return (
     <div
-      className={`relative select-none ${className}`}
+      className={`relative select-none animate-bottle-float ${className}`}
       style={{ aspectRatio: "605 / 1419" }}
     >
       {/* Empty / unfilled bottle */}
