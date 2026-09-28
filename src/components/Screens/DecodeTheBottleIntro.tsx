@@ -18,9 +18,9 @@ export const DecodeTheBottleIntro: React.FC<DecodeTheBottleIntroProps> = ({
   const maxPoints = totalQuestions * pointsPerAnswer;
 
   const instructions: string[] = [
-    `Tap the numbered pins on the bottle to open each of the ${totalQuestions} questions, then choose the correct answer.`,
-    `You get ${questionTime} seconds and one attempt per question. A wrong answer or running out of time closes it.`,
-    `Each correct answer earns ${pointsPerAnswer} craft points, up to ${maxPoints} in total.`,
+    `Tap the numbered pins to open all ${totalQuestions} questions and choose the correct answer.`,
+    `You have ${questionTime} seconds and 1 attempt per question. Wrong answers or time-outs close it.`,
+    `Earn ${pointsPerAnswer} craft points per correct answer — ${maxPoints} points max.`,
   ];
 
   const handleStart = () => {

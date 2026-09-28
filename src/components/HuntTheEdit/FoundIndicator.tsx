@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles } from 'lucide-react';
+import React from "react";
+import { Sparkles } from "lucide-react";
 
 interface FoundIndicatorProps {
   foundCount: number;
@@ -8,7 +8,7 @@ interface FoundIndicatorProps {
 
 export const FoundIndicator: React.FC<FoundIndicatorProps> = ({
   foundCount,
-  totalCount = 5
+  totalCount = 5,
 }) => {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2 rounded-2xl bg-[#140a05]/90 backdrop-blur-md border border-[#d4af37]/35 shadow-lg max-w-sm mx-auto">
@@ -31,23 +31,27 @@ export const FoundIndicator: React.FC<FoundIndicatorProps> = ({
               key={idx}
               className={`relative transition-all duration-500 flex items-center justify-center ${
                 isFound
-                  ? 'scale-110 text-[#d4af37]'
-                  : 'opacity-35 text-[#ab9580]'
+                  ? "scale-110 text-[#d4af37]"
+                  : "opacity-35 text-[#ab9580]"
               }`}
-              title={isFound ? `Bottle ${idx + 1} Found!` : `Bottle ${idx + 1} Hidden`}
+              title={
+                isFound
+                  ? `Bottle ${idx + 1} Found!`
+                  : `Bottle ${idx + 1} Hidden`
+              }
             >
               {/* Mini Bottle Silhouette */}
               <div
                 className={`w-4 h-7 rounded-t-sm rounded-b-md border transition-all duration-300 flex flex-col items-center justify-start pt-0.5 ${
                   isFound
-                    ? 'bg-gradient-to-b from-[#f7e7a9] via-[#d4af37] to-[#8b4513] border-[#fff3c4] shadow-[0_0_10px_rgba(212,175,55,0.7)]'
-                    : 'bg-[#1c0e07] border-[#ab9580]/40'
+                    ? "bg-linear-to-b from-[#f7e7a9] via-[#d4af37] to-[#8b4513] border-[#fff3c4] shadow-[0_0_10px_rgba(212,175,55,0.7)]"
+                    : "bg-[#1c0e07] border-[#ab9580]/40"
                 }`}
               >
                 {/* Cap */}
                 <div
                   className={`w-2 h-1 rounded-xs ${
-                    isFound ? 'bg-[#fff3c4]' : 'bg-[#ab9580]/50'
+                    isFound ? "bg-[#fff3c4]" : "bg-[#ab9580]/50"
                   }`}
                 />
                 {/* Diamond Seal Accent */}

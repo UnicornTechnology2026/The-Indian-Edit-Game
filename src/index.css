@@ -132,7 +132,7 @@
   color: #0d0603;
   font-weight: 700;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: capitalize;
   border-radius: 9999px;
   box-shadow: 0 4px 22px rgba(212, 175, 55, 0.42);
   transition: all 0.25s ease;
