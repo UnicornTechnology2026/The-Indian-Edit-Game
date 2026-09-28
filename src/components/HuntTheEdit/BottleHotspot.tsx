@@ -75,7 +75,7 @@ export const BottleHotspot: React.FC<BottleHotspotProps> = ({
         {justFound && (
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap pointer-events-none animate-bounce flex items-center gap-1 px-3 py-1 rounded-full bg-linear-to-r from-[#d4af37] to-[#f7e7a9] text-[#070403] font-bold text-xs shadow-[0_4px_20px_rgba(212,175,55,0.9)]">
             <Sparkles className="w-3 h-3 text-[#070403]" />
-            <span>FOUND! 100</span>
+            <span>FOUND! 10</span>
           </div>
         )}
       </div>

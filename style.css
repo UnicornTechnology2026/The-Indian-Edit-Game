@@ -212,7 +212,7 @@ textarea:focus {
   font-weight: 700;
   font-size: 0.95rem;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: capitalize;
   padding: 14px 28px;
   border-radius: var(--radius-sm);
   box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);

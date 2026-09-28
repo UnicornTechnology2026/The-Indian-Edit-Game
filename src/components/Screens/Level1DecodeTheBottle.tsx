@@ -25,14 +25,17 @@ const HOTSPOTS: Hotspot[] = [
     id: "cap",
     number: 1,
     label: "THE CROWN DETAIL",
+    // Positions are percentages of the bottle IMAGE itself (see the
+    // inline-block wrapper around <img> below), so they track the real
+    // photo regardless of surrounding container padding.
     top: "10%",
     left: "46%",
     question:
-      "What does this architectural hexagonal cap contribute to the bottle's visual identity?",
+      "How does this hexagonal cap make the bottle look unique and stylish?",
     answers: [
       {
         key: "A",
-        text: "A crown-inspired royal appearance and tactile seal",
+        text: "A royal crown-like look with a premium, textured seal.",
         correct: true,
       },
       { key: "B", text: "A sports-inspired appearance", correct: false },
@@ -51,7 +54,7 @@ const HOTSPOTS: Hotspot[] = [
     answers: [
       {
         key: "A",
-        text: "Indian identity and contemporary luxury",
+        text: "Indian identity with modern luxury",
         correct: true,
       },
       { key: "B", text: "European sports culture", correct: false },
@@ -65,8 +68,7 @@ const HOTSPOTS: Hotspot[] = [
     label: "THE EDIT TYPOGRAPHY",
     top: "53%",
     left: "46%",
-    question:
-      "What is the signature branding phrase displayed prominently on the glass?",
+    question: "What brand name is clearly shown on the bottle?",
     answers: [
       { key: "A", text: "THE INDIAN EDIT", correct: true },
       { key: "B", text: "THE ROYAL EDIT", correct: false },
@@ -80,8 +82,7 @@ const HOTSPOTS: Hotspot[] = [
     label: "THE SIGNATURE CREST",
     top: "70%",
     left: "46%",
-    question:
-      "What visual color combination creates the luxury contrast on this seal?",
+    question: "Which colors give the seal its luxurious look?",
     answers: [
       { key: "A", text: "Ruby Red and Antique Gold", correct: true },
       { key: "B", text: "Blue and Neon Green", correct: false },
@@ -95,16 +96,15 @@ const HOTSPOTS: Hotspot[] = [
     label: "EMBOSSED ARTISAN BASE",
     top: " 90%",
     left: "46%",
-    question:
-      "Which craftsmanship approach is honored in this heavy crystalline glass base?",
+    question: "What craft style is shown in the heavy crystal glass base?",
     answers: [
       {
         key: "A",
-        text: "Paying close attention to sustainable bottle craft & heritage weight",
+        text: "Thoughtful bottle craft inspired by heritage",
         correct: true,
       },
-      { key: "B", text: "Mass plastic extrusion", correct: false },
-      { key: "C", text: "Disposable synthetic packaging", correct: false },
+      { key: "B", text: "Large-scale plastic production.", correct: false },
+      { key: "C", text: "Single-use plastic packaging", correct: false },
       { key: "D", text: "Unweighted aluminum can styling", correct: false },
     ],
   },
@@ -275,6 +275,32 @@ export const DecodeTheBottleGame: React.FC = () => {
   const isTimerDanger = questionTimeLeft <= QUESTION_DANGER_THRESHOLD;
   const timerLabel = `00:${String(Math.max(questionTimeLeft, 0)).padStart(2, "0")}`;
 
+  // Level Completion Card (Proceed button). Rendered once inside the
+  // desktop checklist card, and standalone (no card chrome) on mobile.
+  const completionCard = isCompleted ? (
+    <div className="p-4 rounded-xl bg-linear-to-r from-[#160602] to-[#3d261a] border border-[#d4af37] text-center space-y-3 animate-fade-in">
+      <div className="flex items-center justify-center gap-1.5 text-[#fff1b8] text-sm font-bold">
+        <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
+        <span>Level 03 Completed!</span>
+      </div>
+      <p className="text-xs text-[#warm-beige]">
+        {solvedHotspots.length >= 5
+          ? "You decoded all 5 artisanal bottle details and secured maximum craft provenance points."
+          : `You decoded ${solvedHotspots.length} of 5 artisanal bottle details and earned ${score} craft points.`}
+      </p>
+
+      <button
+        onClick={() => {
+          sound.playSuccess();
+          navigateTo("screen-level-2");
+        }}
+        className="w-full p-2 btn-gold text-xs font-bold flex items-center justify-center gap-2 group cursor-pointer"
+      >
+        <span>Proceed to Level 04: Blend the Edit</span>
+      </button>
+    </div>
+  ) : null;
+
   return (
     <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6 animate-fade-in">
       {/* Level Header */}
@@ -391,7 +417,9 @@ export const DecodeTheBottleGame: React.FC = () => {
 
         {/* Right Craft Hotspots Checklist */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="gold-card p-5">
+          {/* Desktop: full card with checklist + completion card nested
+              inside the same bordered box. Hidden entirely on mobile. */}
+          <div className="hidden lg:block gold-card p-5">
             <h3 className="font-serif text-lg font-bold text-[#faf6f0] flex items-center gap-2">
               <span>Craft Hotspot Index</span>
             </h3>
@@ -448,31 +476,12 @@ export const DecodeTheBottleGame: React.FC = () => {
               })}
             </div>
 
-            {/* Level Completion Card */}
-            {isCompleted && (
-              <div className="mt-6 p-4 rounded-xl bg-linear-to-r from-[#160602] to-[#3d261a] border border-[#d4af37] text-center space-y-3 animate-fade-in">
-                <div className="flex items-center justify-center gap-1.5 text-[#fff1b8] text-sm font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
-                  <span>Level 03 Completed!</span>
-                </div>
-                <p className="text-xs text-[#warm-beige]">
-                  {solvedHotspots.length >= 5
-                    ? "You decoded all 5 artisanal bottle details and secured maximum craft provenance points."
-                    : `You decoded ${solvedHotspots.length} of 5 artisanal bottle details and earned ${score} craft points.`}
-                </p>
-
-                <button
-                  onClick={() => {
-                    sound.playSuccess();
-                    navigateTo("screen-level-2");
-                  }}
-                  className="w-full p-2 btn-gold text-xs font-bold flex items-center justify-center gap-2 group cursor-pointer"
-                >
-                  <span>Proceed to Level 04: Blend the Edit</span>
-                </button>
-              </div>
-            )}
+            {completionCard && <div className="mt-6">{completionCard}</div>}
           </div>
+
+          {/* Mobile: no card box — show only the Proceed button/completion
+              card once the level is done. Nothing renders before that. */}
+          <div className="lg:hidden">{completionCard}</div>
         </div>
       </div>
 

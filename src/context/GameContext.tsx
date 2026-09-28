@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useContext, useState, useRef } from "react";
 import {
   GameState,
   ScreenId,
@@ -16,8 +10,6 @@ import { computeMasterScore, computePersonality } from "../data/personalities";
 import { REWARD_GIFTS } from "../data/rewards";
 import { sound } from "../utils/audio";
 import { supabaseInsert } from "../lib/supabaseClient";
-
-const STORAGE_KEY = "the_indian_edit_state_v2";
 
 const INITIAL_STATE: GameState = {
   userName: "",
@@ -130,32 +122,15 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [state, setState] = useState<GameState>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return { ...INITIAL_STATE, ...parsed };
-      }
-    } catch {
-      // Fallback
-    }
-    return INITIAL_STATE;
-  });
+  // In-memory only — no localStorage read/write. Every page load/refresh
+  // starts fresh from INITIAL_STATE.
+  const [state, setState] = useState<GameState>(INITIAL_STATE);
 
   // Guard refs — prevent the same Supabase row being inserted twice, whether
   // from a StrictMode double-invoke, a double-click, or a re-triggered
   // navigation to the same screen. Reset in resetGame() for the next playthrough.
   const hasRegisteredRef = useRef(false);
   const hasLoggedResultRef = useRef(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // Ignore
-    }
-  }, [state]);
 
   const navigateTo = (screen: ScreenId) => {
     sound.playClick();
@@ -408,7 +383,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const resetGame = () => {
-    localStorage.removeItem(STORAGE_KEY);
     hasRegisteredRef.current = false;
     hasLoggedResultRef.current = false;
     setState(INITIAL_STATE);

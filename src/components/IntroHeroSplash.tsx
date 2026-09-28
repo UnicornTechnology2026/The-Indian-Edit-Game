@@ -36,13 +36,19 @@ export const IntroHeroSplash: React.FC<IntroHeroSplashProps> = ({
       <div className="absolute inset-x-0 bottom-0 h-56 bg-linear-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
       {/* Bottom CTA Action Bar */}
-      <div className="absolute bottom-0 inset-x-0 flex flex-col items-center px-4 pb-6 sm:pb-8 pt-4 z-10">
+      <div
+        className="absolute bottom-0 inset-x-0 flex flex-col items-center px-4 pt-4 pb-16 sm:pb-20 z-10"
+        style={{
+          paddingBottom:
+            "max(4rem, calc(env(safe-area-inset-bottom, 0px) + 4rem))",
+        }}
+      >
         <button
           id="btn-enter-experience"
           onClick={handleStart}
-          className="w-full sm:w-auto px-10 py-3.5 btn-gold text-sm sm:text-base font-bold tracking-[0.15em] uppercase flex items-center justify-center gap-3 cursor-pointer shadow-[0_8px_30px_rgba(212,175,55,0.45)] hover:shadow-[0_10px_40px_rgba(212,175,55,0.65)] transform hover:-translate-y-0.5 transition-all"
+          className="w-full sm:w-auto px-10 py-3.5 btn-gold text-sm sm:text-base font-bold tracking-[0.15em] flex items-center justify-center gap-3 cursor-pointer shadow-[0_8px_30px_rgba(212,175,55,0.45)] hover:shadow-[0_10px_40px_rgba(212,175,55,0.65)] transform hover:-translate-y-0.5 transition-all"
         >
-          <span>ENTER THE EXPERIENCE</span>
+          <span>Enter The Experience</span>
         </button>
 
         <p className="mt-2 text-[11px] font-mono text-[#ab9580] tracking-widest uppercase drop-shadow-md">

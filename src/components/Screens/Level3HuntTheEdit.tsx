@@ -47,15 +47,7 @@ export const Level3HuntTheEdit: React.FC = () => {
   const [roundStartTime, setRoundStartTime] = useState<number>(0);
   const [allFoundCount, setAllFoundCount] = useState<number>(0);
   const [roundTimeTaken, setRoundTimeTaken] = useState<number>(0);
-  const [bestRoundTime, setBestRoundTime] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem(BEST_TIME_KEY);
-      return saved ? parseFloat(saved) : 0;
-    } catch {
-      return 0;
-    }
-  });
-
+  const [bestRoundTime, setBestRoundTime] = useState<number>(0);
   const isUrgent = timeRemaining <= 10;
   const isCritical = timeRemaining <= 5;
 
@@ -67,14 +59,7 @@ export const Level3HuntTheEdit: React.FC = () => {
   };
 
   // Best overall score
-  const [bestScore, setBestScore] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem(BEST_SCORE_KEY);
-      return saved ? parseInt(saved, 10) : 0;
-    } catch {
-      return 0;
-    }
-  });
+  const [bestScore, setBestScore] = useState<number>(0);
 
   // Modals
   const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
@@ -156,26 +141,13 @@ export const Level3HuntTheEdit: React.FC = () => {
   // Save Best Score helper
   const checkAndSaveBestScore = useCallback(
     (newScore: number, roundTimeTaken: number) => {
-      setBestScore((prevBest) => {
-        const topScore = Math.max(prevBest, newScore);
-        try {
-          localStorage.setItem(BEST_SCORE_KEY, topScore.toString());
-        } catch {
-          // Ignore
-        }
-        return topScore;
-      });
+      setBestScore((prevBest) => Math.max(prevBest, newScore));
 
       setBestRoundTime((prevTime) => {
         const validRoundTime = roundTimeTaken > 0 ? roundTimeTaken : 18.5;
-        const topTime =
-          prevTime > 0 ? Math.min(prevTime, validRoundTime) : validRoundTime;
-        try {
-          localStorage.setItem(BEST_TIME_KEY, topTime.toString());
-        } catch {
-          // Ignore
-        }
-        return topTime;
+        return prevTime > 0
+          ? Math.min(prevTime, validRoundTime)
+          : validRoundTime;
       });
     },
     [],
