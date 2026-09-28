@@ -110,10 +110,10 @@ export const LoginScreen: React.FC = () => {
             <div>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#faf6f0]">
                 Enter the World of{" "}
-                <span className="gold-shimmer-text">Luxury</span>
+                <span className="gold-shimmer-text">The Indian Edit</span>
               </h2>
               <p className="text-xs text-[#a69383] mt-1 tracking-wide">
-                Complete your profile to begin the experience
+                Complete your profile to begin the edit experience
               </p>
             </div>
 
@@ -264,14 +264,6 @@ export const LoginScreen: React.FC = () => {
             </motion.div>
           </form>
         </motion.div>
-
-        {/* Soft footer hint */}
-        <motion.p
-          variants={item}
-          className="text-center text-[11px] text-[#6d5746] mt-5 tracking-widest uppercase"
-        >
-          Your details stay private • Luxury experience only
-        </motion.p>
       </motion.div>
     </motion.div>
   );

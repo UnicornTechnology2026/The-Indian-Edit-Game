@@ -166,6 +166,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           decode_score: state.decodeScore,
           blend_score: state.blendScore,
           hunt_score: state.huntScore,
+          coupon_code: gift.code,
+          coupon_name: gift.name,
+          coupon_value: gift.value ?? null,
         }).catch((err) =>
           console.error("Supabase save (game_results) failed:", err),
         );

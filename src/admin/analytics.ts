@@ -1,0 +1,264 @@
+import type { DashboardData, GameResultRow, RegistrationRow } from "./adminApi";
+
+export interface CountItem {
+  label: string;
+  count: number;
+}
+export interface CouponItem {
+  code: string;
+  name: string;
+  value: string;
+  count: number;
+}
+export interface DayPoint {
+  key: string;
+  label: string;
+  registrations: number;
+  plays: number;
+}
+export interface LevelStat {
+  label: string;
+  avg: number;
+  max: number;
+  players: number;
+}
+export interface Analytics {
+  totalRegistrations: number;
+  totalPlays: number;
+  uniquePlayers: number;
+  completionRate: number; // 0-100
+  playsToday: number;
+  plays7d: number;
+  registrationsToday: number;
+  avgTotal: number;
+  maxTotal: number;
+  couponsIssued: number;
+  levels: LevelStat[];
+  daily: DayPoint[];
+  cities: CountItem[];
+  personalities: CountItem[];
+  coupons: CouponItem[];
+  couponsUnrecorded: number;
+  shares: CountItem[];
+  sharesTotal: number;
+  topPlayers: GameResultRow[];
+}
+
+const num = (v: unknown): number => {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+const pad = (n: number) => String(n).padStart(2, "0");
+const dayKey = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+function parseDate(s?: string | null): Date | null {
+  if (!s) return null;
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** Normalises a phone to its last 10 digits so "+91 98..." and "98..." match. */
+export function phoneKey(phone?: string | null): string {
+  return (phone || "").replace(/\D/g, "").slice(-10);
+}
+
+function tally(
+  values: (string | null | undefined)[],
+  limit: number,
+): CountItem[] {
+  const map = new Map<string, CountItem>();
+  for (const raw of values) {
+    const label = (raw || "").trim();
+    if (!label) continue;
+    const k = label.toLowerCase();
+    const cur = map.get(k);
+    if (cur) cur.count += 1;
+    else map.set(k, { label, count: 1 });
+  }
+  return [...map.values()].sort((a, b) => b.count - a.count).slice(0, limit);
+}
+
+function levelStat(
+  label: string,
+  rows: GameResultRow[],
+  pick: (r: GameResultRow) => number | null,
+): LevelStat {
+  const scores = rows.map((r) => num(pick(r)));
+  const played = scores.filter((s) => s > 0);
+  return {
+    label,
+    avg: scores.length
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : 0,
+    max: scores.length ? Math.max(...scores) : 0,
+    players: played.length,
+  };
+}
+
+export function computeAnalytics(data: DashboardData, days = 14): Analytics {
+  const { results, registrations, shares } = data;
+  const now = new Date();
+  const todayKey = dayKey(now);
+
+  // ----- daily series (last N days, oldest first) -----
+  const daily: DayPoint[] = [];
+  const index = new Map<string, DayPoint>();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const p: DayPoint = {
+      key: dayKey(d),
+      label: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`,
+      registrations: 0,
+      plays: 0,
+    };
+    daily.push(p);
+    index.set(p.key, p);
+  }
+  for (const r of registrations) {
+    const d = parseDate(r.created_at);
+    if (d) {
+      const p = index.get(dayKey(d));
+      if (p) p.registrations += 1;
+    }
+  }
+  for (const r of results) {
+    const d = parseDate(r.created_at);
+    if (d) {
+      const p = index.get(dayKey(d));
+      if (p) p.plays += 1;
+    }
+  }
+
+  const sevenDaysAgo = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 6,
+  ).getTime();
+  const playsToday = results.filter((r) => {
+    const d = parseDate(r.created_at);
+    return d ? dayKey(d) === todayKey : false;
+  }).length;
+  const plays7d = results.filter((r) => {
+    const d = parseDate(r.created_at);
+    return d ? d.getTime() >= sevenDaysAgo : false;
+  }).length;
+  const registrationsToday = registrations.filter((r) => {
+    const d = parseDate(r.created_at);
+    return d ? dayKey(d) === todayKey : false;
+  }).length;
+
+  // ----- players -----
+  const uniqueSet = new Set(
+    results.map(
+      (r) =>
+        phoneKey(r.user_phone) ||
+        `${(r.user_name || "").toLowerCase()}|${(r.user_city || "").toLowerCase()}`,
+    ),
+  );
+  const totals = results.map((r) => num(r.total_score));
+
+  // ----- coupons -----
+  const couponMap = new Map<string, CouponItem>();
+  let couponsUnrecorded = 0;
+  for (const r of results) {
+    const code = (r.coupon_code || "").trim();
+    if (!code) {
+      couponsUnrecorded += 1;
+      continue;
+    }
+    const cur = couponMap.get(code);
+    if (cur) cur.count += 1;
+    else
+      couponMap.set(code, {
+        code,
+        name: r.coupon_name || code,
+        value: r.coupon_value || "",
+        count: 1,
+      });
+  }
+  const coupons = [...couponMap.values()].sort((a, b) => b.count - a.count);
+
+  return {
+    totalRegistrations: registrations.length,
+    totalPlays: results.length,
+    uniquePlayers: uniqueSet.size,
+    completionRate: registrations.length
+      ? Math.min(100, Math.round((results.length / registrations.length) * 100))
+      : 0,
+    playsToday,
+    plays7d,
+    registrationsToday,
+    avgTotal: totals.length
+      ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length)
+      : 0,
+    maxTotal: totals.length ? Math.max(...totals) : 0,
+    couponsIssued: results.length - couponsUnrecorded,
+    levels: [
+      levelStat("Level 1 · Decode The Bottle", results, (r) => r.decode_score),
+      levelStat("Level 2 · Master The Blend", results, (r) => r.blend_score),
+      levelStat("Level 3 · Hunt The Edit", results, (r) => r.hunt_score),
+    ],
+    daily,
+    // Registrations cover everyone who signed up; fall back to results if empty.
+    cities: tally(
+      (registrations.length ? registrations : results).map((r) => r.user_city),
+      8,
+    ),
+    personalities: tally(
+      results.map((r) => r.personality),
+      8,
+    ),
+    coupons,
+    couponsUnrecorded,
+    shares: tally(
+      shares.map((s) => s.action),
+      6,
+    ),
+    sharesTotal: shares.length,
+    topPlayers: [...results]
+      .sort((a, b) => num(b.total_score) - num(a.total_score))
+      .slice(0, 5),
+  };
+}
+
+/** Registrations that never produced a game result (by phone). */
+export function registeredPhonesWhoPlayed(
+  results: GameResultRow[],
+): Set<string> {
+  return new Set(results.map((r) => phoneKey(r.user_phone)).filter(Boolean));
+}
+
+export function playedFlag(reg: RegistrationRow, played: Set<string>): boolean {
+  const k = phoneKey(reg.user_phone);
+  return k ? played.has(k) : false;
+}
+
+// ---------- CSV ----------
+
+// Prefix cells that spreadsheets would treat as formulas (CSV injection),
+// since names/cities are user-entered.
+function csvCell(v: string | number | null | undefined): string {
+  let s = v === null || v === undefined ? "" : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
+}
+
+export function downloadCsv(
+  filename: string,
+  headers: string[],
+  rows: (string | number | null | undefined)[][],
+) {
+  const body = [headers, ...rows]
+    .map((r) => r.map(csvCell).join(","))
+    .join("\r\n");
+  const blob = new Blob(["\uFEFF" + body], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
