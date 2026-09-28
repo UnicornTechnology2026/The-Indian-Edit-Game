@@ -21,6 +21,7 @@ export interface AdminSession {
 }
 
 export interface GameResultRow {
+  id?: number | string;
   user_name: string | null;
   user_city: string | null;
   user_phone: string | null;
@@ -29,6 +30,10 @@ export interface GameResultRow {
   decode_score: number | null;
   blend_score: number | null;
   hunt_score: number | null;
+  decode_time_seconds?: number | null;
+  blend_time_seconds?: number | null;
+  hunt_time_seconds?: number | null;
+  total_time_seconds?: number | null;
   coupon_code?: string | null;
   coupon_name?: string | null;
   coupon_value?: string | null;
@@ -36,26 +41,16 @@ export interface GameResultRow {
 }
 
 export interface RegistrationRow {
+  id?: number | string;
   user_name: string | null;
   user_city: string | null;
   user_phone: string | null;
   created_at?: string | null;
 }
 
-export interface SocialShareRow {
-  user_name: string | null;
-  user_city: string | null;
-  personality: string | null;
-  total_score: number | null;
-  action: string | null;
-  caption?: string | null;
-  created_at?: string | null;
-}
-
 export interface DashboardData {
   results: GameResultRow[];
   registrations: RegistrationRow[];
-  shares: SocialShareRow[];
   warnings: string[];
 }
 
@@ -205,6 +200,43 @@ function authHeaders(s: AdminSession): Record<string, string> {
   return { apikey: key, Authorization: `Bearer ${s.accessToken}` };
 }
 
+/** Delete rows by primary key `id`. Returns how many rows were removed. */
+export async function deleteRows(
+  s: AdminSession,
+  table: "game_results" | "registrations",
+  ids: (number | string)[],
+): Promise<number> {
+  const { url } = requireEnv();
+  let removed = 0;
+  const CHUNK = 100;
+
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const part = ids.slice(i, i + CHUNK);
+    const list = part.map((id) => encodeURIComponent(String(id))).join(",");
+    const res = await fetch(`${url}/rest/v1/${table}?id=in.(${list})`, {
+      method: "DELETE",
+      headers: { ...authHeaders(s), Prefer: "return=representation" },
+    });
+    if (res.status === 401) {
+      throw new AdminAuthError("Your session expired. Please sign in again.");
+    }
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(
+        `Could not delete from ${table} (${res.status}): ${text}`,
+      );
+    }
+    removed += ((await res.json()) as unknown[]).length;
+  }
+
+  if (removed === 0 && ids.length > 0) {
+    throw new Error(
+      "Nothing was deleted. Run the delete-policy SQL (supabase-admin-delete.sql) in Supabase first.",
+    );
+  }
+  return removed;
+}
+
 /** True when the signed-in user is listed in the admin_users table. */
 export async function isAdmin(s: AdminSession): Promise<boolean> {
   const { url } = requireEnv();
@@ -263,14 +295,13 @@ async function fetchAll<T>(
 export async function fetchDashboardData(
   s: AdminSession,
 ): Promise<DashboardData> {
-  const [results, regs, shares] = await Promise.allSettled([
+  const [results, regs] = await Promise.allSettled([
     fetchAll<GameResultRow>(s, "game_results", "created_at"),
     fetchAll<RegistrationRow>(s, "registrations", "created_at"),
-    fetchAll<SocialShareRow>(s, "social_shares", "created_at"),
   ]);
 
   // An expired session on any request means: sign in again.
-  for (const r of [results, regs, shares]) {
+  for (const r of [results, regs]) {
     if (r.status === "rejected" && r.reason instanceof AdminAuthError) {
       throw r.reason;
     }
@@ -280,13 +311,10 @@ export async function fetchDashboardData(
 
   const warnings: string[] = [];
   if (regs.status === "rejected") warnings.push(String(regs.reason.message));
-  if (shares.status === "rejected")
-    warnings.push(String(shares.reason.message));
 
   return {
     results: results.value,
     registrations: regs.status === "fulfilled" ? regs.value : [],
-    shares: shares.status === "fulfilled" ? shares.value : [],
     warnings,
   };
 }

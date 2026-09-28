@@ -7,7 +7,7 @@ import {
   isAdmin,
   loadSession,
 } from "./adminApi";
-import { AdminLogin } from "./Adminlogin";
+import { AdminLogin } from "./AdminLogin";
 import { AdminDashboard } from "./AdminDashboard";
 
 const AdminApp: React.FC = () => {
@@ -64,7 +64,7 @@ const AdminApp: React.FC = () => {
 
   if (session === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#070403] text-[#d4af37]">
+      <div className="min-h-screen flex items-center justify-center text-[#d4af37]">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );

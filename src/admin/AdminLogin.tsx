@@ -37,7 +37,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#070403] text-[#faf5eb]">
+    <div className="min-h-screen flex items-center justify-center px-4 text-[#faf5eb]">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-6">
           <img src={logo} alt="The Indian Edit" className="h-16 w-auto" />

@@ -21,6 +21,8 @@ export interface LevelStat {
   avg: number;
   max: number;
   players: number;
+  avgSeconds: number; // average over runs that recorded a time
+  totalSeconds: number;
 }
 export interface Analytics {
   totalRegistrations: number;
@@ -32,6 +34,8 @@ export interface Analytics {
   registrationsToday: number;
   avgTotal: number;
   maxTotal: number;
+  totalPlaySeconds: number;
+  avgPlaySeconds: number;
   couponsIssued: number;
   levels: LevelStat[];
   daily: DayPoint[];
@@ -39,8 +43,6 @@ export interface Analytics {
   personalities: CountItem[];
   coupons: CouponItem[];
   couponsUnrecorded: number;
-  shares: CountItem[];
-  sharesTotal: number;
   topPlayers: GameResultRow[];
 }
 
@@ -83,8 +85,11 @@ function levelStat(
   label: string,
   rows: GameResultRow[],
   pick: (r: GameResultRow) => number | null,
+  pickTime: (r: GameResultRow) => number | null,
 ): LevelStat {
   const scores = rows.map((r) => num(pick(r)));
+  const times = rows.map((r) => num(pickTime(r))).filter((t) => t > 0);
+  const totalSeconds = times.reduce((a, b) => a + b, 0);
   const played = scores.filter((s) => s > 0);
   return {
     label,
@@ -93,11 +98,36 @@ function levelStat(
       : 0,
     max: scores.length ? Math.max(...scores) : 0,
     players: played.length,
+    avgSeconds: times.length ? Math.round(totalSeconds / times.length) : 0,
+    totalSeconds,
   };
 }
 
+/** Total time for one run: the stored total, else the sum of the levels. */
+export function runSeconds(r: GameResultRow): number {
+  const stored = num(r.total_time_seconds);
+  if (stored > 0) return stored;
+  return (
+    num(r.decode_time_seconds) +
+    num(r.blend_time_seconds) +
+    num(r.hunt_time_seconds)
+  );
+}
+
+/** 75 -> "1m 15s", 3700 -> "1h 1m", 0/null -> "—" */
+export function formatDuration(seconds?: number | null): string {
+  const s = Math.round(num(seconds));
+  if (s <= 0) return "—";
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${String(sec).padStart(2, "0")}s`;
+  return `${sec}s`;
+}
+
 export function computeAnalytics(data: DashboardData, days = 14): Analytics {
-  const { results, registrations, shares } = data;
+  const { results, registrations } = data;
   const now = new Date();
   const todayKey = dayKey(now);
 
@@ -193,11 +223,31 @@ export function computeAnalytics(data: DashboardData, days = 14): Analytics {
       ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length)
       : 0,
     maxTotal: totals.length ? Math.max(...totals) : 0,
+    totalPlaySeconds: results.reduce((a, r) => a + runSeconds(r), 0),
+    avgPlaySeconds: (() => {
+      const t = results.map(runSeconds).filter((x) => x > 0);
+      return t.length ? Math.round(t.reduce((a, b) => a + b, 0) / t.length) : 0;
+    })(),
     couponsIssued: results.length - couponsUnrecorded,
     levels: [
-      levelStat("Level 1 · Decode The Bottle", results, (r) => r.decode_score),
-      levelStat("Level 2 · Master The Blend", results, (r) => r.blend_score),
-      levelStat("Level 3 · Hunt The Edit", results, (r) => r.hunt_score),
+      levelStat(
+        "Level 1 · Decode The Bottle",
+        results,
+        (r) => r.decode_score,
+        (r) => r.decode_time_seconds ?? null,
+      ),
+      levelStat(
+        "Level 2 · Master The Blend",
+        results,
+        (r) => r.blend_score,
+        (r) => r.blend_time_seconds ?? null,
+      ),
+      levelStat(
+        "Level 3 · Hunt The Edit",
+        results,
+        (r) => r.hunt_score,
+        (r) => r.hunt_time_seconds ?? null,
+      ),
     ],
     daily,
     // Registrations cover everyone who signed up; fall back to results if empty.
@@ -211,11 +261,6 @@ export function computeAnalytics(data: DashboardData, days = 14): Analytics {
     ),
     coupons,
     couponsUnrecorded,
-    shares: tally(
-      shares.map((s) => s.action),
-      6,
-    ),
-    sharesTotal: shares.length,
     topPlayers: [...results]
       .sort((a, b) => num(b.total_score) - num(a.total_score))
       .slice(0, 5),
