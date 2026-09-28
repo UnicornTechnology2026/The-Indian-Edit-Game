@@ -1,14 +1,24 @@
 import React, { useState } from "react";
 import { useGame } from "../context/GameContext";
 import { ScreenId } from "../types";
-import { Sparkles, RotateCcw, ChevronDown, KeyRound } from "lucide-react";
+import {
+  Sparkles,
+  RotateCcw,
+  ChevronDown,
+  KeyRound,
+  Trophy,
+} from "lucide-react";
 import logo from "../assets/images/editLogo.svg";
 
 interface HeaderProps {
   onShowIntroSplash?: () => void;
+  onShowLeaderboard?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onShowIntroSplash }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onShowIntroSplash,
+  onShowLeaderboard,
+}) => {
   const { state, navigateTo, toggleSound, resetGame, loadDemoState } =
     useGame();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -73,6 +83,18 @@ export const Header: React.FC<HeaderProps> = ({ onShowIntroSplash }) => {
 
         {/* Right Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Leaderboard Button */}
+          {onShowLeaderboard && (
+            <button
+              onClick={onShowLeaderboard}
+              className="px-3 py-1.5 text-xs font-medium tracking-wide flex items-center gap-1.5 rounded-full border border-[#d4af37]/40 bg-[#22160f] hover:bg-[#2e1e15] text-[#f5d77f] hover:border-[#d4af37] transition-colors shadow-sm"
+              title="View Leaderboard"
+            >
+              <Trophy className="w-3.5 h-3.5 text-[#d4af37]" />
+              <span className="hidden sm:inline">Leaderboard</span>
+            </button>
+          )}
+
           <div className="flex items-center bg-[#130a05] border border-[#d4af37]/30 rounded-lg px-3 py-1.5 gap-2">
             <span className="text-[10px] tracking-wider text-[#ab9580] uppercase font-bold">
               SCORE

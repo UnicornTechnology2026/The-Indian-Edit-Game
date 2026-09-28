@@ -37,7 +37,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#070403]">
       <BottleLoader percent={percent} className="h-[58vh] max-h-130" />
       <p className="mt-8 font-serif text-sm tracking-[0.2em] uppercase text-[#f7e7a9]/80">
-        {percent < 100 ? "Pouring the edit" : "The Indian Edit"}
+        {percent < 100 ? "It Start Here" : "The Indian Edit"}
       </p>
     </div>
   );
