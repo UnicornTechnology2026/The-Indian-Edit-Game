@@ -59,10 +59,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           type="button"
           id="btn-start-the-hunt"
           onClick={handleStart}
-          className="group relative px-10 py-4 rounded-xl bg-linear-to-b from-[#1c0e07] to-[#0a0402] border border-[#d4af37] text-sm sm:text-base font-bold tracking-[0.2em] text-[#faf5eb] uppercase cursor-pointer shadow-[0_10px_35px_rgba(212,175,55,0.35)] hover:shadow-[0_15px_45px_rgba(212,175,55,0.55)] hover:border-[#fff3c4] transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3"
+          className="group relative px-10 py-4 rounded-xl btn-gold text-sm sm:text-base font-bold tracking-[0.2em] text-[#0d0603] uppercase cursor-pointer transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3"
         >
-          <div className="absolute inset-0 rounded-xl bg-linear-to-r from-transparent via-[#d4af37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <span className="relative z-10 text-[#fff3c4] group-hover:text-[#ffffff]">
+          {/* <div className="absolute inset-0 rounded-xl" /> */}
+          <span className="relative text-[#0d0603] font-bold">
             START THE HUNT
           </span>
         </button>

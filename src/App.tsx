@@ -55,30 +55,32 @@ const MainExperience: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-between selection:bg-[#d4af37]/30 selection:text-[#fff3c4]">
-      {/* Cinematic Animated Bottle Showcase Intro */}
+      {/* Full-screen intro — blocks everything underneath */}
       {showIntroSplash && (
         <IntroHeroSplash onEnter={() => setShowIntroSplash(false)} />
       )}
 
-      <div>
-        {!showIntroSplash && (
-          <Header
-            onShowIntroSplash={() => setShowIntroSplash(true)}
-            onShowLeaderboard={() => setIsLeaderboardOpen(true)}
-          />
-        )}
-        <main className="w-full">{renderActiveScreen()}</main>
-      </div>
+      {/* Only mount Header + screens AFTER intro is closed */}
+      {!showIntroSplash && (
+        <>
+          <div>
+            <Header
+              onShowIntroSplash={() => setShowIntroSplash(true)}
+              onShowLeaderboard={() => setIsLeaderboardOpen(true)}
+            />
+            <main className="w-full">{renderActiveScreen()}</main>
+          </div>
 
-      {/* Global Modals */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
-      <LeaderboardModal
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-      />
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+          />
+          <LeaderboardModal
+            isOpen={isLeaderboardOpen}
+            onClose={() => setIsLeaderboardOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 };
@@ -89,6 +91,7 @@ export function App() {
   if (!appLoaded) {
     return <LoadingScreen onComplete={() => setAppLoaded(true)} />;
   }
+
   return (
     <GameProvider>
       <MainExperience />
