@@ -3,11 +3,9 @@ import { useGame } from "../../context/GameContext";
 import {
   UploadCloud,
   CheckCircle2,
-  ArrowRight,
   ShieldCheck,
   Sparkles,
   Image as ImageIcon,
-  FileText,
 } from "lucide-react";
 import { sound } from "../../utils/audio";
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useGame } from "../../context/GameContext";
-import { CheckCircle2, HelpCircle, RotateCcw, Share2, X } from "lucide-react";
+import { CheckCircle2, HelpCircle, X } from "lucide-react";
 import { sound } from "../../utils/audio";
 import bottleImg from "../../assets/images/NewBottle.png";
 
@@ -270,7 +270,10 @@ export const Level2MasterTheBlend: React.FC = () => {
       {/* ---------------- INTRO ---------------- */}
       {screen === "intro" && (
         <div className="min-h-[65vh] flex flex-col items-center justify-center text-center gap-6">
-          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-gradient-text leading-tight">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a0c06]/90 border border-[#d4af37]/50 text-xs font-semibold tracking-[0.25em] text-[#f7e7a9] uppercase shadow">
+            Level 02
+          </div>
+          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-shimmer-text leading-tight">
             BLEND THE EDIT
           </h1>
 
@@ -488,7 +491,7 @@ export const Level2MasterTheBlend: React.FC = () => {
       {/* ---------------- COMPLETED ---------------- */}
       {screen === "completed" && finalStats && (
         <div className="min-h-[65vh] flex flex-col items-center justify-center text-center gap-4">
-          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-gradient-text">
+          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-shimmer-text">
             EDIT COMPLETE
           </h1>
 
@@ -523,23 +526,6 @@ export const Level2MasterTheBlend: React.FC = () => {
                 </b>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-1 w-full max-w-xs">
-            <button
-              onClick={startGame}
-              className="flex-1 py-3 btn-gold flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Play Again</span>
-            </button>
-            <button
-              onClick={shareScore}
-              className="flex-1 py-3 btn-gold  flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>{shared ? "Copied!" : "Share"}</span>
-            </button>
           </div>
 
           <button
@@ -577,14 +563,6 @@ export const Level2MasterTheBlend: React.FC = () => {
               Unite 3 Blend into the Edit vessel before 30 seconds elapse.
             </p>
           </div>
-
-          <button
-            onClick={startGame}
-            className="px-9 py-3.5 btn-gold text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Retry The Edit</span>
-          </button>
         </div>
       )}
 

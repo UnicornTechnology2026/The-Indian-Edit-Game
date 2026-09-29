@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useGame } from "../../context/GameContext";
-import { Copy, Check, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Copy, Check, Image as ImageIcon } from "lucide-react";
 import { sound } from "../../utils/audio";
 import { ShareCard } from "../ShareCard/ShareCard";
 

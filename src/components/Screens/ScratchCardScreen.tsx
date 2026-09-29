@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useGame } from "../../context/GameContext";
 import { REWARD_GIFTS } from "../../data/rewards";
-import { Gift, Copy, Check, Trophy, CheckCircle2 } from "lucide-react";
+import { Gift } from "lucide-react";
 import { sound } from "../../utils/audio";
 import { ScratchReveal } from "../ScratchCard/ScratchReveal";
 

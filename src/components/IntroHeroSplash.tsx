@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
 import { sound } from "../utils/audio";
 import fullSizeImg from "../assets/images/fullSize.png";
 import newCreativeImg from "../assets/images/NewCreative.png";
@@ -92,7 +91,7 @@ export const IntroHeroSplash: React.FC<IntroHeroSplashProps> = ({
         </motion.button>
 
         <motion.p
-          className="mt-3 text-[11px] font-mono text-[#ab9580] tracking-[0.3em] uppercase"
+          className="mt-3 text-[11px] font-mono text-[#f2ead9] tracking-[0.3em] uppercase"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1 }}

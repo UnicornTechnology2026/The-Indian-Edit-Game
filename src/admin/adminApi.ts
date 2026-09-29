@@ -1,11 +1,3 @@
-// Admin API: Supabase Auth (email + password) and authenticated data reads.
-// Uses raw fetch, same style as ../lib/supabaseClient.ts (no extra dependency).
-//
-// SECURITY NOTE: hiding the dashboard in the UI is NOT what protects the data.
-// The real protection is Row Level Security in Supabase (see
-// supabase-admin-setup.sql): only signed-in users listed in `admin_users`
-// can SELECT from the customer tables.
-
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as
   | string

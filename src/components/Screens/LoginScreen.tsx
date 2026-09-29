@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence, type Variants } from "motion/react";
 import { useGame } from "../../context/GameContext";
-import { Sparkles, ArrowRight, MapPin, User, Phone } from "lucide-react";
+import { MapPin, User, Phone } from "lucide-react";
 import { sound } from "../../utils/audio";
+import { PrivacyPolicyModal } from "../Modals/PrivacyPolicyModal";
+import { Check } from "lucide-react"; // add Check to your existing lucide import
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -32,7 +34,8 @@ export const LoginScreen: React.FC = () => {
   const [city, setCity] = useState(state.userCity);
   const [customCity, setCustomCity] = useState("");
   const [phone, setPhone] = useState(state.userPhone || "");
-  const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
+  const [isPolicyAccepted, setIsPolicyAccepted] = useState(false);
+  const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
@@ -53,8 +56,8 @@ export const LoginScreen: React.FC = () => {
       return;
     }
 
-    if (!isAgeConfirmed) {
-      setError("You must confirm you are of legal drinking age (25).");
+    if (!isPolicyAccepted) {
+      setError("Please accept the Privacy Policy to continue.");
       sound.playWrong();
       return;
     }
@@ -66,14 +69,6 @@ export const LoginScreen: React.FC = () => {
     setUserPhone(cleanPhone);
     sound.playSuccess();
     navigateTo("screen-otp");
-  };
-
-  const fillDemo = () => {
-    setName("Aarav Sharma");
-    setCity("Nagpur");
-    setPhone("9876543210");
-    setIsAgeConfirmed(true);
-    sound.playClick();
   };
 
   return (
@@ -109,25 +104,13 @@ export const LoginScreen: React.FC = () => {
           >
             <div>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#faf6f0]">
-                Enter the World of{" "}
+                Enter the World of <br />
                 <span className="gold-shimmer-text">The Indian Edit</span>
               </h2>
-              <p className="text-xs text-[#a69383] mt-1 tracking-wide">
+              <p className="text-xs text-[#f2ead9] mt-1 tracking-wide">
                 Complete your profile to begin the edit experience
               </p>
             </div>
-
-            <motion.button
-              type="button"
-              onClick={fillDemo}
-              className="text-xs px-3 py-1.5 rounded-full border border-[#d4af37]/30 bg-[#22160f] text-[#f5d77f] hover:bg-[#2e1e15] hover:border-[#d4af37] transition-all flex items-center gap-1.5 shrink-0"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              title="Prefill sample credentials"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Quick Autofill</span>
-            </motion.button>
           </motion.div>
 
           {/* Animated Error */}
@@ -234,21 +217,48 @@ export const LoginScreen: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Age checkbox */}
-            <motion.div variants={item} className="pt-1">
-              <label className="flex items-start gap-3 text-sm leading-relaxed text-[#a69383] cursor-pointer group">
-                <motion.input
-                  type="checkbox"
-                  checked={isAgeConfirmed}
-                  onChange={(e) => setIsAgeConfirmed(e.target.checked)}
-                  className="mt-1 h-4 w-4 shrink-0 rounded border-[#d4af37]/60 text-[#d4af37] focus:ring-[#d4af37] bg-[#170f0a] accent-[#d4af37]"
-                  whileTap={{ scale: 0.9 }}
-                />
-                <span className="group-hover:text-[#cbb9a8] transition-colors">
-                  I confirm that I am 25 years of age or older, and agree to
-                  receive my luxury personality report & reward notification.
-                </span>
-              </label>
+            {/* Privacy Policy */}
+            <motion.div variants={item}>
+              <div className="flex items-start gap-3">
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={isPolicyAccepted}
+                  aria-label="Accept privacy policy"
+                  onClick={() => {
+                    sound.playClick();
+                    setIsPolicyAccepted((v) => !v);
+                    setError("");
+                  }}
+                  className={`mt-0.5 w-5 h-5 shrink-0 rounded-md border flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                    isPolicyAccepted
+                      ? "bg-[#d4af37] border-[#d4af37]"
+                      : "bg-[#170f0a]/90 border-[#d4af37]/50 hover:border-[#d4af37]"
+                  }`}
+                >
+                  {isPolicyAccepted && (
+                    <Check
+                      className="w-3.5 h-3.5 text-[#0d0603]"
+                      strokeWidth={3}
+                    />
+                  )}
+                </button>
+
+                <p className="text-xs text-[#e5d8cb] leading-relaxed">
+                  I have read and agree to the{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      setIsPolicyOpen(true);
+                    }}
+                    className="font-semibold text-[#f7e7a9] underline underline-offset-2 hover:text-[#d4af37] cursor-pointer"
+                  >
+                    Privacy Policy
+                  </button>
+                  .
+                </p>
+              </div>
             </motion.div>
 
             {/* Submit */}
@@ -265,6 +275,14 @@ export const LoginScreen: React.FC = () => {
           </form>
         </motion.div>
       </motion.div>
+      <PrivacyPolicyModal
+        isOpen={isPolicyOpen}
+        onClose={() => setIsPolicyOpen(false)}
+        onAccept={() => {
+          setIsPolicyAccepted(true);
+          setError("");
+        }}
+      />
     </motion.div>
   );
 };

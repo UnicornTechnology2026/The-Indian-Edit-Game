@@ -5,13 +5,7 @@ import React, {
   useState,
   useRef,
 } from "react";
-import {
-  GameState,
-  ScreenId,
-  CityCategory,
-  PersonalityType,
-  RewardGift,
-} from "../types";
+import { GameState, ScreenId, CityCategory, RewardGift } from "../types";
 import { computeMasterScore, computePersonality } from "../data/personalities";
 import { REWARD_GIFTS } from "../data/rewards";
 import { sound } from "../utils/audio";
