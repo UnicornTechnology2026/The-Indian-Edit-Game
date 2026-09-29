@@ -42,7 +42,7 @@ export const DecodeTheBottleIntro: React.FC<DecodeTheBottleIntroProps> = ({
           Level 01
         </div>
 
-        <h1 className="mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold uppercase tracking-widest leading-tight gold-gradient-text drop-shadow-[0_3px_12px_rgba(0,0,0,0.9)]">
+        <h1 className="mt-6 font-serif text-[clamp(2rem,5.5vw,3.4rem)] sm:text-5xl md:text-6xl font-bold uppercase tracking-widest leading-tight gold-shimmer-text drop-shadow-[0_3px_12px_rgba(0,0,0,0.9)]">
           Decode the Bottle
         </h1>
       </div>

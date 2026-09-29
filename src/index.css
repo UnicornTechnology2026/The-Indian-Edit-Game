@@ -105,6 +105,7 @@
     #937119 100%
   );
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -112,6 +113,7 @@
 .amber-gradient-text {
   background: linear-gradient(135deg, #ffc278 0%, #e58325 55%, #b84a20 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -124,6 +126,7 @@
     #5a0a0e 100%
   );
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -332,6 +335,7 @@
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmerGold 4s linear infinite;
 }
@@ -370,5 +374,37 @@
 @media (orientation: landscape) and (max-height: 500px) {
   body.hunt-playing header {
     display: none;
+  }
+}
+
+/* Admin analytics: one draw-in when a chart first appears. */
+@keyframes ie-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ie-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.ie-draw {
+  stroke-dasharray: 1;
+  animation: ie-draw 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.ie-grow {
+  transform-origin: left center;
+  animation: ie-grow 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ie-draw,
+  .ie-grow {
+    animation: none;
   }
 }

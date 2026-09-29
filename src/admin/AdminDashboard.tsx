@@ -12,19 +12,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  Gift,
   Loader2,
   LogOut,
   RefreshCw,
   Search,
   Trash2,
-  Trophy,
-  UserPlus,
-  Users,
-  Gamepad2,
-  Percent,
-  Timer,
-  TrendingUp,
 } from "lucide-react";
 import {
   AdminAuthError,
@@ -38,8 +30,6 @@ import {
 } from "./adminApi";
 import {
   Analytics,
-  CountItem,
-  DayPoint,
   computeAnalytics,
   downloadCsv,
   formatDuration,
@@ -47,6 +37,8 @@ import {
   runSeconds,
   registeredPhonesWhoPlayed,
 } from "./analytics";
+
+import { AnalyticsOverview } from "./AnalyticsOverview";
 
 import logo from "../assets/images/editLogo.svg";
 
@@ -97,134 +89,6 @@ const Card: React.FC<{
     {children}
   </section>
 );
-
-const Kpi: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  hint?: string;
-}> = ({ icon, label, value, hint }) => (
-  <div className="rounded-2xl border border-[#d4af37]/30 bg-[#140a05]/90 p-4">
-    <div className="flex items-center gap-2 text-[#d4af37]">
-      {icon}
-      <span className="text-[10px] sm:text-[11px] tracking-widest uppercase text-[#ab9580]">
-        {label}
-      </span>
-    </div>
-    <div className="mt-2 font-serif text-2xl sm:text-3xl font-bold text-[#faf5eb] tabular-nums">
-      {value}
-    </div>
-    {hint && <div className="mt-0.5 text-[11px] text-[#ab9580]">{hint}</div>}
-  </div>
-);
-
-const BarList: React.FC<{
-  items: CountItem[];
-  empty?: string;
-}> = ({ items, empty = "No data yet." }) => {
-  if (!items.length) return <p className="text-xs text-[#ab9580]">{empty}</p>;
-  const max = Math.max(...items.map((i) => i.count), 1);
-  return (
-    <ul className="space-y-2.5">
-      {items.map((i) => (
-        <li key={i.label}>
-          <div className="flex justify-between text-xs mb-1">
-            <span className="text-[#ebd9c0] truncate pr-2">{i.label}</span>
-            <span className="font-mono text-[#f7e7a9]">{fmt(i.count)}</span>
-          </div>
-          <div className="h-2 rounded-full bg-[#0c0503] overflow-hidden">
-            <div
-              className="h-full rounded-full bg-linear-to-r from-[#937119] to-[#f7e7a9]"
-              style={{ width: `${(i.count / max) * 100}%` }}
-            />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
-const DailyChart: React.FC<{ days: DayPoint[] }> = ({ days }) => {
-  const W = 700;
-  const H = 220;
-  const padL = 30;
-  const padB = 26;
-  const padT = 10;
-  const max = Math.max(1, ...days.flatMap((d) => [d.registrations, d.plays]));
-  const slot = (W - padL) / days.length;
-  const barW = Math.min(16, slot * 0.34);
-  const y = (v: number) => padT + (H - padT - padB) * (1 - v / max);
-  const ticks = [0, Math.ceil(max / 2), max];
-
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      className="w-full h-auto"
-      role="img"
-      aria-label="Registrations and plays per day"
-    >
-      {ticks.map((t) => (
-        <g key={t}>
-          <line
-            x1={padL}
-            x2={W}
-            y1={y(t)}
-            y2={y(t)}
-            stroke="#d4af37"
-            strokeOpacity="0.15"
-          />
-          <text
-            x={padL - 6}
-            y={y(t) + 3}
-            textAnchor="end"
-            fontSize="10"
-            fill="#ab9580"
-          >
-            {t}
-          </text>
-        </g>
-      ))}
-      {days.map((d, i) => {
-        const cx = padL + slot * i + slot / 2;
-        return (
-          <g key={d.key}>
-            <rect
-              x={cx - barW - 1}
-              y={y(d.registrations)}
-              width={barW}
-              height={H - padB - y(d.registrations)}
-              rx="2"
-              fill="#937119"
-            >
-              <title>{`${d.label}: ${d.registrations} registered`}</title>
-            </rect>
-            <rect
-              x={cx + 1}
-              y={y(d.plays)}
-              width={barW}
-              height={H - padB - y(d.plays)}
-              rx="2"
-              fill="#f7e7a9"
-            >
-              <title>{`${d.label}: ${d.plays} completed`}</title>
-            </rect>
-            {((days.length - 1 - i) % 2 === 0 || days.length <= 8) && (
-              <text
-                x={cx}
-                y={H - 8}
-                textAnchor="middle"
-                fontSize="10"
-                fill="#ab9580"
-              >
-                {d.label}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </svg>
-  );
-};
 
 // ---------- generic data table ----------
 
@@ -709,7 +573,6 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  session,
   onSignOut,
 }) => {
   const [tab, setTab] = useState<Tab>("overview");
@@ -749,11 +612,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const t = setInterval(() => load(true), 60_000);
     return () => clearInterval(t);
   }, [load]);
-
-  const analytics: Analytics | null = useMemo(
-    () => (data ? computeAnalytics(data) : null),
-    [data],
-  );
 
   const playedPhones = useMemo(
     () => registeredPhonesWhoPlayed(data?.results ?? []),
@@ -832,6 +690,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: "registrations", label: "Registrations" },
   ];
 
+  const [range, setRange] = useState(14);
+
+  const analytics: Analytics | null = useMemo(
+    () => (data ? computeAnalytics(data, range) : null),
+    [data, range],
+  );
+
   return (
     <div className="min-h-screen text-[#faf5eb]">
       {/* Top bar */}
@@ -888,23 +753,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-5 space-y-4">
-        {error && (
-          <div
-            role="alert"
-            className="rounded-xl border border-[#e53e3e]/60 bg-[#8b151b]/30 px-4 py-3 text-xs text-[#fed7d7]"
-          >
-            {error}
-          </div>
-        )}
-        {data?.warnings.map((w) => (
-          <div
-            key={w}
-            className="rounded-xl border border-[#e58325]/50 bg-[#e58325]/10 px-4 py-3 text-xs text-[#fbd38d]"
-          >
-            {w}
-          </div>
-        ))}
-
         {loading && !data && (
           <div className="flex items-center justify-center py-24 text-[#d4af37]">
             <Loader2 className="w-8 h-8 animate-spin" />
@@ -912,167 +760,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
         {data && analytics && tab === "overview" && (
-          <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <Kpi
-                icon={<UserPlus className="w-4 h-4" />}
-                label="Registered"
-                value={fmt(analytics.totalRegistrations)}
-                hint={`${fmt(analytics.registrationsToday)} today`}
-              />
-              <Kpi
-                icon={<Gamepad2 className="w-4 h-4" />}
-                label="Completed runs"
-                value={fmt(analytics.totalPlays)}
-                hint={`${fmt(analytics.playsToday)} today · ${fmt(analytics.plays7d)} last 7 days`}
-              />
-              <Kpi
-                icon={<Users className="w-4 h-4" />}
-                label="Unique players"
-                value={fmt(analytics.uniquePlayers)}
-              />
-              <Kpi
-                icon={<Percent className="w-4 h-4" />}
-                label="Completion rate"
-                value={`${analytics.completionRate}%`}
-                hint="completed ÷ registered"
-              />
-              <Kpi
-                icon={<TrendingUp className="w-4 h-4" />}
-                label="Avg total score"
-                value={fmt(analytics.avgTotal)}
-              />
-              <Kpi
-                icon={<Trophy className="w-4 h-4" />}
-                label="Highest score"
-                value={fmt(analytics.maxTotal)}
-              />
-              <Kpi
-                icon={<Timer className="w-4 h-4" />}
-                label="Total play time"
-                value={formatDuration(analytics.totalPlaySeconds)}
-                hint={`${formatDuration(analytics.avgPlaySeconds)} avg per run`}
-              />
-              <Kpi
-                icon={<Gift className="w-4 h-4" />}
-                label="Coupons issued"
-                value={fmt(analytics.couponsIssued)}
-              />
-            </div>
-
-            <Card
-              title="Last 14 days"
-              right={
-                <div className="flex items-center gap-3 text-[11px] text-[#ab9580]">
-                  <span className="flex items-center gap-1">
-                    <i className="w-2.5 h-2.5 rounded-sm bg-[#937119]" />
-                    Registered
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <i className="w-2.5 h-2.5 rounded-sm bg-[#f7e7a9]" />
-                    Completed
-                  </span>
-                </div>
-              }
-            >
-              <DailyChart days={analytics.daily} />
-            </Card>
-
-            <div className="grid lg:grid-cols-3 gap-4">
-              <Card title="Points by level" className="lg:col-span-2">
-                <div className="grid sm:grid-cols-3 gap-3">
-                  {analytics.levels.map((l) => (
-                    <div
-                      key={l.label}
-                      className="rounded-xl border border-[#d4af37]/20 bg-[#0c0503] p-3"
-                    >
-                      <div className="text-[11px] text-[#ab9580] mb-2">
-                        {l.label}
-                      </div>
-                      <div className="font-serif text-xl font-bold text-[#f7e7a9] tabular-nums">
-                        {fmt(l.avg)}
-                      </div>
-                      <div className="text-[10px] text-[#ab9580] mb-2">
-                        average
-                      </div>
-                      <div className="text-[11px] text-[#ebd9c0]">
-                        Best: <b className="tabular-nums">{fmt(l.max)}</b>
-                      </div>
-                      <div className="text-[11px] text-[#ebd9c0]">
-                        Scored: <b className="tabular-nums">{fmt(l.players)}</b>{" "}
-                        players
-                      </div>
-                      <div className="mt-2 pt-2 border-t border-[#d4af37]/15 text-[11px] text-[#ebd9c0]">
-                        Time spent:{" "}
-                        <b className="tabular-nums">
-                          {formatDuration(l.totalSeconds)}
-                        </b>
-                      </div>
-                      <div className="text-[11px] text-[#ebd9c0]">
-                        Avg per run:{" "}
-                        <b className="tabular-nums">
-                          {formatDuration(l.avgSeconds)}
-                        </b>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card title="Top 5 players">
-                {analytics.topPlayers.length === 0 ? (
-                  <p className="text-xs text-[#ab9580]">No games yet.</p>
-                ) : (
-                  <ol className="space-y-2">
-                    {analytics.topPlayers.map((p, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center justify-between gap-2 text-xs"
-                      >
-                        <span className="truncate">
-                          <span className="text-[#d4af37] font-bold mr-2">
-                            {i + 1}
-                          </span>
-                          {dash(p.user_name)}
-                          <span className="text-[#ab9580]">
-                            {" "}
-                            · {dash(p.user_city)}
-                          </span>
-                        </span>
-                        <span className="font-mono text-[#f7e7a9]">
-                          {fmt(p.total_score)}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </Card>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card title="Top cities">
-                <BarList items={analytics.cities} />
-              </Card>
-              <Card title="Personalities">
-                <BarList items={analytics.personalities} />
-              </Card>
-              <Card title="Coupons given">
-                <BarList
-                  items={analytics.coupons.map((c) => ({
-                    label: c.value ? `${c.code} · ${c.value}` : c.code,
-                    count: c.count,
-                  }))}
-                  empty="No coupon data recorded yet."
-                />
-                {analytics.couponsUnrecorded > 0 && (
-                  <p className="mt-3 text-[11px] text-[#ab9580]">
-                    {fmt(analytics.couponsUnrecorded)} earlier run(s) have no
-                    coupon recorded.
-                  </p>
-                )}
-              </Card>
-            </div>
-          </>
+          <AnalyticsOverview
+            analytics={analytics}
+            range={range}
+            onRangeChange={setRange}
+            updatedAt={updatedAt}
+          />
         )}
 
         {data && tab === "players" && (

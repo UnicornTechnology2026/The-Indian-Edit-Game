@@ -1,15 +1,6 @@
 import React, { useEffect } from "react";
 import { useGame } from "../../context/GameContext";
-import {
-  Sparkles,
-  Trophy,
-  ArrowRight,
-  Share2,
-  Award,
-  Wine,
-  Compass,
-  Gift,
-} from "lucide-react";
+import { Share2, Gift } from "lucide-react";
 import { sound } from "../../utils/audio";
 
 export const ResultScreen: React.FC = () => {

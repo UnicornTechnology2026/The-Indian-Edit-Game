@@ -69,7 +69,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             exit={{ opacity: 0 }}
             className="mt-10 font-serif text-sm tracking-[0.28em] uppercase text-[#f7e7a9]/80"
           >
-            Crafting the experience…
+            It Start Here…
           </motion.p>
         ) : (
           <motion.p

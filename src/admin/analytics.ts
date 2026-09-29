@@ -18,13 +18,36 @@ export interface DayPoint {
 }
 export interface LevelStat {
   label: string;
+  short: string;
+  name: string;
   avg: number;
   max: number;
   players: number;
   avgSeconds: number; // average over runs that recorded a time
   totalSeconds: number;
+  scoredRate: number; // % of completed runs that scored in this level
+}
+
+export interface Delta {
+  current: number;
+  previous: number;
+  /** % change vs the previous period; null when there is nothing to compare */
+  pct: number | null;
+}
+
+export interface Band {
+  label: string;
+  count: number;
 }
 export interface Analytics {
+  rangeDays: number;
+  registrationsInRange: Delta;
+  playsInRange: Delta;
+  peakDay: DayPoint | null;
+  hourly: number[]; // 24 buckets, local time, completed runs
+  peakHour: number | null;
+  scoreBands: Band[];
+  medianTotal: number;
   totalRegistrations: number;
   totalPlays: number;
   uniquePlayers: number;
@@ -83,6 +106,8 @@ function tally(
 
 function levelStat(
   label: string,
+  short: string,
+  name: string,
   rows: GameResultRow[],
   pick: (r: GameResultRow) => number | null,
   pickTime: (r: GameResultRow) => number | null,
@@ -93,6 +118,11 @@ function levelStat(
   const played = scores.filter((s) => s > 0);
   return {
     label,
+    short,
+    name,
+    scoredRate: scores.length
+      ? Math.round((played.length / scores.length) * 100)
+      : 0,
     avg: scores.length
       ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
       : 0,
@@ -208,8 +238,79 @@ export function computeAnalytics(data: DashboardData, days = 14): Analytics {
       });
   }
   const coupons = [...couponMap.values()].sort((a, b) => b.count - a.count);
+  // ----- range vs previous range -----
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
+  const DAY = 86_400_000;
+  const rangeStart = startOfToday - (days - 1) * DAY;
+  const prevStart = rangeStart - days * DAY;
+  const countBetween = (
+    rows: { created_at?: string | null }[],
+    from: number,
+    to: number,
+  ) =>
+    rows.filter((r) => {
+      const d = parseDate(r.created_at);
+      return d ? d.getTime() >= from && d.getTime() < to : false;
+    }).length;
+  const delta = (rows: { created_at?: string | null }[]): Delta => {
+    const current = countBetween(rows, rangeStart, startOfToday + DAY);
+    const previous = countBetween(rows, prevStart, rangeStart);
+    return {
+      current,
+      previous,
+      pct:
+        previous > 0
+          ? Math.round(((current - previous) / previous) * 100)
+          : null,
+    };
+  };
+
+  // ----- hour of day -----
+  const hourly = Array.from({ length: 24 }, () => 0);
+  for (const r of results) {
+    const d = parseDate(r.created_at);
+    if (d) hourly[d.getHours()] += 1;
+  }
+  const hourMax = Math.max(...hourly);
+
+  // ----- score bands -----
+  const topScore = totals.length ? Math.max(...totals) : 0;
+  const step = Math.max(1, Math.ceil((topScore + 1) / 5));
+  const scoreBands: Band[] = Array.from({ length: 5 }, (_, i) => ({
+    label: `${i * step}–${(i + 1) * step - 1}`,
+    count: 0,
+  }));
+  if (topScore > 0) {
+    for (const t of totals) {
+      scoreBands[Math.min(4, Math.floor(t / step))].count += 1;
+    }
+  }
+  const sortedTotals = [...totals].sort((a, b) => a - b);
+  const medianTotal = sortedTotals.length
+    ? Math.round(
+        (sortedTotals[Math.floor((sortedTotals.length - 1) / 2)] +
+          sortedTotals[Math.ceil((sortedTotals.length - 1) / 2)]) /
+          2,
+      )
+    : 0;
+  const peakDay = daily.reduce<DayPoint | null>(
+    (best, d) => (d.plays > 0 && (!best || d.plays > best.plays) ? d : best),
+    null,
+  );
 
   return {
+    rangeDays: days,
+    registrationsInRange: delta(registrations),
+    playsInRange: delta(results),
+    peakDay,
+    hourly,
+    peakHour: hourMax > 0 ? hourly.indexOf(hourMax) : null,
+    scoreBands,
+    medianTotal,
     totalRegistrations: registrations.length,
     totalPlays: results.length,
     uniquePlayers: uniqueSet.size,
@@ -232,18 +333,24 @@ export function computeAnalytics(data: DashboardData, days = 14): Analytics {
     levels: [
       levelStat(
         "Level 1 · Decode The Bottle",
+        "Level 1",
+        "Decode The Bottle",
         results,
         (r) => r.decode_score,
         (r) => r.decode_time_seconds ?? null,
       ),
       levelStat(
         "Level 2 · Master The Blend",
+        "Level 2",
+        "Master The Blend",
         results,
         (r) => r.blend_score,
         (r) => r.blend_time_seconds ?? null,
       ),
       levelStat(
         "Level 3 · Hunt The Edit",
+        "Level 3",
+        "Hunt The Edit",
         results,
         (r) => r.hunt_score,
         (r) => r.hunt_time_seconds ?? null,

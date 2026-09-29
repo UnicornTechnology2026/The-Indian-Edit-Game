@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { ParticleEffect } from "./ParticleEffect";
 import { sound } from "../../utils/audio";
 

@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGame } from "../../context/GameContext";
-import {
-  ShieldCheck,
-  ArrowRight,
-  RotateCcw,
-  CheckCircle2,
-  KeyRound,
-} from "lucide-react";
+import { RotateCcw, CheckCircle2, KeyRound } from "lucide-react";
 import { sound } from "../../utils/audio";
 
 export const OtpScreen: React.FC = () => {

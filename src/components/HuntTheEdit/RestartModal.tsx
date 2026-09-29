@@ -1,6 +1,6 @@
-import React from 'react';
-import { AlertCircle, RotateCcw } from 'lucide-react';
-import { sound } from '../../utils/audio';
+import React from "react";
+import { RotateCcw } from "lucide-react";
+import { sound } from "../../utils/audio";
 
 interface RestartModalProps {
   isOpen: boolean;
@@ -8,12 +8,16 @@ interface RestartModalProps {
   onConfirm: () => void;
 }
 
-export const RestartModal: React.FC<RestartModalProps> = ({ isOpen, onCancel, onConfirm }) => {
+export const RestartModal: React.FC<RestartModalProps> = ({
+  isOpen,
+  onCancel,
+  onConfirm,
+}) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#070403]/90 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-sm p-6 rounded-3xl bg-gradient-to-b from-[#1c0e07] to-[#0a0402] border border-[#d4af37]/60 shadow-[0_20px_50px_rgba(0,0,0,0.9)] text-center">
+      <div className="relative w-full max-w-sm p-6 rounded-3xl bg-linear-to-b from-[#1c0e07] to-[#0a0402] border border-[#d4af37]/60 shadow-[0_20px_50px_rgba(0,0,0,0.9)] text-center">
         <div className="w-12 h-12 rounded-2xl bg-[#231208] border border-[#d4af37]/40 flex items-center justify-center mx-auto mb-3 text-[#d4af37]">
           <RotateCcw className="w-6 h-6" />
         </div>
@@ -44,7 +48,7 @@ export const RestartModal: React.FC<RestartModalProps> = ({ isOpen, onCancel, on
               sound.playClick();
               onConfirm();
             }}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#f7e7a9] text-[#070403] text-xs font-bold tracking-widest uppercase shadow-md hover:shadow-lg transition-all cursor-pointer"
+            className="flex-1 py-3 rounded-xl bg-linear-to-r from-[#d4af37] to-[#f7e7a9] text-[#070403] text-xs font-bold tracking-widest uppercase shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             RESTART
           </button>

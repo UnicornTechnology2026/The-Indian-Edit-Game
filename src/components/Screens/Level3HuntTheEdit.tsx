@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useGame } from "../../context/GameContext";
 import { HUNT_ROUNDS, HiddenBottle, SCORING } from "../../data/huntData";
 import { WelcomeScreen } from "../HuntTheEdit/WelcomeScreen";
-import { InstructionsScreen } from "../HuntTheEdit/InstructionsScreen";
 
 import { GameBoard } from "../HuntTheEdit/GameBoard";
 import { FoundIndicator } from "../HuntTheEdit/FoundIndicator";
@@ -16,7 +15,6 @@ import { TimerIcon } from "lucide-react";
 
 type GameScreenState =
   | "welcome"
-  | "instructions"
   | "round"
   | "roundComplete"
   | "timesUp"
@@ -279,14 +277,10 @@ export const Level3HuntTheEdit: React.FC = () => {
       {/* Dynamic Screen Rendering */}
       {screenState === "welcome" && (
         <WelcomeScreen
-          onStart={() => setScreenState("instructions")}
+          onStart={() => startRound(0)}
           bestScore={bestScore}
           bestTime={bestRoundTime}
         />
-      )}
-
-      {screenState === "instructions" && (
-        <InstructionsScreen onStartRoundOne={() => startRound(0)} />
       )}
 
       {screenState === "round" && (

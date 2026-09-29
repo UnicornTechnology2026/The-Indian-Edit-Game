@@ -17,6 +17,7 @@ import { ScratchCardScreen } from "./components/Screens/ScratchCardScreen";
 import { SettingsModal } from "./components/Modals/SettingsModal";
 import { LeaderboardModal } from "./components/Modals/LeaderboardModal";
 import { IntroHeroSplash } from "./components/IntroHeroSplash";
+import { AgeGateModal } from "./components/Agegatemodal";
 
 import { LoadingScreen } from "./components/LoadingScreen";
 
@@ -25,6 +26,7 @@ const MainExperience: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [showIntroSplash, setShowIntroSplash] = useState(true);
+  const [showAgeGate, setShowAgeGate] = useState(false);
 
   const renderActiveScreen = () => {
     switch (state.currentScreen) {
@@ -57,11 +59,19 @@ const MainExperience: React.FC = () => {
     <div className="min-h-screen flex flex-col justify-between selection:bg-[#d4af37]/30 selection:text-[#fff3c4]">
       {/* Full-screen intro — blocks everything underneath */}
       {showIntroSplash && (
-        <IntroHeroSplash onEnter={() => setShowIntroSplash(false)} />
+        <IntroHeroSplash
+          onEnter={() => {
+            setShowIntroSplash(false);
+            setShowAgeGate(true); // step 2: age modal
+          }}
+        />
       )}
 
+      {/* Age gate — shown after "Enter The Experience", before the login form */}
+      {showAgeGate && <AgeGateModal onEnter={() => setShowAgeGate(false)} />}
+
       {/* Only mount Header + screens AFTER intro is closed */}
-      {!showIntroSplash && (
+      {!showIntroSplash && !showAgeGate && (
         <>
           <div>
             <Header

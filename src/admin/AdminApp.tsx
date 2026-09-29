@@ -58,6 +58,15 @@ const AdminApp: React.FC = () => {
 
   const signOut = async (message = "") => {
     await adminLogout(loadSession());
+
+    // Manual sign out (button click) -> leave admin and go to the public
+    // game, which starts at LoadingScreen -> IntroHeroSplash.
+    if (!message) {
+      window.location.replace("/");
+      return;
+    }
+
+    // Session expired / error -> stay on the admin login and show the notice.
     setNotice(message);
     setSession(null);
   };

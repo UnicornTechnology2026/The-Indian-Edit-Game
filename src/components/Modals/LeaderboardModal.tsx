@@ -93,14 +93,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
     setPage(1);
   }, [isOpen]);
 
-  // Reset to page 1 whenever the filter or sort changes
   useEffect(() => {
     setPage(1);
   }, [search, sortKey, sortDir]);
 
-  // Filter, then sort. Ranks are computed AFTER sorting by total score
-  // descending (independent of the user's current sort) so "#1" always
-  // means the actual highest score, not just top of the current view.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return entries;
