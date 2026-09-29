@@ -17,6 +17,7 @@ import { ScratchCardScreen } from "./components/Screens/ScratchCardScreen";
 import { SettingsModal } from "./components/Modals/SettingsModal";
 import { LeaderboardModal } from "./components/Modals/LeaderboardModal";
 import { IntroHeroSplash } from "./components/IntroHeroSplash";
+import { AgeGateModal } from "./components/Agegatemodal";
 
 import { LoadingScreen } from "./components/LoadingScreen";
 
@@ -25,6 +26,7 @@ const MainExperience: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [showIntroSplash, setShowIntroSplash] = useState(true);
+  const [showAgeGate, setShowAgeGate] = useState(false);
 
   const renderActiveScreen = () => {
     switch (state.currentScreen) {
@@ -55,30 +57,40 @@ const MainExperience: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-between selection:bg-[#d4af37]/30 selection:text-[#fff3c4]">
-      {/* Cinematic Animated Bottle Showcase Intro */}
+      {/* Full-screen intro — blocks everything underneath */}
       {showIntroSplash && (
-        <IntroHeroSplash onEnter={() => setShowIntroSplash(false)} />
+        <IntroHeroSplash
+          onEnter={() => {
+            setShowIntroSplash(false);
+            setShowAgeGate(true); // step 2: age modal
+          }}
+        />
       )}
 
-      <div>
-        {!showIntroSplash && (
-          <Header
-            onShowIntroSplash={() => setShowIntroSplash(true)}
-            onShowLeaderboard={() => setIsLeaderboardOpen(true)}
-          />
-        )}
-        <main className="w-full">{renderActiveScreen()}</main>
-      </div>
+      {/* Age gate — shown after "Enter The Experience", before the login form */}
+      {showAgeGate && <AgeGateModal onEnter={() => setShowAgeGate(false)} />}
 
-      {/* Global Modals */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
-      <LeaderboardModal
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-      />
+      {/* Only mount Header + screens AFTER intro is closed */}
+      {!showIntroSplash && !showAgeGate && (
+        <>
+          <div>
+            <Header
+              onShowIntroSplash={() => setShowIntroSplash(true)}
+              onShowLeaderboard={() => setIsLeaderboardOpen(true)}
+            />
+            <main className="w-full">{renderActiveScreen()}</main>
+          </div>
+
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+          />
+          <LeaderboardModal
+            isOpen={isLeaderboardOpen}
+            onClose={() => setIsLeaderboardOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 };
@@ -89,6 +101,7 @@ export function App() {
   if (!appLoaded) {
     return <LoadingScreen onComplete={() => setAppLoaded(true)} />;
   }
+
   return (
     <GameProvider>
       <MainExperience />

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, Copy, Check, Share2, Send } from 'lucide-react';
-import { sound } from '../../utils/audio';
+import React, { useState } from "react";
+import { X, Copy, Check, Share2, Send } from "lucide-react";
+import { sound } from "../../utils/audio";
 
 interface ShareCardProps {
   score: number;
@@ -15,12 +15,12 @@ export const ShareCard: React.FC<ShareCardProps> = ({
   bestTime,
   bottlesFound,
   totalBottles = 15,
-  onClose
+  onClose,
 }) => {
   const [copied, setCopied] = useState(false);
 
   const shareTitle = "THE INDIAN EDIT — HUNT THE EDIT";
-  const shareText = `🥃 I found all ${bottlesFound}/${totalBottles} bottles in THE INDIAN EDIT — HUNT THE EDIT!\n⏱️ Time: ${bestTime > 0 ? bestTime.toFixed(1) : '21.4'}s\n🏆 Title: EDIT MASTER\n✨ Score: ${score.toLocaleString()}\n\nCan you beat my time? Play now at: ${window.location.origin}`;
+  const shareText = `🥃 I found all ${bottlesFound}/${totalBottles} bottles in THE INDIAN EDIT — HUNT THE EDIT!\n⏱️ Time: ${bestTime > 0 ? bestTime.toFixed(1) : "21.4"}s\n🏆 Title: EDIT MASTER\n✨ Score: ${score.toLocaleString()}\n\nCan you beat my time? Play now at: ${window.location.origin}`;
   const shareUrl = window.location.href;
 
   const handleCopy = async () => {
@@ -41,7 +41,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
         await navigator.share({
           title: shareTitle,
           text: shareText,
-          url: shareUrl
+          url: shareUrl,
         });
         return;
       } catch {
@@ -54,24 +54,24 @@ export const ShareCard: React.FC<ShareCardProps> = ({
   const handleWhatsApp = () => {
     sound.playClick();
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleTwitter = () => {
     sound.playClick();
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleFacebook = () => {
     sound.playClick();
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#070403]/90 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-[#1c0e07] via-[#140804] to-[#0a0402] border border-[#d4af37] shadow-[0_20px_60px_rgba(212,175,55,0.4)] text-center">
+      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-3xl bg-linear-to-b from-[#1c0e07] via-[#140804] to-[#0a0402] border border-[#d4af37] shadow-[0_20px_60px_rgba(212,175,55,0.4)] text-center">
         {/* Close Button */}
         <button
           type="button"
@@ -86,7 +86,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
         </button>
 
         {/* The Graphic Share Card */}
-        <div className="p-6 rounded-2xl bg-gradient-to-b from-[#120703] to-[#1c0d06] border border-[#d4af37]/50 shadow-inner mb-6 relative overflow-hidden">
+        <div className="p-6 rounded-2xl bg-linear-to-b from-[#120703] to-[#1c0d06] border border-[#d4af37]/50 shadow-inner mb-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-radial from-[#d4af37]/20 to-transparent blur-xl pointer-events-none" />
 
           <span className="text-[10px] font-mono tracking-[0.25em] text-[#d4af37] uppercase block mb-1">
@@ -107,7 +107,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({
             <div className="flex items-center gap-2 text-sm sm:text-base font-serif text-[#ebd9c0]">
               <span>⏱️</span>
               <span className="font-bold text-[#f7e7a9]">
-                {bestTime > 0 ? `${bestTime.toFixed(1)} SEC` : '21.4 SEC'}
+                {bestTime > 0 ? `${bestTime.toFixed(1)} SEC` : "21.4 SEC"}
               </span>
             </div>
 
@@ -139,7 +139,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({
             title="Share on WhatsApp"
           >
             <Send className="w-4 h-4" />
-            <span className="text-[10px] font-mono text-[#ebd9c0]">WhatsApp</span>
+            <span className="text-[10px] font-mono text-[#ebd9c0]">
+              WhatsApp
+            </span>
           </button>
 
           <button

@@ -11,10 +11,10 @@ export const FoundIndicator: React.FC<FoundIndicatorProps> = ({
   totalCount = 5,
 }) => {
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-2 rounded-2xl bg-[#140a05]/90 backdrop-blur-md border border-[#d4af37]/35 shadow-lg max-w-sm mx-auto">
+    <div className="flex items-center justify-between gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl whitespace-nowrap shrink-0 bg-[#140a05]/90 backdrop-blur-md border border-[#d4af37]/35 shadow-lg sm:max-w-sm sm:mx-auto">
       <div className="flex items-center gap-2">
         <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
-        <span className="font-serif text-xs font-bold tracking-[0.2em] text-[#faf5eb] uppercase">
+        <span className="font-serif text-[10px] sm:text-xs font-bold tracking-[0.12em] sm:tracking-[0.2em] text-[#faf5eb] uppercase">
           FOUND
         </span>
         <span className="font-mono text-xs font-bold text-[#f7e7a9]">
@@ -23,7 +23,7 @@ export const FoundIndicator: React.FC<FoundIndicatorProps> = ({
       </div>
 
       {/* 5 bottle icons */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1 sm:gap-1.5">
         {Array.from({ length: totalCount }).map((_, idx) => {
           const isFound = idx < foundCount;
           return (
@@ -42,7 +42,7 @@ export const FoundIndicator: React.FC<FoundIndicatorProps> = ({
             >
               {/* Mini Bottle Silhouette */}
               <div
-                className={`w-4 h-7 rounded-t-sm rounded-b-md border transition-all duration-300 flex flex-col items-center justify-start pt-0.5 ${
+                className={`w-3 h-5 sm:w-4 sm:h-7 rounded-t-sm rounded-b-md border transition-all duration-300 flex flex-col items-center justify-start pt-0.5 ${
                   isFound
                     ? "bg-linear-to-b from-[#f7e7a9] via-[#d4af37] to-[#8b4513] border-[#fff3c4] shadow-[0_0_10px_rgba(212,175,55,0.7)]"
                     : "bg-[#1c0e07] border-[#ab9580]/40"

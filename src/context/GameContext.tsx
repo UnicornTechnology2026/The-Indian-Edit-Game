@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useRef } from "react";
-import {
-  GameState,
-  ScreenId,
-  CityCategory,
-  PersonalityType,
-  RewardGift,
-} from "../types";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
+import { GameState, ScreenId, CityCategory, RewardGift } from "../types";
 import { computeMasterScore, computePersonality } from "../data/personalities";
 import { REWARD_GIFTS } from "../data/rewards";
 import { sound } from "../utils/audio";
@@ -104,10 +104,6 @@ interface GameContextType {
     bottlesFound: number,
     bestTime: number,
   ) => void;
-  logSocialShare: (
-    action: "caption_copied" | "card_downloaded" | "card_shared",
-    caption?: string,
-  ) => void;
   setScreenshotUploaded: (url: string) => void;
   setScratchRevealed: (revealed: boolean) => void;
   selectReward: (gift: RewardGift) => void;
@@ -132,8 +128,35 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const hasRegisteredRef = useRef(false);
   const hasLoggedResultRef = useRef(false);
 
+  // Time spent on each level screen (ms). Time only counts while the tab is
+  // visible, and replays inside a level keep adding to the same total.
+  const screenRef = useRef<ScreenId>(state.currentScreen);
+  screenRef.current = state.currentScreen;
+  const enteredAtRef = useRef(Date.now());
+  const levelMsRef = useRef({ l1: 0, l2: 0, l3: 0 });
+
+  const flushLevelTime = () => {
+    const now = Date.now();
+    const spent = now - enteredAtRef.current;
+    enteredAtRef.current = now;
+    const cur = screenRef.current;
+    if (cur === "screen-level-1") levelMsRef.current.l1 += spent;
+    else if (cur === "screen-level-2") levelMsRef.current.l2 += spent;
+    else if (cur === "screen-level-3") levelMsRef.current.l3 += spent;
+  };
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushLevelTime();
+      else enteredAtRef.current = Date.now();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
   const navigateTo = (screen: ScreenId) => {
     sound.playClick();
+    flushLevelTime();
 
     if (screen === "screen-result") {
       // Compute the derived values once, from the state we already have —
@@ -157,6 +180,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       // only ever fire once per completed run.
       if (!hasLoggedResultRef.current) {
         hasLoggedResultRef.current = true;
+        const decodeSecs = Math.round(levelMsRef.current.l1 / 1000);
+        const blendSecs = Math.round(levelMsRef.current.l2 / 1000);
+        const huntSecs = Math.round(levelMsRef.current.l3 / 1000);
         supabaseInsert("game_results", {
           user_name: state.userName || "VIP Guest",
           user_city: state.userCity || "Nagpur",
@@ -166,6 +192,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           decode_score: state.decodeScore,
           blend_score: state.blendScore,
           hunt_score: state.huntScore,
+          decode_time_seconds: decodeSecs,
+          blend_time_seconds: blendSecs,
+          hunt_time_seconds: huntSecs,
+          total_time_seconds: decodeSecs + blendSecs + huntSecs,
+          coupon_code: gift.code,
+          coupon_name: gift.name,
+          coupon_value: gift.value ?? null,
         }).catch((err) =>
           console.error("Supabase save (game_results) failed:", err),
         );
@@ -338,24 +371,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const logSocialShare = (
-    action: "caption_copied" | "card_downloaded" | "card_shared",
-    caption?: string,
-  ) => {
-    // No state change here at all — this was only ever wrapped in setState
-    // to read `prev`, but `state` is already in scope. Call it directly.
-    supabaseInsert("social_shares", {
-      user_name: state.userName || null,
-      user_city: state.userCity || null,
-      personality: state.personality?.name ?? null,
-      total_score: state.totalScore || null,
-      action,
-      caption: caption ?? null,
-    }).catch((err) =>
-      console.error("Supabase save (social_shares) failed:", err),
-    );
-  };
-
   const setScreenshotUploaded = (url: string) => {
     setState((prev) => ({
       ...prev,
@@ -385,6 +400,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetGame = () => {
     hasRegisteredRef.current = false;
     hasLoggedResultRef.current = false;
+    levelMsRef.current = { l1: 0, l2: 0, l3: 0 };
+    enteredAtRef.current = Date.now();
     setState(INITIAL_STATE);
   };
 
@@ -455,7 +472,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         finishCityBuilding,
         updateHuntScore,
         finishHuntGame,
-        logSocialShare,
         setScreenshotUploaded,
         setScratchRevealed,
         selectReward,

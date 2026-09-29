@@ -7,6 +7,7 @@ import {
   ChevronDown,
   KeyRound,
   Trophy,
+  ShieldCheck,
 } from "lucide-react";
 import logo from "../assets/images/editLogo.svg";
 
@@ -22,34 +23,6 @@ export const Header: React.FC<HeaderProps> = ({
   const { state, navigateTo, toggleSound, resetGame, loadDemoState } =
     useGame();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Compute label for level badge
-  const getLevelBadgeText = (screen: ScreenId) => {
-    switch (screen) {
-      case "screen-login":
-        return "LOGIN";
-      case "screen-otp":
-        return "VERIFY";
-      case "screen-welcome":
-        return "PROLOGUE";
-      case "screen-level-1":
-        return "LEVEL 01 / 03";
-      case "screen-level-2":
-        return "LEVEL 02 / 03";
-      case "screen-level-3":
-        return "LEVEL 03 / 03";
-      case "screen-result":
-        return "ARCHETYPE REVEAL";
-      case "screen-social":
-        return "SOCIAL POST";
-      case "screen-upload":
-        return "VERIFICATION";
-      case "screen-scratch":
-        return "ROYAL REWARD";
-      default:
-        return "EXPERIENCE";
-    }
-  };
 
   const navItems: { id: ScreenId; label: string; step: string }[] = [
     { id: "screen-login", label: "VIP Registration", step: "00" },
@@ -94,6 +67,18 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden sm:inline">Leaderboard</span>
             </button>
           )}
+
+          {/* Admin Button */}
+          <button
+            onClick={() => {
+              window.location.hash = "#/admin";
+            }}
+            className="px-3 py-1.5 text-xs font-medium tracking-wide flex items-center gap-1.5 rounded-full border border-[#d4af37]/40 bg-[#22160f] hover:bg-[#2e1e15] text-[#f5d77f] hover:border-[#d4af37] transition-colors shadow-sm"
+            title="Admin Dashboard"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-[#d4af37]" />
+            <span className="hidden sm:inline">Admin</span>
+          </button>
 
           <div className="flex items-center bg-[#130a05] border border-[#d4af37]/30 rounded-lg px-3 py-1.5 gap-2">
             <span className="text-[10px] tracking-wider text-[#ab9580] uppercase font-bold">

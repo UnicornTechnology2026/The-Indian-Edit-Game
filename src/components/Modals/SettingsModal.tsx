@@ -1,14 +1,7 @@
 import React from "react";
 import { useGame } from "../../context/GameContext";
 import { ScreenId } from "../../types";
-import {
-  X,
-  Sparkles,
-  RotateCcw,
-  Award,
-  CheckCircle,
-  Database,
-} from "lucide-react";
+import { X, Sparkles, RotateCcw, Database } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;

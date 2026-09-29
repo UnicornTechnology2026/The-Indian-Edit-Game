@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useGame } from "../../context/GameContext";
-import { CheckCircle2, HelpCircle, RotateCcw, Share2, X } from "lucide-react";
+import { CheckCircle2, HelpCircle, X } from "lucide-react";
 import { sound } from "../../utils/audio";
 import bottleImg from "../../assets/images/NewBottle.png";
 
@@ -270,14 +270,12 @@ export const Level2MasterTheBlend: React.FC = () => {
       {/* ---------------- INTRO ---------------- */}
       {screen === "intro" && (
         <div className="min-h-[65vh] flex flex-col items-center justify-center text-center gap-6">
-          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-gradient-text leading-tight">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a0c06]/90 border border-[#d4af37]/50 text-xs font-semibold tracking-[0.25em] text-[#f7e7a9] uppercase shadow">
+            Level 02
+          </div>
+          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-shimmer-text leading-tight">
             BLEND THE EDIT
           </h1>
-          <p className="max-w-md text-sm text-[#e5d8cb] leading-relaxed">
-            Bring together the right elements and create the distinctive edit.
-            Discover the harmonic convergence of Indian and Scottish spirits in
-            a singular craft vessel.
-          </p>
 
           <div className="w-full flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-2">
             {[
@@ -493,7 +491,7 @@ export const Level2MasterTheBlend: React.FC = () => {
       {/* ---------------- COMPLETED ---------------- */}
       {screen === "completed" && finalStats && (
         <div className="min-h-[65vh] flex flex-col items-center justify-center text-center gap-4">
-          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-gradient-text">
+          <h1 className="font-serif text-[clamp(2rem,5.5vw,3.4rem)] font-bold gold-shimmer-text">
             EDIT COMPLETE
           </h1>
 
@@ -530,23 +528,6 @@ export const Level2MasterTheBlend: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-1 w-full max-w-xs">
-            <button
-              onClick={startGame}
-              className="flex-1 py-3 rounded-full border border-[#d4af37]/40 text-xs text-[#a69383] hover:text-[#faf6f0] hover:bg-[#2e1e15] flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Play Again</span>
-            </button>
-            <button
-              onClick={shareScore}
-              className="flex-1 py-3 rounded-full border border-[#d4af37]/40 text-xs text-[#a69383] hover:text-[#faf6f0] hover:bg-[#2e1e15] flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>{shared ? "Copied!" : "Share"}</span>
-            </button>
-          </div>
-
           <button
             onClick={() => {
               sound.playSuccess();
@@ -555,7 +536,7 @@ export const Level2MasterTheBlend: React.FC = () => {
             className="w-full max-w-xs py-3.5 btn-gold text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Proceed to Level 05: Hunt The Edit</span>
+            <span>Proceed to Level 03: Hunt The Edit</span>
           </button>
         </div>
       )}
@@ -570,10 +551,7 @@ export const Level2MasterTheBlend: React.FC = () => {
             &ldquo;Mastery requires patience and precision.&rdquo;
           </p>
 
-          <div className="gold-card px-9 py-7 min-w-70">
-            <div className="text-[11px] tracking-wide text-[#a69383]">
-              Points Recorded
-            </div>
+          <div className=" px-9 py-7 min-w-70">
             <div
               className={`font-serif text-4xl my-1.5 ${
                 timeoutScore < 0 ? "text-[#f87171]" : "text-[#f5d77f]"
@@ -581,21 +559,10 @@ export const Level2MasterTheBlend: React.FC = () => {
             >
               {timeoutScore} pts
             </div>
-            <p className="text-xs text-[#e5d8cb] mt-2 leading-relaxed">
-              Unite <b className="text-[#d4af37]">Indian Malt</b>,{" "}
-              <b className="text-[#d4af37]">Indian Grain</b>, and{" "}
-              <b className="text-[#d4af37]">Scotch Malt</b> into the Edit vessel
-              before 30 seconds elapse.
+            <p className="text-xs text-[#f2ead9] mt-2 leading-relaxed">
+              Unite 3 Blend into the Edit vessel before 30 seconds elapse.
             </p>
           </div>
-
-          <button
-            onClick={startGame}
-            className="px-9 py-3.5 btn-gold text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Retry The Edit</span>
-          </button>
         </div>
       )}
 

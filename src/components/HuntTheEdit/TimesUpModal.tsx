@@ -1,5 +1,5 @@
 import React from "react";
-import { RotateCcw, AlertTriangle, ArrowRight } from "lucide-react";
+import { RotateCcw, AlertTriangle } from "lucide-react";
 import { sound } from "../../utils/audio";
 
 interface TimesUpModalProps {

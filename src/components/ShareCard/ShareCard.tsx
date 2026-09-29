@@ -1,27 +1,8 @@
 import React, { useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { Download, Share2 } from "lucide-react";
+import { Download } from "lucide-react";
 import { useGame } from "../../context/GameContext";
 import { sound } from "../../utils/audio";
-
-/**
- * Replaces the hand-rolled <canvas> drawing in SocialPostScreen.tsx.
- * That version had real bugs worth not repeating here:
- *  - fillStyle = '#warm-beige' is not a color, it silently keeps the
- *    previous fillStyle (D12) — this component only ever uses the real
- *    hex/CSS-var tokens already defined in src/index.css.
- *  - it hard-coded coordinates for one fixed layout; this renders the
- *    actual on-screen DOM node via html-to-image, so preview and
- *    download are pixel-identical (no separate canvas re-implementation
- *    to keep in sync).
- *
- * Text-only layout: no bottle art. The middle block (archetype, tagline,
- * score, name) is vertically centered in the remaining space between the
- * wordmark and the footer, rather than being anchored to where the bottle
- * used to sit.
- *
- * Needs one new dependency: `npm install html-to-image`
- */
 
 const CARD_WIDTH = 1080;
 const CARD_HEIGHT = 1350; // 4:5 — more feed real estate than a square post

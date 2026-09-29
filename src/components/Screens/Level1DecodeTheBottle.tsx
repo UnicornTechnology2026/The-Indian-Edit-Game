@@ -25,9 +25,6 @@ const HOTSPOTS: Hotspot[] = [
     id: "cap",
     number: 1,
     label: "THE CROWN DETAIL",
-    // Positions are percentages of the bottle IMAGE itself (see the
-    // inline-block wrapper around <img> below), so they track the real
-    // photo regardless of surrounding container padding.
     top: "10%",
     left: "46%",
     question:
@@ -278,10 +275,10 @@ export const DecodeTheBottleGame: React.FC = () => {
   // Level Completion Card (Proceed button). Rendered once inside the
   // desktop checklist card, and standalone (no card chrome) on mobile.
   const completionCard = isCompleted ? (
-    <div className="p-4 rounded-xl bg-linear-to-r from-[#160602] to-[#3d261a] border border-[#d4af37] text-center space-y-3 animate-fade-in">
+    <div className="p-4 rounded-xl  text-center space-y-3 animate-fade-in">
       <div className="flex items-center justify-center gap-1.5 text-[#fff1b8] text-sm font-bold">
         <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
-        <span>Level 03 Completed!</span>
+        <span>Level 01 Completed!</span>
       </div>
       <p className="text-xs text-[#warm-beige]">
         {solvedHotspots.length >= 5
@@ -296,7 +293,7 @@ export const DecodeTheBottleGame: React.FC = () => {
         }}
         className="w-full p-2 btn-gold text-xs font-bold flex items-center justify-center gap-2 group cursor-pointer"
       >
-        <span>Proceed to Level 04: Blend the Edit</span>
+        <span>Proceed to Level 02: Blend the Edit</span>
       </button>
     </div>
   ) : null;
