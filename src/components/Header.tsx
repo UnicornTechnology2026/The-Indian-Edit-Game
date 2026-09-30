@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           {/* Experience Jumper Menu */}
           <div className="relative">
-            {/* <button
+            <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="px-3 py-1.5 text-xs font-medium tracking-wide flex items-center gap-1.5 rounded-full border border-[#d4af37]/40 bg-[#22160f] hover:bg-[#2e1e15] text-[#f5d77f] hover:border-[#d4af37] transition-colors shadow-sm"
               title="Quick Jump to any Experience or Level"
@@ -104,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
               />
-            </button> */}
+            </button>
 
             {dropdownOpen && (
               <div
