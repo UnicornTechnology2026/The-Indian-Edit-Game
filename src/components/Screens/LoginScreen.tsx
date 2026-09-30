@@ -73,7 +73,7 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <motion.div
-      className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center pt-16 pb-10 sm:pt-20 px-4 sm:px-6"
+      className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center pb-20 sm:pt-20 px-4 sm:px-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
@@ -269,7 +269,7 @@ export const LoginScreen: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span>Verify & Unlock the Experience</span>
+                <span>Verify & Unlock the Edit</span>
               </motion.button>
             </motion.div>
           </form>

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Crown, RefreshCw, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  RefreshCw,
+  Search,
+  X,
+} from "lucide-react";
 import { supabaseSelect } from "../../lib/supabaseClient";
 import bottleImg from "../../assets/images/NewBottle.png";
 import bannerTop from "../../assets/images/banner-top.webp";
@@ -12,6 +19,7 @@ interface LeaderboardRow {
 interface Entry {
   name: string;
   total: number;
+  rank: number; // global rank, kept even when search filters the list
 }
 
 interface LeaderboardModalProps {
@@ -23,7 +31,7 @@ const PAGE_SIZE = 6; // players per page
 const FETCH_LIMIT = 100; // how many top scores to load in total
 
 // Where the leaderboard sits on the bottle (percent of the 605x1419 image).
-const PANEL = { top: 33, height: 56, left: 3, right: 8 };
+const PANEL = { top: 32, height: 56, left: 3, right: 8 };
 
 const GOLD_TEXT: React.CSSProperties = {
   background: "linear-gradient(180deg,#fff2b8 0%,#e6c25a 45%,#9a7420 100%)",
@@ -105,6 +113,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
 
   const load = () => {
     setLoading(true);
@@ -117,9 +126,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
     })
       .then((rows) =>
         setEntries(
-          rows.map((r) => ({
+          rows.map((r, i) => ({
             name: r.user_name || "VIP Guest",
             total: r.total_score ?? 0,
+            rank: i + 1,
           })),
         ),
       )
@@ -133,15 +143,20 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     setPage(1);
+    setQuery("");
     load();
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? entries.filter((e) => e.name.toLowerCase().includes(q))
+    : entries;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const pageRows = entries.slice(startIndex, startIndex + PAGE_SIZE);
+  const pageRows = filtered.slice(startIndex, startIndex + PAGE_SIZE);
 
   const navBtn = (disabled: boolean): React.CSSProperties => ({
     width: "7cqw",
@@ -159,11 +174,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
       className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
-      <div className="min-h-full flex items-center justify-center p-4">
+      <div className="min-h-full flex items-center justify-center pl-4">
         <div
           className="relative w-full"
           style={{
-            maxWidth: 375,
+            maxWidth: 280,
             aspectRatio: "605 / 1419",
             containerType: "inline-size",
           }}
@@ -224,8 +239,48 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 Leaderboard
               </h3>
             </div>
-            <div style={{ margin: "1.6cqw 0 2cqw" }}>
+            <div style={{ margin: "1.2cqw 0 1.8cqw" }}>
               <Divider />
+            </div>
+            {/* Search */}
+            <div
+              className="flex items-center"
+              style={{
+                gap: "1.8cqw",
+                height: "8cqw",
+                padding: "5cqw 3.4cqw",
+                marginBottom: "1.8cqw",
+                borderRadius: 999,
+                border: "1px solid rgba(212,175,55,0.7)",
+                background: "rgba(35,7,4,0.6)",
+              }}
+            >
+              <Search
+                className="shrink-0"
+                style={{ width: "3.8cqw", height: "3.8cqw", color: "#e6c25a" }}
+              />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search player"
+                aria-label="Search players"
+                className="flex-1 min-w-0 bg-transparent outline-none font-serif placeholder:text-[#f3d9a4]/50"
+                style={{ fontSize: "3.4cqw", color: "#f7ecd6" }}
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="shrink-0 flex items-center justify-center"
+                  style={{ color: "#e6c25a" }}
+                >
+                  <X style={{ width: "3.8cqw", height: "3.8cqw" }} />
+                </button>
+              )}
             </div>
             {/* Column headers */}
             <div
@@ -237,7 +292,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 letterSpacing: "0.08em",
                 color: "#e6c25a",
                 borderBottom: "1px solid rgba(212,175,55,0.6)",
-                marginBottom: "2cqw",
+                marginBottom: "1.6cqw",
+                marginTop: "1cqw",
               }}
             >
               <span>Rank</span>
@@ -248,8 +304,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             <div
               className="flex-1 min-h-0 grid"
               style={{
-                gridTemplateRows: `repeat(${PAGE_SIZE}, 9cqw)`,
-                rowGap: "3.6cqw",
+                gridTemplateRows: `repeat(${PAGE_SIZE}, 8.4cqw)`,
+                rowGap: "2.4cqw",
                 alignContent: "start",
               }}
             >
@@ -282,6 +338,22 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 </div>
               )}
 
+              {!loading &&
+                !error &&
+                entries.length > 0 &&
+                filtered.length === 0 && (
+                  <div
+                    className="flex items-center justify-center text-center"
+                    style={{
+                      gridRow: `1 / span ${PAGE_SIZE}`,
+                      fontSize: "3.4cqw",
+                      color: "#f3d9a4",
+                    }}
+                  >
+                    No players found for “{query.trim()}”.
+                  </div>
+                )}
+
               {!loading && !error && entries.length === 0 && (
                 <div
                   className="flex items-center justify-center text-center"
@@ -298,7 +370,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               {!loading &&
                 !error &&
                 pageRows.map((e, i) => {
-                  const rank = startIndex + i + 1; // global rank
+                  const rank = e.rank; // global rank (unchanged by search)
                   const isFirst = rank === 1;
                   return (
                     <div
@@ -348,10 +420,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 })}
             </div>
             {/* Pagination */}
-            {!loading && !error && entries.length > 0 && (
+            {!loading && !error && filtered.length > 0 && (
               <div
                 className="flex items-center justify-center"
-                style={{ gap: "4cqw", marginTop: "2.4cqw" }}
+                style={{ gap: "4cqw", marginBottom: "-1.5cqw" }}
               >
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}

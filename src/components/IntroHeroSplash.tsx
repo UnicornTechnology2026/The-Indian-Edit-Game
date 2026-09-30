@@ -87,7 +87,7 @@ export const IntroHeroSplash: React.FC<IntroHeroSplashProps> = ({
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
         >
-          <span>Enter The Experience</span>
+          <span>Enter The Edit</span>
         </motion.button>
 
         <motion.p
@@ -96,7 +96,8 @@ export const IntroHeroSplash: React.FC<IntroHeroSplashProps> = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1 }}
         >
-          Super Premium Whisky • Crafted in India
+          Super Premium Whisky <br />
+          <span className="ml-4">Crafted in India</span>
         </motion.p>
       </motion.div>
     </motion.div>

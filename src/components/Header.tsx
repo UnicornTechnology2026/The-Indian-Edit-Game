@@ -4,10 +4,10 @@ import { ScreenId } from "../types";
 import {
   Sparkles,
   RotateCcw,
-  ChevronDown,
   KeyRound,
   Trophy,
   ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
 import logo from "../assets/images/editLogo.svg";
 
@@ -49,8 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-3 text-left group focus:outline-none cursor-pointer"
           title="Return to Experience Home"
         >
-          <div className="mt-5 ml-10">
-            <img src={logo} alt="" className="h-36 w-36" />
+          <div className="">
+            <img src={logo} alt="" className="h-25 w-25" />
           </div>
         </button>
 

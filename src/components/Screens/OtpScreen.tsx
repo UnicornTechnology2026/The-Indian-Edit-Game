@@ -118,7 +118,7 @@ export const OtpScreen: React.FC = () => {
             type="submit"
             className="w-full py-3.5 btn-gold text-sm font-bold flex items-center justify-center gap-2 group cursor-pointer"
           >
-            <span>Confirm & Enter Experience</span>
+            <span>Confirm & Enter Edit</span>
           </button>
         </form>
 

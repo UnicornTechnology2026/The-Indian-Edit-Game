@@ -94,7 +94,7 @@ export const WelcomeScreen: React.FC = () => {
           whileTap={{ scale: 0.97 }}
           aria-describedby="begin-challenge-hint"
         >
-          <span>Begin Challenge 01</span>
+          <span>Begin Edit Tour</span>
         </motion.button>
       </motion.div>
     </motion.div>
