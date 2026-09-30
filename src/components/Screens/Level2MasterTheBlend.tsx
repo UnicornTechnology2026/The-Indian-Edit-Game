@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useGame } from "../../context/GameContext";
-import { CheckCircle2, HelpCircle, X } from "lucide-react";
+import { CheckCircle2, HelpCircle, RotateCcw, X } from "lucide-react";
 import { sound } from "../../utils/audio";
 import bottleImg from "../../assets/images/NewBottle.png";
 
@@ -266,7 +266,7 @@ export const Level2MasterTheBlend: React.FC = () => {
   const ss = String(timeLeft % 60).padStart(2, "0");
 
   return (
-    <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6 animate-fade-in">
+    <div className="max-w-5xl mx-auto py-1.5 lg:py-6 px-3 sm:px-6 animate-fade-in">
       {/* ---------------- INTRO ---------------- */}
       {screen === "intro" && (
         <div className="min-h-[65vh] flex flex-col items-center justify-center text-center gap-6">
@@ -322,22 +322,22 @@ export const Level2MasterTheBlend: React.FC = () => {
       {/* ---------------- PLAYING ---------------- */}
       {screen === "playing" && (
         <div>
-          <div className="text-center mb-8">
-            <h2 className="font-serif text-[clamp(1.6rem,4.5vw,2.6rem)] font-bold gold-gradient-text">
+          <div className="text-center mb-2 lg:mb-8">
+            <h2 className="font-serif text-[clamp(1.25rem,4.5vw,2.6rem)] font-bold gold-gradient-text">
               BLEND THE EDIT
             </h2>
-            <p className="mt-1.5 text-xs sm:text-sm text-[#e5d8cb]">
+            <p className="mt-0.5 lg:mt-1.5 text-[11px] sm:text-sm text-[#e5d8cb]">
               Select the right origins and bring them into the Indian Edit
               bottle.
             </p>
 
-            <div className="flex items-center justify-center gap-6 sm:gap-8 mt-5 flex-wrap">
+            <div className="flex items-center justify-center gap-4 sm:gap-8 mt-1 lg:mt-5 flex-wrap">
               <div className="text-center min-w-24">
-                <div className="text-[11px] tracking-wide text-[#a69383] mb-1">
+                <div className="text-[10px] lg:text-[11px] tracking-wide text-[#a69383] lg:mb-1">
                   Blend Score
                 </div>
                 <div
-                  className={`font-serif text-2xl ${
+                  className={`font-serif text-xl lg:text-2xl ${
                     score < 0 ? "text-[#f87171]" : "text-[#f5d77f]"
                   }`}
                 >
@@ -345,7 +345,7 @@ export const Level2MasterTheBlend: React.FC = () => {
                 </div>
               </div>
 
-              <div className="min-h-4.5 text-xs font-medium flex items-center">
+              <div className="min-h-4.5 text-[11px] lg:text-xs font-medium flex items-center justify-center order-last basis-full lg:order-0 lg:basis-auto">
                 {feedback && (
                   <span
                     className={
@@ -358,11 +358,11 @@ export const Level2MasterTheBlend: React.FC = () => {
               </div>
 
               <div className="text-center min-w-24">
-                <div className="text-[11px] tracking-wide text-[#a69383] mb-1">
+                <div className="text-[10px] lg:text-[11px] tracking-wide text-[#a69383] lg:mb-1">
                   Time Remaining
                 </div>
                 <div
-                  className={`font-serif text-2xl ${timeLeft <= 10 ? "text-[#c9645a]" : "text-[#f5d77f]"}`}
+                  className={`font-serif text-xl lg:text-2xl ${timeLeft <= 10 ? "text-[#c9645a]" : "text-[#f5d77f]"}`}
                 >
                   {mm}:{ss}
                 </div>
@@ -378,9 +378,13 @@ export const Level2MasterTheBlend: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 items-center">
+          <div className="grid grid-cols-[auto_1fr] lg:grid-cols-2 gap-3 lg:gap-7 items-center">
             {/* Ingredients list */}
-            <div className="flex flex-col gap-2.5 order-2 lg:order-1">
+            <div className="flex flex-col gap-1 lg:gap-2.5 order-2 lg:order-1 min-w-0">
+              {/* Mobile only: the list sits beside the bottle */}
+              <p className="lg:hidden text-center font-serif italic text-[11px] leading-none text-[#f5d77f]">
+                Blend list
+              </p>
               {order.map((ing) => {
                 const isCollected = collectedIds.includes(ing.id);
                 const isShaking = shakeId === ing.id;
@@ -390,27 +394,27 @@ export const Level2MasterTheBlend: React.FC = () => {
                     draggable={!isCollected}
                     onDragStart={(e) => handleDragStart(e, ing.id)}
                     onClick={() => attemptAdd(ing)}
-                    className={`flex items-center justify-between gap-2.5 p-3.5 rounded-lg border backdrop-blur-sm transition-all duration-150 select-none ${
+                    className={`flex items-center justify-between gap-2 px-2 py-1 lg:p-3.5 rounded-lg border backdrop-blur-sm transition-all duration-150 select-none ${
                       isCollected
                         ? "opacity-35 pointer-events-none border-[#7ab08c]/30 bg-[#14100a]/60"
                         : "cursor-grab border-[#d4af37]/25 bg-[#14100a]/70 hover:border-[#d4af37] hover:translate-x-1"
                     } ${isShaking ? "border-[#c9645a] animate-[shake_0.45s]" : ""}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded flex items-center justify-center text-sm border border-[#d4af37]/25 shrink-0">
+                    <div className="flex items-center gap-2 lg:gap-3 min-w-0">
+                      {/* <div className="w-5 h-5 lg:w-8 lg:h-8 rounded flex items-center justify-center text-xs lg:text-sm border border-[#d4af37]/25 shrink-0">
                         {ing.icon}
-                      </div>
+                      </div> */}
                       <div>
-                        <span className="block text-xs font-semibold text-[#faf6f0]">
+                        <span className="block text-[11px] lg:text-xs leading-tight font-semibold text-[#faf6f0] truncate">
                           {ing.name}
                         </span>
-                        <span className="block text-[11px] text-[#a69383]">
+                        <span className="block text-[9px] lg:text-[11px] leading-tight text-[#a69383] truncate">
                           {ing.origin}
                         </span>
                       </div>
                     </div>
                     <div
-                      className={`w-4.75 h-4.75 rounded-full border border-[#d4af37]/25 flex items-center justify-center text-[10px] shrink-0 ${
+                      className={`w-4 h-4 lg:w-4.75 lg:h-4.75 rounded-full border border-[#d4af37]/25 flex items-center justify-center text-[10px] shrink-0 ${
                         isCollected
                           ? "bg-[#7ab08c] border-[#7ab08c] text-[#151013]"
                           : ""
@@ -424,7 +428,7 @@ export const Level2MasterTheBlend: React.FC = () => {
             </div>
 
             {/* Vessel */}
-            <div className="flex flex-col items-center gap-3.5 order-1 lg:order-2">
+            <div className="flex flex-col items-center gap-2 lg:gap-3.5 order-1 lg:order-2 [--w:112px] sm:[--w:150px] lg:[--w:190px]">
               <div className="flex gap-2">
                 {[0, 1, 2].map((i) => (
                   <div
@@ -445,12 +449,12 @@ export const Level2MasterTheBlend: React.FC = () => {
                 }}
                 onDragLeave={() => setVesselHover(false)}
                 onDrop={handleDrop}
-                className={`relative w-47.5 transition-[filter] duration-200 ${
+                className={`relative transition-[filter] duration-200 ${
                   vesselHover
                     ? "drop-shadow-[0_0_16px_rgba(212,175,55,0.5)]"
                     : ""
                 }`}
-                style={{ aspectRatio: "605/1419" }}
+                style={{ width: "var(--w)", aspectRatio: "605/1419" }}
               >
                 <img
                   src={bottleImg}
@@ -472,15 +476,15 @@ export const Level2MasterTheBlend: React.FC = () => {
                     draggable={false}
                     className="absolute left-0 bottom-0 object-contain object-bottom"
                     style={{
-                      width: 190,
-                      height: (190 * 1419) / 605,
+                      width: "var(--w)",
+                      height: "calc(var(--w) * 1419 / 605)",
                       filter: "drop-shadow(0 0 12px rgba(212,175,55,0.3))",
                     }}
                   />
                 </div>
               </div>
 
-              <div className="text-[11px] tracking-wide text-[#a69383] text-center">
+              <div className="w-(--w) lg:w-auto text-[8px] lg:text-[11px] leading-tight tracking-wide text-[#a69383] text-center">
                 {vesselLabel}
               </div>
             </div>
@@ -563,6 +567,14 @@ export const Level2MasterTheBlend: React.FC = () => {
               Unite 3 Blend into the Edit vessel before 30 seconds elapse.
             </p>
           </div>
+
+          <button
+            onClick={startGame}
+            className="w-full max-w-xs py-3.5 btn-gold text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Play Again</span>
+          </button>
         </div>
       )}
 
