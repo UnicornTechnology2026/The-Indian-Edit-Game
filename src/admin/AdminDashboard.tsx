@@ -111,6 +111,7 @@ function DataTable<T>({
   emptyText = "No records found.",
   getId,
   onDelete,
+  showSrNo = false,
 }: {
   rows: T[];
   columns: Column<T>[];
@@ -123,6 +124,7 @@ function DataTable<T>({
   getId?: (row: T) => number | string | undefined;
   /** Deletes the given ids, then the parent reloads the data. */
   onDelete?: (ids: (number | string)[]) => Promise<void>;
+  showSrNo?: boolean;
 }) {
   const [selected, setSelected] = useState<Set<number | string>>(new Set());
   const [deleting, setDeleting] = useState(false);
@@ -313,6 +315,11 @@ function DataTable<T>({
                   />
                 </th>
               )}
+              {showSrNo && (
+                <th className="px-3 py-2.5 font-semibold tracking-wide whitespace-nowrap text-left w-14">
+                  Sr. No.
+                </th>
+              )}
               {columns.map((c) => {
                 const active = c.key === sortKey;
                 return (
@@ -350,7 +357,9 @@ function DataTable<T>({
             {slice.length === 0 && (
               <tr>
                 <td
-                  colSpan={columns.length + (canDelete ? 1 : 0)}
+                  colSpan={
+                    columns.length + (canDelete ? 1 : 0) + (showSrNo ? 1 : 0)
+                  }
                   className="px-3 py-8 text-center text-[#ab9580]"
                 >
                   {emptyText}
@@ -373,6 +382,11 @@ function DataTable<T>({
                         className="accent-[#d4af37]"
                       />
                     )}
+                  </td>
+                )}
+                {showSrNo && (
+                  <td className="px-3 py-2.5 whitespace-nowrap tabular-nums text-[#ab9580]">
+                    {safePage * pageSize + i + 1}
                   </td>
                 )}
                 {columns.map((c) => (
@@ -778,6 +792,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               defaultSort={{ key: "total", dir: "desc" }}
               getId={(r) => r.id}
               onDelete={handleDelete("game_results")}
+              showSrNo
             />
           </Card>
         )}
@@ -792,6 +807,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               defaultSort={{ key: "ttotal", dir: "desc" }}
               getId={(r) => r.id}
               onDelete={handleDelete("game_results")}
+              showSrNo
             />
           </Card>
         )}

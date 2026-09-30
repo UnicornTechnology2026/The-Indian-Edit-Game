@@ -28,7 +28,7 @@ export const HUNT_ROUNDS: HuntRound[] = [
     title: "FIND THE EDIT",
     subtitle: "The Royal Lounge & Bar",
     difficulty: "EASY",
-    duration: 30000,
+    duration: 25,
     background: "/assets/round-1.jpg",
     fallbackColor: "#170b05",
     bottles: [

@@ -1,33 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Crown, RefreshCw, X } from "lucide-react";
 import { supabaseSelect } from "../../lib/supabaseClient";
-import {
-  X,
-  Trophy,
-  Crown,
-  RefreshCw,
-  Search,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import bottleImg from "../../assets/images/NewBottle.png";
+import bannerTop from "../../assets/images/banner-top.webp";
 
 interface LeaderboardRow {
   user_name: string;
-  user_city: string;
   total_score: number;
-  decode_score: number;
-  blend_score: number;
-  hunt_score: number;
 }
 
-interface LeaderboardEntry {
+interface Entry {
   name: string;
-  city: string;
-  level1: number;
-  level2: number;
-  level3: number;
   total: number;
 }
 
@@ -36,354 +19,389 @@ interface LeaderboardModalProps {
   onClose: () => void;
 }
 
-type SortKey = "name" | "city" | "level1" | "level2" | "level3" | "total";
-type SortDir = "asc" | "desc";
+const PAGE_SIZE = 6; // players per page
+const FETCH_LIMIT = 100; // how many top scores to load in total
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50];
+// Where the leaderboard sits on the bottle (percent of the 605x1419 image).
+const PANEL = { top: 33, height: 56, left: 3, right: 8 };
+
+const GOLD_TEXT: React.CSSProperties = {
+  background: "linear-gradient(180deg,#fff2b8 0%,#e6c25a 45%,#9a7420 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+};
+
+const RANK_COLORS: Record<number, string> = {
+  1: "#f5c84c",
+  2: "#d9dde3",
+  3: "#d98a5b",
+};
+
+const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
+  const color = RANK_COLORS[rank];
+  if (color) {
+    return (
+      <span
+        className="relative inline-flex items-center justify-center"
+        style={{ width: "8cqw", height: "8cqw" }}
+      >
+        <Crown
+          style={{ width: "8cqw", height: "8cqw", color, fill: color }}
+          strokeWidth={1.2}
+        />
+        <span
+          className="absolute font-serif font-bold"
+          style={{ fontSize: "2.8cqw", color: "#3a1208", top: "2.6cqw" }}
+        >
+          {rank}
+        </span>
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-full font-serif font-bold"
+      style={{
+        width: "6.4cqw",
+        height: "6.4cqw",
+        fontSize: "3cqw",
+        paddingTop: "1cqw",
+        color: "#f1d27a",
+        border: "0.35cqw solid #d4af37",
+        background: "rgba(30,6,3,0.6)",
+      }}
+    >
+      {rank}
+    </span>
+  );
+};
+
+const Divider: React.FC = () => (
+  <div className="flex items-center justify-center" style={{ gap: "1.2cqw" }}>
+    <span
+      style={{
+        height: 1,
+        flex: 1,
+        background: "linear-gradient(90deg,transparent,#d4af37)",
+      }}
+    />
+    <span style={{ color: "#d4af37", fontSize: "2.4cqw" }}>◆ ❖ ◆</span>
+    <span
+      style={{
+        height: 1,
+        flex: 1,
+        background: "linear-gradient(270deg,transparent,#d4af37)",
+      }}
+    />
+  </div>
+);
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("total");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
 
-  const loadLeaderboard = () => {
+  const load = () => {
     setLoading(true);
     setError(null);
     supabaseSelect<LeaderboardRow>("game_results", {
-      columns:
-        "user_name,user_city,total_score,decode_score,blend_score,hunt_score",
+      columns: "user_name,total_score",
       orderBy: "total_score",
       ascending: false,
-      limit: 500,
+      limit: FETCH_LIMIT,
     })
-      .then((rows) => {
+      .then((rows) =>
         setEntries(
-          rows.map((row) => ({
-            name: row.user_name || "VIP Guest",
-            city: row.user_city || "—",
-            level1: row.decode_score ?? 0,
-            level2: row.blend_score ?? 0,
-            level3: row.hunt_score ?? 0,
-            total: row.total_score ?? 0,
+          rows.map((r) => ({
+            name: r.user_name || "VIP Guest",
+            total: r.total_score ?? 0,
           })),
-        );
-      })
+        ),
+      )
       .catch((err) => {
         console.error("Failed to load leaderboard:", err);
-        setError("Could not load the leaderboard. Please try again.");
+        setError("Could not load the leaderboard.");
       })
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     if (!isOpen) return;
-    loadLeaderboard();
-    setSearch("");
-    setSortKey("total");
-    setSortDir("desc");
     setPage(1);
+    load();
   }, [isOpen]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [search, sortKey, sortDir]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return entries;
-    return entries.filter(
-      (e) =>
-        e.name.toLowerCase().includes(q) || e.city.toLowerCase().includes(q),
-    );
-  }, [entries, search]);
-
-  const ranked = useMemo(() => {
-    const byTotalDesc = [...filtered].sort((a, b) => b.total - a.total);
-    const rankMap = new Map<LeaderboardEntry, number>();
-    byTotalDesc.forEach((e, i) => rankMap.set(e, i + 1));
-    return filtered.map((e) => ({ ...e, rank: rankMap.get(e)! }));
-  }, [filtered]);
-
-  const sorted = useMemo(() => {
-    const list = [...ranked];
-    list.sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === "name" || sortKey === "city") {
-        cmp = a[sortKey].localeCompare(b[sortKey]);
-      } else {
-        cmp = a[sortKey] - b[sortKey];
-      }
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-    return list;
-  }, [ranked, sortKey, sortDir]);
-
-  // Early return happens AFTER every hook has been called, so hook order
-  // stays identical between renders regardless of `isOpen`.
   if (!isOpen) return null;
 
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir(key === "name" || key === "city" ? "asc" : "desc");
-    }
-  };
+  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = entries.slice(startIndex, startIndex + PAGE_SIZE);
 
-  const sortIcon = (key: SortKey) => {
-    if (sortKey !== key) return <ArrowUpDown className="w-3 h-3 opacity-40" />;
-    return sortDir === "asc" ? (
-      <ArrowUp className="w-3 h-3 text-[#d4af37]" />
-    ) : (
-      <ArrowDown className="w-3 h-3 text-[#d4af37]" />
-    );
-  };
-
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
-  const clampedPage = Math.min(page, totalPages);
-  const pageStart = (clampedPage - 1) * pageSize;
-  const pageRows = sorted.slice(pageStart, pageStart + pageSize);
-
-  const columns: { key: SortKey; label: string; align?: "right" }[] = [
-    { key: "name", label: "Name" },
-    { key: "city", label: "Place" },
-    { key: "level1", label: "L1", align: "right" },
-    { key: "level2", label: "L2", align: "right" },
-    { key: "level3", label: "L3", align: "right" },
-    { key: "total", label: "Total", align: "right" },
-  ];
+  const navBtn = (disabled: boolean): React.CSSProperties => ({
+    width: "7cqw",
+    height: "7cqw",
+    borderRadius: 999,
+    border: "1px solid rgba(212,175,55,0.7)",
+    background: "rgba(35,7,4,0.6)",
+    color: "#f1d27a",
+    opacity: disabled ? 0.3 : 1,
+    cursor: disabled ? "not-allowed" : "pointer",
+  });
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
-      <div
-        className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl bg-[#22160f] border border-[#d4af37]/50 shadow-2xl text-[#faf6f0]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#3d261a]">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-[#d4af37]" />
-            <h3 className="font-serif text-xl font-bold text-[#faf6f0]">
-              Leaderboard
-            </h3>
-            {!loading && !error && (
-              <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-[#3d261a] text-[#a69383] font-mono">
-                {sorted.length} players
-              </span>
-            )}
+      <div className="min-h-full flex items-center justify-center p-4">
+        <div
+          className="relative w-full"
+          style={{
+            maxWidth: 375,
+            aspectRatio: "605 / 1419",
+            containerType: "inline-size",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Bottle */}
+          <img
+            src={bottleImg}
+            alt="The Indian Edit bottle"
+            className="absolute inset-0 w-full h-full select-none pointer-events-none"
+            draggable={false}
+          />
+
+          {/* Amber panel that covers the original label, feathered at the edges */}
+          <div
+            className="absolute"
+            style={{
+              top: `${PANEL.top}%`,
+              height: `${PANEL.height}%`,
+              left: `${PANEL.left}%`,
+              right: `${PANEL.right}%`,
+              background:
+                "radial-gradient(ellipse at 50% 40%, #8f3016 0%, #6a2010 45%, #3f150c 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to right,transparent,#000 7%,#000 93%,transparent), linear-gradient(to bottom,transparent,#000 5%,#000 95%,transparent)",
+              maskImage:
+                "linear-gradient(to right,transparent,#000 7%,#000 93%,transparent), linear-gradient(to bottom,transparent,#000 5%,#000 95%,transparent)",
+              WebkitMaskComposite: "source-in",
+              maskComposite: "intersect",
+            }}
+          />
+
+          {/* Leaderboard content */}
+          <div
+            className="absolute flex flex-col"
+            style={{
+              top: `${PANEL.top + 1.5}%`,
+              height: `${PANEL.height - 3}%`,
+              left: `${PANEL.left + 3}%`,
+              right: `${PANEL.right + 3}%`,
+            }}
+          >
+            {/* Title */}
+            <div
+              className="flex flex-col items-center"
+              style={{ gap: "0.6cqw" }}
+            >
+              <img src={bannerTop} alt="" className="h-15 w-30" />
+              <h3
+                className="font-serif font-bold uppercase"
+                style={{
+                  fontSize: "7.4cqw",
+                  letterSpacing: "0.02em",
+                  lineHeight: 1,
+                  ...GOLD_TEXT,
+                }}
+              >
+                Leaderboard
+              </h3>
+            </div>
+            <div style={{ margin: "1.6cqw 0 2cqw" }}>
+              <Divider />
+            </div>
+            {/* Column headers */}
+            <div
+              className="grid font-serif font-bold uppercase"
+              style={{
+                gridTemplateColumns: "13cqw 1fr auto",
+                padding: "0 3cqw",
+                fontSize: "2.4cqw",
+                letterSpacing: "0.08em",
+                color: "#e6c25a",
+                borderBottom: "1px solid rgba(212,175,55,0.6)",
+                marginBottom: "2cqw",
+              }}
+            >
+              <span>Rank</span>
+              <span>Player</span>
+              <span>Score</span>
+            </div>
+            {/* Rows: always 8 slots per page, with clear space between rows */}
+            <div
+              className="flex-1 min-h-0 grid"
+              style={{
+                gridTemplateRows: `repeat(${PAGE_SIZE}, 9cqw)`,
+                rowGap: "3.6cqw",
+                alignContent: "start",
+              }}
+            >
+              {loading && (
+                <div
+                  className="flex items-center justify-center"
+                  style={{ gridRow: `1 / span ${PAGE_SIZE}` }}
+                >
+                  <div className="w-8 h-8 border-2 border-[#d4af37]/30 border-t-[#d4af37] rounded-full animate-spin" />
+                </div>
+              )}
+
+              {!loading && error && (
+                <div
+                  className="flex flex-col items-center justify-center text-center"
+                  style={{
+                    gridRow: `1 / span ${PAGE_SIZE}`,
+                    gap: "2cqw",
+                    color: "#f3d9a4",
+                  }}
+                >
+                  <p style={{ fontSize: "3.4cqw" }}>{error}</p>
+                  <button
+                    onClick={load}
+                    className="rounded-full bg-[#d4af37] text-[#170f0a] font-semibold"
+                    style={{ fontSize: "3cqw", padding: "1cqw 4cqw" }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {!loading && !error && entries.length === 0 && (
+                <div
+                  className="flex items-center justify-center text-center"
+                  style={{
+                    gridRow: `1 / span ${PAGE_SIZE}`,
+                    fontSize: "3.4cqw",
+                    color: "#f3d9a4",
+                  }}
+                >
+                  No scores yet. Be the first!
+                </div>
+              )}
+
+              {!loading &&
+                !error &&
+                pageRows.map((e, i) => {
+                  const rank = startIndex + i + 1; // global rank
+                  const isFirst = rank === 1;
+                  return (
+                    <div
+                      key={`${e.name}-${rank}`}
+                      className="flex items-center"
+                      style={{
+                        height: "100%",
+                        padding: rank > 3 ? "0 4.6cqw" : "0.5cqw 3cqw",
+                        borderRadius: 999,
+                        border: "1px solid rgba(212,175,55,0.65)",
+                        background: isFirst
+                          ? "linear-gradient(90deg, rgba(212,175,55,0.45), rgba(90,20,10,0.55))"
+                          : "rgba(35,7,4,0.55)",
+                        boxShadow: isFirst
+                          ? "0 0 12px rgba(212,175,55,0.35)"
+                          : "none",
+                      }}
+                    >
+                      <span
+                        className="flex items-center shrink-0"
+                        style={{ width: rank > 3 ? "11.4cqw" : "13cqw" }}
+                      >
+                        <RankBadge rank={rank} />
+                      </span>
+                      <span
+                        className="font-serif truncate flex-1 min-w-0"
+                        style={{
+                          fontSize: "3.6cqw",
+                          color: "#f7ecd6",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {e.name}
+                      </span>
+                      <span
+                        className="font-serif font-bold tabular-nums shrink-0"
+                        style={{
+                          fontSize: "3.6cqw",
+                          color: "#f1d27a",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {e.total.toLocaleString()}
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+            {/* Pagination */}
+            {!loading && !error && entries.length > 0 && (
+              <div
+                className="flex items-center justify-center"
+                style={{ gap: "4cqw", marginTop: "2.4cqw" }}
+              >
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  aria-label="Previous page"
+                  className="flex items-center justify-center transition-colors"
+                  style={navBtn(currentPage <= 1)}
+                >
+                  <ChevronLeft style={{ width: "4cqw", height: "4cqw" }} />
+                </button>
+                <span
+                  className="font-serif tabular-nums"
+                  style={{
+                    fontSize: "3cqw",
+                    color: "#f1d27a",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  aria-label="Next page"
+                  className="flex items-center justify-center transition-colors"
+                  style={navBtn(currentPage >= totalPages)}
+                >
+                  <ChevronRight style={{ width: "4cqw", height: "4cqw" }} />
+                </button>
+              </div>
+            )}{" "}
           </div>
-          <div className="flex items-center gap-1">
+
+          {/* Refresh / close */}
+          <div className="absolute top-2 right-2 flex gap-1">
             <button
-              onClick={loadLeaderboard}
-              className="p-1.5 rounded-lg text-[#a69383] hover:text-[#faf6f0] hover:bg-[#3d261a] transition-colors"
+              onClick={load}
               title="Refresh"
+              className="p-2 rounded-full bg-black/50 text-[#f1d27a] hover:bg-black/70 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[#a69383] hover:text-[#faf6f0] hover:bg-[#3d261a] transition-colors"
+              title="Close"
+              className="p-2 rounded-full bg-black/50 text-[#f1d27a] hover:bg-black/70 transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
-        </div>
-
-        {/* Search + page size */}
-        {!loading && !error && entries.length > 0 && (
-          <div className="flex items-center gap-3 px-6 py-3 border-b border-[#3d261a]">
-            <div className="relative flex-1">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#a69383]" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name or place..."
-                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#170f0a] border border-[#3d261a] text-xs text-[#e5d8cb] placeholder:text-[#6b5c4f] focus:outline-none focus:border-[#d4af37]/60"
-              />
-            </div>
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="text-xs bg-[#170f0a] border border-[#3d261a] rounded-lg px-2 py-1.5 text-[#e5d8cb] focus:outline-none focus:border-[#d4af37]/60"
-            >
-              {PAGE_SIZE_OPTIONS.map((n) => (
-                <option key={n} value={n}>
-                  {n} / page
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading && (
-          <div className="py-16 flex flex-col items-center justify-center gap-3 text-[#a69383]">
-            <div className="w-8 h-8 border-2 border-[#d4af37]/30 border-t-[#d4af37] rounded-full animate-spin" />
-            <span className="text-xs tracking-wider uppercase">
-              Loading Leaderboard...
-            </span>
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div className="py-12 flex flex-col items-center justify-center gap-3 text-center px-6">
-            <p className="text-sm text-[#e5a5a5]">{error}</p>
-            <button
-              onClick={loadLeaderboard}
-              className="px-4 py-1.5 rounded-full bg-[#d4af37] text-[#170f0a] font-semibold text-xs hover:bg-[#f5d77f] transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Empty */}
-        {!loading && !error && entries.length === 0 && (
-          <div className="py-16 text-center text-[#a69383] text-sm">
-            No scores yet. Be the first to complete the experience!
-          </div>
-        )}
-
-        {/* Table */}
-        {!loading && !error && entries.length > 0 && (
-          <>
-            <div className="flex-1 overflow-y-auto px-6">
-              {sorted.length === 0 ? (
-                <div className="py-16 text-center text-[#a69383] text-sm">
-                  No players match "{search}".
-                </div>
-              ) : (
-                <table className="w-full text-xs border-collapse">
-                  <thead className="sticky top-0 bg-[#22160f] z-10">
-                    <tr className="text-[9px] font-bold uppercase tracking-wider text-[#a69383]">
-                      <th className="py-2 pr-2 text-left w-10">#</th>
-                      {columns.map((col) => (
-                        <th
-                          key={col.key}
-                          onClick={() => toggleSort(col.key)}
-                          className={`py-2 px-2 cursor-pointer select-none hover:text-[#e5d8cb] transition-colors ${
-                            col.align === "right" ? "text-right" : "text-left"
-                          }`}
-                        >
-                          <span
-                            className={`inline-flex items-center gap-1 ${
-                              col.align === "right" ? "flex-row-reverse" : ""
-                            }`}
-                          >
-                            {col.label}
-                            {sortIcon(col.key)}
-                          </span>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#3d261a]">
-                    {pageRows.map((entry) => {
-                      const isTop3 = entry.rank <= 3;
-                      const rankColor =
-                        entry.rank === 1
-                          ? "text-[#d4af37]"
-                          : entry.rank === 2
-                            ? "text-[#c0c0c0]"
-                            : entry.rank === 3
-                              ? "text-[#cd7f32]"
-                              : "text-[#a69383]";
-                      return (
-                        <tr
-                          key={`${entry.name}-${entry.rank}`}
-                          className={`transition-colors hover:bg-[#2e1e15]/60 ${
-                            isTop3 ? "bg-[#d4af37]/6" : ""
-                          }`}
-                        >
-                          <td className="py-2 pr-2">
-                            <span
-                              className={`inline-flex items-center gap-1 font-mono font-bold ${rankColor}`}
-                            >
-                              {entry.rank === 1 && (
-                                <Crown className="w-3 h-3" />
-                              )}
-                              {entry.rank}
-                            </span>
-                          </td>
-                          <td className="py-2 px-2 text-[#e5d8cb] font-medium max-w-40 truncate">
-                            {entry.name}
-                          </td>
-                          <td className="py-2 px-2 text-[#a69383] max-w-32 truncate">
-                            {entry.city}
-                          </td>
-                          <td className="py-2 px-2 text-right text-[#a69383] tabular-nums">
-                            {entry.level1.toLocaleString()}
-                          </td>
-                          <td className="py-2 px-2 text-right text-[#a69383] tabular-nums">
-                            {entry.level2.toLocaleString()}
-                          </td>
-                          <td className="py-2 px-2 text-right text-[#a69383] tabular-nums">
-                            {entry.level3.toLocaleString()}
-                          </td>
-                          <td className="py-2 px-2 text-right font-bold text-[#f5d77f] tabular-nums">
-                            {entry.total.toLocaleString()}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            {/* Pagination */}
-            {sorted.length > 0 && (
-              <div className="flex items-center justify-between px-6 py-3 border-t border-[#3d261a] text-[11px] text-[#a69383]">
-                <span>
-                  Showing {pageStart + 1}–
-                  {Math.min(pageStart + pageSize, sorted.length)} of{" "}
-                  {sorted.length}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={clampedPage <= 1}
-                    className="p-1.5 rounded-lg border border-[#3d261a] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#d4af37]/50 transition-colors"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="font-mono">
-                    {clampedPage} / {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={clampedPage >= totalPages}
-                    className="p-1.5 rounded-lg border border-[#3d261a] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#d4af37]/50 transition-colors"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        <div className="flex justify-end px-6 py-4 border-t border-[#3d261a]">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-full bg-[#d4af37] text-[#170f0a] font-semibold text-xs hover:bg-[#f5d77f] transition-colors"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>

@@ -107,7 +107,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-sm tracking-wide text-[#070403] bg-linear-to-r from-[#d4af37] to-[#f7e7a9] hover:brightness-110 disabled:opacity-60 transition"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-sm tracking-wide text-[#070403] bg-linear-to-r from-[#d4af37] to-[#f7e7a9] hover:brightness-110 disabled:opacity-60 transition cursor-pointer"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

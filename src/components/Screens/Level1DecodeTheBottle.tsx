@@ -133,6 +133,10 @@ export const DecodeTheBottleGame: React.FC = () => {
   // Hotspots where the 10-second timer ran out before an answer was given.
   // Permanently closed as well.
   const [timedOutHotspots, setTimedOutHotspots] = useState<string[]>([]);
+  // Which wrong option the player picked, per hotspot (shown in red).
+  const [wrongPickById, setWrongPickById] = useState<Record<string, string>>(
+    {},
+  );
   // Remaining seconds for each question. A question's clock only runs while
   // its modal is open, and it resumes from where it stopped if the modal is
   // dismissed and reopened (so closing/reopening can't reset the 10 seconds).
@@ -244,27 +248,28 @@ export const DecodeTheBottleGame: React.FC = () => {
       setSolvedHotspots(newSolved);
       const newScore = score + 50;
 
-      setFeedback({ message: "Correct! +50 Craft Points", isCorrect: true });
       setScore(newScore);
       updateDecodeScore(newScore, newSolved.length, newSolved.length >= 5);
+      // Stay open a little so the player sees the green row.
       setTimeout(() => {
         setFeedback(null);
         setActiveHotspot(null);
-      }, 1200);
+      }, 1800);
     } else {
       sound.playWrong();
-      setFeedback({
-        message: "Incorrect. This question is now closed.",
-        isCorrect: false,
-      });
+      setWrongPickById((prev) => ({
+        ...prev,
+        [activeHotspot.id]: answer.text,
+      }));
       // Permanently close this question — no more attempts on it.
       setClosedHotspots((prev) =>
         prev.includes(activeHotspot.id) ? prev : [...prev, activeHotspot.id],
       );
+      // Stay open longer so the player can read the correct answer.
       setTimeout(() => {
         setFeedback(null);
         setActiveHotspot(null);
-      }, 1400);
+      }, 3000);
     }
   };
 
@@ -350,7 +355,7 @@ export const DecodeTheBottleGame: React.FC = () => {
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-            <span className="text-xs font-mono text-[#a69383] ml-1">
+            <span className="text-xs font-mono text-[#f2ead9] ml-1">
               {Math.round(zoomLevel * 100)}%
             </span>
           </div>
@@ -556,36 +561,94 @@ export const DecodeTheBottleGame: React.FC = () => {
               </div>
             )}
 
-            {!solvedHotspots.includes(activeHotspot.id) &&
-            (closedHotspots.includes(activeHotspot.id) ||
-              timedOutHotspots.includes(activeHotspot.id)) ? (
-              // Either answered incorrectly once, or the 10s timer ran out —
-              // either way, this question can no longer be attempted.
-              <div className="mt-4 p-4 rounded-xl bg-red-950/30 border border-red-600/50 text-center">
-                <p className="text-xs text-red-200">
-                  {timedOutHotspots.includes(activeHotspot.id)
-                    ? `Time's up! You didn't answer within ${QUESTION_TIME} seconds, so this question is closed.`
-                    : "This question is closed. You already gave an incorrect answer, so it can't be attempted again."}
-                </p>
-              </div>
-            ) : (
-              <div className="mt-4 space-y-2.5">
-                {shuffledAnswers.map((ans) => (
-                  <button
-                    key={ans.text}
-                    onClick={() => handleSelectAnswer(ans)}
-                    className="w-full p-3 rounded-xl bg-[#170f0a] border border-[#3d261a] hover:border-[#d4af37] text-left text-xs text-[#faf6f0] hover:bg-[#2e1e15] flex items-center gap-3 transition-colors group cursor-pointer"
-                  >
-                    <span className="w-6 h-6 rounded-md bg-[#2e1e15] border border-[#d4af37]/40 text-[#f5d77f] font-mono font-bold flex items-center justify-center text-xs group-hover:border-[#d4af37]">
-                      {ans.key}
-                    </span>
-                    <span className="group-hover:text-[#f5d77f] transition-colors">
-                      {ans.text}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
+            {(() => {
+              const isSolved = solvedHotspots.includes(activeHotspot.id);
+              const isTimedOut = timedOutHotspots.includes(activeHotspot.id);
+              const isClosed = closedHotspots.includes(activeHotspot.id);
+
+              // Once the question is over (right, wrong, or timed out),
+              // lock the options and reveal the correct answer.
+              const showAnswer = isSolved || isClosed || isTimedOut;
+
+              const wrongPick = wrongPickById[activeHotspot.id];
+
+              return (
+                <>
+                  {!isSolved && (isClosed || isTimedOut) && (
+                    <div className="mt-4 p-3 rounded-xl bg-red-950/30 border border-red-600/50 text-center">
+                      <p className="text-xs text-red-200">
+                        {isTimedOut
+                          ? "Time's up! This question is closed. The correct answer is shown in green."
+                          : "This question is closed. The correct answer is shown in green."}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-4 space-y-2.5">
+                    {shuffledAnswers.map((ans) => {
+                      const isCorrectOption = ans.correct;
+                      const isWrongPick = !isSolved && wrongPick === ans.text;
+
+                      let style =
+                        "bg-[#170f0a] border-[#3d261a] text-[#faf6f0] hover:border-[#d4af37] hover:bg-[#2e1e15]";
+                      let keyStyle =
+                        "bg-[#2e1e15] border-[#d4af37]/40 text-[#f5d77f] group-hover:border-[#d4af37]";
+
+                      if (showAnswer) {
+                        if (isSolved) {
+                          // Answered correctly: full row bright green.
+                          if (isCorrectOption) {
+                            style =
+                              "bg-green-600 border-green-300 text-white font-semibold shadow-[0_0_16px_rgba(74,222,128,0.55)]";
+                            keyStyle = "bg-white border-white text-green-700";
+                          } else {
+                            style =
+                              "bg-[#170f0a] border-[#3d261a] text-[#faf6f0] opacity-40";
+                            keyStyle =
+                              "bg-[#2e1e15] border-[#d4af37]/20 text-[#a69383]";
+                          }
+                        } else if (isCorrectOption) {
+                          // Wrong answer or timeout: reveal the right one.
+                          style =
+                            "bg-green-950/60 border-green-500 text-green-100";
+                          keyStyle = "bg-green-600 border-green-300 text-white";
+                        } else if (isWrongPick) {
+                          style = "bg-red-950/60 border-red-500 text-red-100";
+                          keyStyle = "bg-red-600 border-red-300 text-white";
+                        } else {
+                          style =
+                            "bg-[#170f0a] border-[#3d261a] text-[#faf6f0] opacity-50";
+                          keyStyle =
+                            "bg-[#2e1e15] border-[#d4af37]/20 text-[#a69383]";
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={ans.text}
+                          onClick={() => handleSelectAnswer(ans)}
+                          disabled={showAnswer}
+                          className={`w-full p-3 rounded-xl border text-left text-xs flex items-center gap-3 transition-colors group ${style} ${
+                            showAnswer ? "cursor-default" : "cursor-pointer"
+                          }`}
+                        >
+                          <span
+                            className={`w-6 h-6 rounded-md border font-mono font-bold flex items-center justify-center text-xs ${keyStyle}`}
+                          >
+                            {showAnswer && isCorrectOption
+                              ? "✓"
+                              : showAnswer && isWrongPick
+                                ? "✗"
+                                : ans.key}
+                          </span>
+                          <span>{ans.text}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
 
             <div className="mt-5 text-right">
               <button
