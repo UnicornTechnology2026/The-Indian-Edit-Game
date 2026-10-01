@@ -6,9 +6,9 @@ import NewBottle from "../../assets/images/NewBottle.png";
 import { DecodeTheBottleIntro } from "./DecodeTheBottleIntro";
 
 // Seconds the player gets to answer EACH question.
-const QUESTION_TIME = 10;
+const QUESTION_TIME = 15;
 // Seconds remaining at or below which the modal timer turns red.
-const QUESTION_DANGER_THRESHOLD = 3;
+const QUESTION_DANGER_THRESHOLD = 6;
 
 interface Hotspot {
   id: string;
