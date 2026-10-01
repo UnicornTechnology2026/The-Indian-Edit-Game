@@ -43,15 +43,6 @@ export type CityCategory =
   | "LIFESTYLE"
   | "FUTURE";
 
-export interface CityElementItem {
-  id: number;
-  category: CityCategory;
-  x: number;
-  y: number;
-  scale: number;
-  rotation: number;
-}
-
 export interface GameState {
   userName: string;
   userCity: string;

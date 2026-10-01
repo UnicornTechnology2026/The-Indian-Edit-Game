@@ -112,7 +112,6 @@ export const Level2MasterTheBlend: React.FC = () => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [finalStats, setFinalStats] = useState<FinalStats | null>(null);
   const [timeoutScore, setTimeoutScore] = useState(0);
-  const [shared, setShared] = useState(false);
 
   const startedAtRef = useRef(0);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -139,7 +138,6 @@ export const Level2MasterTheBlend: React.FC = () => {
     setIncorrectAttempts(0);
     setFeedback(null);
     setFinalStats(null);
-    setShared(false);
     startedAtRef.current = Date.now();
     setScreen("playing");
   }, []);
@@ -222,26 +220,6 @@ export const Level2MasterTheBlend: React.FC = () => {
     const id = e.dataTransfer.getData("text/plain");
     const ing = order.find((i) => i.id === id);
     if (ing) attemptAdd(ing);
-  };
-
-  const shareScore = () => {
-    const r = finalStats
-      ? { score: finalStats.total, elapsed: finalStats.elapsed }
-      : { score: timeoutScore, elapsed: ROUND_SECONDS };
-    const text = `I mastered the blend with a score of ${r.score} pts in ${r.elapsed}s! Discover The Indian Edit: Different origins. One distinctive edit.`;
-    if (navigator.share) {
-      navigator
-        .share({
-          title: "Master The Blend | The Indian Edit",
-          text,
-          url: window.location.href,
-        })
-        .catch(() => {});
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(`${text} — ${window.location.href}`);
-      setShared(true);
-      setTimeout(() => setShared(false), 2500);
-    }
   };
 
   const collectedCount = collectedIds.length;

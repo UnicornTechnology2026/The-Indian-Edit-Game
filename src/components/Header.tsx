@@ -16,12 +16,8 @@ interface HeaderProps {
   onShowLeaderboard?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  onShowIntroSplash,
-  onShowLeaderboard,
-}) => {
-  const { state, navigateTo, toggleSound, resetGame, loadDemoState } =
-    useGame();
+export const Header: React.FC<HeaderProps> = ({ onShowLeaderboard }) => {
+  const { state, navigateTo, resetGame, loadDemoState } = useGame();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const navItems: { id: ScreenId; label: string; step: string }[] = [

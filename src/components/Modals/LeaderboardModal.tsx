@@ -369,7 +369,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
               {!loading &&
                 !error &&
-                pageRows.map((e, i) => {
+                pageRows.map((e) => {
                   const rank = e.rank; // global rank (unchanged by search)
                   const isFirst = rank === 1;
                   return (

@@ -17,8 +17,6 @@ export const FinalResult: React.FC<FinalResultProps> = ({
   totalBottles = 15,
   totalScore,
   bestTime,
-  onOpenShare,
-  onRestart,
   onContinueToGrandFinale,
 }) => {
   useEffect(() => {

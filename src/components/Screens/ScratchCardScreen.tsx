@@ -6,10 +6,7 @@ import { sound } from "../../utils/audio";
 import { ScratchReveal } from "../ScratchCard/ScratchReveal";
 
 export const ScratchCardScreen: React.FC = () => {
-  const { state, setScratchRevealed, claimReward, navigateTo } = useGame();
-
-  const [copiedCode, setCopiedCode] = useState(false);
-  const [claimed, setClaimed] = useState(state.rewardClaimed);
+  const { state, setScratchRevealed, claimReward } = useGame();
 
   const gift = state.selectedGift || REWARD_GIFTS[0];
 
@@ -17,15 +14,7 @@ export const ScratchCardScreen: React.FC = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(voucherCode);
-    setCopiedCode(true);
     sound.playClick();
-    setTimeout(() => setCopiedCode(false), 2500);
-  };
-
-  const handleClaim = () => {
-    sound.playSuccess();
-    setClaimed(true);
-    claimReward();
   };
 
   return (

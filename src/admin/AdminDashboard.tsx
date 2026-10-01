@@ -592,7 +592,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [tab, setTab] = useState<Tab>("overview");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   // Keep the latest onSignOut without re-triggering the fetch effect.

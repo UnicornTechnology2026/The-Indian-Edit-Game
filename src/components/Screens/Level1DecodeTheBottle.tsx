@@ -147,7 +147,6 @@ export const DecodeTheBottleGame: React.FC = () => {
     message: string;
     isCorrect: boolean;
   } | null>(null);
-  const [useIframe, setUseIframe] = useState(false);
 
   // ---- Per-question timer -------------------------------------------------
   const activeId = activeHotspot?.id ?? null;
@@ -360,61 +359,53 @@ export const DecodeTheBottleGame: React.FC = () => {
             </span>
           </div>
 
-          {useIframe ? (
-            <iframe
-              src="/decode-the-bottle/index.html"
-              title="Decode The Bottle Canvas Experience"
-              className="w-full h-130 rounded-xl border border-[#3d261a]"
-            />
-          ) : (
-            <div className="relative w-full max-w-sm h-120 flex items-center justify-center select-none overflow-hidden">
-              <div
-                className="relative inline-block transition-transform duration-300 ease-out"
-                style={{ transform: `scale(${zoomLevel})` }}
-              >
-                <img
-                  src={NewBottle}
-                  alt="The Indian Edit Bottle"
-                  className="block h-110 w-auto max-w-full object-contain pointer-events-none rounded-lg shadow-2xl"
-                  referrerPolicy="no-referrer"
-                />
+          <div className="relative w-full max-w-sm h-120 flex items-center justify-center select-none overflow-hidden">
+            <div
+              className="relative inline-block transition-transform duration-300 ease-out"
+              style={{ transform: `scale(${zoomLevel})` }}
+            >
+              <img
+                src={NewBottle}
+                alt="The Indian Edit Bottle"
+                className="block h-110 w-auto max-w-full object-contain pointer-events-none rounded-lg shadow-2xl"
+                referrerPolicy="no-referrer"
+              />
 
-                {/* 5 Pulsing Interactive Hotspots, anchored to the image */}
-                {HOTSPOTS.map((spot) => {
-                  const isSolved = solvedHotspots.includes(spot.id);
-                  const isRed =
-                    closedHotspots.includes(spot.id) ||
-                    timedOutHotspots.includes(spot.id);
-                  return (
-                    <button
-                      key={spot.id}
-                      onClick={() => openHotspot(spot)}
-                      className="absolute z-20 transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer focus:outline-none"
-                      style={{ top: spot.top, left: spot.left }}
-                      title={`Inspect ${spot.label}`}
+              {/* 5 Pulsing Interactive Hotspots, anchored to the image */}
+              {HOTSPOTS.map((spot) => {
+                const isSolved = solvedHotspots.includes(spot.id);
+                const isRed =
+                  closedHotspots.includes(spot.id) ||
+                  timedOutHotspots.includes(spot.id);
+                return (
+                  <button
+                    key={spot.id}
+                    onClick={() => openHotspot(spot)}
+                    className="absolute z-20 transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer focus:outline-none"
+                    style={{ top: spot.top, left: spot.left }}
+                    title={`Inspect ${spot.label}`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-lg ${
+                        isSolved
+                          ? "bg-green-600 text-white border-2 border-green-300"
+                          : isRed
+                            ? "bg-red-600 text-white border-2 border-red-300"
+                            : "bg-[#d4af37] text-[#170f0a] border-2 border-[#fff1b8] animate-bounce"
+                      }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-lg ${
-                          isSolved
-                            ? "bg-green-600 text-white border-2 border-green-300"
-                            : isRed
-                              ? "bg-red-600 text-white border-2 border-red-300"
-                              : "bg-[#d4af37] text-[#170f0a] border-2 border-[#fff1b8] animate-bounce"
-                        }`}
-                      >
-                        {isSolved ? "✓" : spot.number}
-                      </div>
+                      {isSolved ? "✓" : spot.number}
+                    </div>
 
-                      {/* Tooltip on hover */}
-                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-[#170f0a] border border-[#d4af37]/50 text-[10px] text-[#f5d77f] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
-                        {spot.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                    {/* Tooltip on hover */}
+                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-[#170f0a] border border-[#d4af37]/50 text-[10px] text-[#f5d77f] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
+                      {spot.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Right Craft Hotspots Checklist */}

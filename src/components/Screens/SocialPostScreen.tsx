@@ -9,14 +9,6 @@ export const SocialPostScreen: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   const personalityName = state.personality?.name || "THE LUXURY EDITOR";
-  const totalScore =
-    state.totalScore > 0
-      ? state.totalScore
-      : state.scoreRush +
-        state.scoreZero +
-        state.decodeScore +
-        state.blendScore +
-        state.scoreCity;
 
   const captionText = `I'm ${personalityName}  India, but make it your own. Your style. Your story. Your Indian Edit.\n\n#theindianedit #theindianwhisky #abdl_india #indianWhisky`;
 
@@ -30,10 +22,6 @@ export const SocialPostScreen: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 animate-fade-in">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2e1e15] border border-[#d4af37]/40 text-xs text-[#f5d77f]">
-          <ImageIcon className="w-3.5 h-3.5 text-[#d4af37]" />
-          <span>YOUR RESULT</span>
-        </div>
         <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#faf6f0] mt-1">
           Share Your Archetype
         </h2>

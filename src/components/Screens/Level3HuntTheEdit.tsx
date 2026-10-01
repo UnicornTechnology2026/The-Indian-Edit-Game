@@ -20,17 +20,8 @@ type GameScreenState =
   | "timesUp"
   | "final";
 
-const BEST_SCORE_KEY = "indianEditBestScore";
-const BEST_TIME_KEY = "indianEditBestTime";
-
 export const Level3HuntTheEdit: React.FC = () => {
-  const {
-    state: globalState,
-    navigateTo,
-    updateHuntScore,
-    finishHuntGame,
-    toggleSound,
-  } = useGame();
+  const { navigateTo, updateHuntScore, finishHuntGame } = useGame();
 
   // Screen State
   const [screenState, setScreenState] = useState<GameScreenState>("welcome");
