@@ -134,10 +134,10 @@ Your style. Your story. Your Indian Edit. What's yours?\n\n#TheIndianEdit #India
                 "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0))",
             }}
           >
-            <div className="mt-4 text-[12px] text-(--cream-white) opacity-70">
+            {/* <div className="mt-4 text-[12px] text-(--cream-white) opacity-70">
               Please drink responsibly. For consumption by persons of legal
               drinking age only.
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

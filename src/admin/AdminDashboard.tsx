@@ -664,12 +664,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         sort: (r) => (playedFlag(r, playedPhones) ? 1 : 0),
         csv: (r) => (playedFlag(r, playedPhones) ? "Yes" : "No"),
       },
-      {
-        key: "date",
-        label: "Registered",
-        cell: (r) => fmtDate(r.created_at),
-        sort: (r) => dateValue(r.created_at),
-      },
     ],
     [playedPhones],
   );
@@ -826,6 +820,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               defaultSort={{ key: "date", dir: "desc" }}
               getId={(r) => r.id}
               onDelete={handleDelete("registrations")}
+              showSrNo
             />
           </Card>
         )}
