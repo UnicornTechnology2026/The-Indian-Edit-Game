@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { sound } from "../../utils/audio";
+import img from "../../assets/images/NewBottle.png";
 
 export const UploadScreen: React.FC = () => {
   const { state, setScreenshotUploaded, navigateTo } = useGame();
@@ -38,7 +39,7 @@ export const UploadScreen: React.FC = () => {
   };
 
   const handleUseDemoProof = () => {
-    const demoUrl = "/assets/indian-edit-bottle.svg";
+    const demoUrl = img;
     setPreviewUrl(demoUrl);
     processVerification(demoUrl);
   };

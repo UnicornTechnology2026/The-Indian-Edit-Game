@@ -10,7 +10,8 @@ export const SocialPostScreen: React.FC = () => {
 
   const personalityName = state.personality?.name || "THE LUXURY EDITOR";
 
-  const captionText = `I'm ${personalityName}  India, but make it your own. Your style. Your story. Your Indian Edit.\n\n#theindianedit #theindianwhisky #abdl_india #indianWhisky`;
+  const captionText = `Some stories are inherited. Others are reimagined.
+Discover The Indian Edit.\n\n#theindianedit #theindianwhisky #abdl_india #indianWhisky`;
 
   const handleCopyCaption = () => {
     navigator.clipboard.writeText(captionText);
@@ -20,7 +21,7 @@ export const SocialPostScreen: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 animate-fade-in">
+    <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 animate-fade-in">
       <div className="text-center mb-8">
         <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#faf6f0] mt-1">
           Share Your Archetype

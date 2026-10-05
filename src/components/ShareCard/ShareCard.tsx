@@ -3,9 +3,12 @@ import { toPng } from "html-to-image";
 import { Download } from "lucide-react";
 import { useGame } from "../../context/GameContext";
 import { sound } from "../../utils/audio";
+import coverImg from "../../assets/images/indian-edit-cover.png";
 
-const CARD_WIDTH = 1080;
-const CARD_HEIGHT = 1350; // 4:5 — more feed real estate than a square post
+// Matches the native size of the new cover image (2:3)
+const CARD_WIDTH = 1024;
+const CARD_HEIGHT = 1536;
+const PREVIEW_SCALE = 0.4;
 
 export const ShareCard: React.FC = () => {
   const { state } = useGame();
@@ -68,85 +71,73 @@ Your style. Your story. Your Indian Edit. What's yours?\n\n#TheIndianEdit #India
 
   return (
     <div className="flex flex-col items-center gap-5">
-      {/* Scaled preview — the ref'd node is always rendered at full 1080x1350
+      {/* Scaled preview — the ref'd node is always rendered at full 1024x1536
           so the exported PNG matches this exactly, just visually scaled down */}
       <div
         className="overflow-hidden rounded-2xl border border-(--gold-border) shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
-        style={{ width: CARD_WIDTH * 0.32, height: CARD_HEIGHT * 0.32 }}
+        style={{
+          width: CARD_WIDTH * PREVIEW_SCALE,
+          height: CARD_HEIGHT * PREVIEW_SCALE,
+        }}
       >
         <div
           ref={cardRef}
           style={{
             width: CARD_WIDTH,
             height: CARD_HEIGHT,
-            transform: "scale(0.32)",
+            transform: `scale(${PREVIEW_SCALE})`,
             transformOrigin: "top left",
-            background:
-              "radial-gradient(1100px 700px at 50% 30%, var(--bg-tertiary) 0%, var(--bg-secondary) 55%, var(--bg-primary) 100%)",
           }}
-          className="relative flex h-full flex-col text-(--cream-white)"
+          className="relative text-(--cream-white)"
         >
-          <div className="pointer-events-none absolute inset-11 border border-(--gold-border)" />
+          {/* New Instagram post artwork (logo + courtyard) */}
+          <img
+            src={coverImg}
+            alt=""
+            crossOrigin="anonymous"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
 
-          {/* Wordmark */}
-          <div className="relative z-10 pt-22 text-center">
-            <div className="font-serif italic text-[34px] text-(--gold-light)">
-              The Indian Edit
+          {/* Personalised result — sits in the empty dark area of the artwork */}
+          <div
+            className="absolute z-10 flex flex-col items-center text-center"
+            style={{ top: 500, left: 210, width: 700 }}
+          >
+            <div className="text-[18px] tracking-[6px] text-(--gold-light) opacity-80">
+              YOUR ARCHETYPE
             </div>
-            <div className="mt-2.5 text-[13px] tracking-[3.5px] text-(--muted-sand)">
-              THE INDIAN EDIT — MILE MAP OF INDIA
-            </div>
-          </div>
-
-          {/* Result — vertically centered in the space between wordmark and footer,
-              now that there's no bottle art anchoring it lower on the card */}
-          <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-25 text-center">
-            <div className="font-serif text-[80px] font-bold leading-[1.05] tracking-[-0.5px] text-(--cream-white)">
+            <div
+              className="font-serif mt-6 text-[72px] font-bold leading-[1.05] tracking-[-0.5px] text-(--cream-white)"
+              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.7)" }}
+            >
               {archetypeName.replace(/^THE\s+/i, "The ")}
             </div>
-            <div className="font-serif italic mt-7 max-w-180 text-[28px] leading-snug text-(--gold-light)">
+            <div
+              className="font-serif italic mt-6 max-w-150 text-[28px] leading-snug text-(--gold-light)"
+              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}
+            >
               "{tagline}"
             </div>
-
-            <div className="mt-12 flex items-center justify-center gap-4.5 text-[20px]">
-              <span className="font-semibold text-(--cream-white)">
-                Score {totalScore.toLocaleString()} /{" "}
-                {scoreMax.toLocaleString()}
-              </span>
-              <span className="h-1.25 w-1.25 rounded-full bg-(--gold-primary)" />
-              <span className="text-(--muted-sand)">
-                {state.userCity || "Nagpur"}
-              </span>
-            </div>
-            <div className="mt-3.5 text-[16px] text-(--muted-sand)">
-              {displayName}
-            </div>
           </div>
 
-          <div className="relative z-10 mx-auto h-px w-22.5 bg-(--gold-border)" />
-
-          {/* Footer */}
-          <div className="relative z-10 flex items-center justify-between px-22 pt-6 pb-10">
-            <div className="flex flex-col gap-1.5">
-              <div className="text-[16px] font-semibold text-(--gold-light)">
-                @TheIndianEdit
-              </div>
-              <div className="text-[13px] text-(--muted-sand)">
-                #TheIndianEdit #theindianwhisky #abdl_india
-              </div>
+          {/* Footer: handle + legal line over a soft dark gradient for legibility */}
+          <div
+            className="absolute inset-x-0 bottom-0 z-10 pb-8 pt-24 text-center"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0))",
+            }}
+          >
+            <div className="mt-4 text-[12px] text-(--cream-white) opacity-70">
+              Please drink responsibly. For consumption by persons of legal
+              drinking age only.
             </div>
-            <div className="flex h-16.5 w-16.5 items-center justify-center border border-(--gold-border) text-center text-[9px] tracking-wider text-(--muted-sand)">
-              SCAN
-              <br />
-              TO
-              <br />
-              PLAY
-            </div>
-          </div>
-
-          <div className="relative z-10 pb-7 text-center text-[11.5px] text-(--muted-sand) opacity-70">
-            Please drink responsibly. For consumption by persons of legal
-            drinking age only.
           </div>
         </div>
       </div>
