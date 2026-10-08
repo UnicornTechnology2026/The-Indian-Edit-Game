@@ -9,7 +9,7 @@ interface LoadingScreenProps {
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
-  durationMs = 1800,
+  durationMs = 3600,
 }) => {
   const [percent, setPercent] = useState(0);
   const [phase, setPhase] = useState<"loading" | "reveal">("loading");
@@ -84,14 +84,6 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       </AnimatePresence>
 
       {/* Thin gold progress line */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-48 h-0.5 bg-[#2d160b] rounded-full overflow-hidden">
-        <motion.div
-          className="h-full bg-linear-to-r from-[#937119] via-[#d4af37] to-[#fff3c4]"
-          initial={{ width: "0%" }}
-          animate={{ width: `${percent}%` }}
-          transition={{ ease: "linear" }}
-        />
-      </div>
     </motion.div>
   );
 };
