@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ onShowLeaderboard }) => {
             </span>
           </div>
           {/* Experience Jumper Menu */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="px-3 py-1.5 text-xs font-medium tracking-wide flex items-center gap-1.5 rounded-full border border-[#d4af37]/40 bg-[#22160f] hover:bg-[#2e1e15] text-[#f5d77f] hover:border-[#d4af37] transition-colors shadow-sm"
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({ onShowLeaderboard }) => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Quick Login Link */}
           {state.currentScreen !== "screen-login" && !state.otpVerified && (
