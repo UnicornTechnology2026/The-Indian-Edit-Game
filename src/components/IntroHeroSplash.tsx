@@ -74,7 +74,7 @@ export const IntroHeroSplash: React.FC<IntroHeroSplashProps> = ({
         className="absolute bottom-0 inset-x-0 flex flex-col items-center px-4 z-10"
         style={{
           paddingBottom:
-            "max(4rem, calc(env(safe-area-inset-bottom, 0px) + 4rem))",
+            "max(0rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem))",
         }}
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
