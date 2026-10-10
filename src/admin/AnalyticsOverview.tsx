@@ -415,75 +415,75 @@ const Tile: React.FC<{
 
 // ---------- levels ----------
 
-const LevelPanel: React.FC<{ levels: LevelStat[] }> = ({ levels }) => {
-  const totalSecs = levels.reduce((a, l) => a + l.totalSeconds, 0);
-  return (
-    <Panel
-      title="How each level performs"
-      note="Average score, how many runs scored, and where players spend their time."
-    >
-      <div className="grid md:grid-cols-3 gap-3">
-        {levels.map((l, i) => {
-          const pct = l.max > 0 ? (l.avg / l.max) * 100 : 0;
-          return (
-            <div
-              key={l.label}
-              className="rounded-xl bg-[#0c0503] border border-[#d4af37]/15 p-4"
-            >
-              <div className="flex items-center gap-2">
-                <i
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ background: LEVEL_COLORS[i] }}
-                />
-                <div className="text-sm font-semibold text-[#faf5eb]">
-                  {l.name}
-                </div>
-                <span className="ml-auto text-xs text-[#ab9580]">
-                  {l.short}
-                </span>
-              </div>
+// const LevelPanel: React.FC<{ levels: LevelStat[] }> = ({ levels }) => {
+//   const totalSecs = levels.reduce((a, l) => a + l.totalSeconds, 0);
+//   return (
+//     <Panel
+//       title="How each level performs"
+//       note="Average score, how many runs scored, and where players spend their time."
+//     >
+//       <div className="grid md:grid-cols-3 gap-3">
+//         {levels.map((l, i) => {
+//           const pct = l.max > 0 ? (l.avg / l.max) * 100 : 0;
+//           return (
+//             <div
+//               key={l.label}
+//               className="rounded-xl bg-[#0c0503] border border-[#d4af37]/15 p-4"
+//             >
+//               <div className="flex items-center gap-2">
+//                 <i
+//                   className="w-2.5 h-2.5 rounded-full"
+//                   style={{ background: LEVEL_COLORS[i] }}
+//                 />
+//                 <div className="text-sm font-semibold text-[#faf5eb]">
+//                   {l.name}
+//                 </div>
+//                 <span className="ml-auto text-xs text-[#ab9580]">
+//                   {l.short}
+//                 </span>
+//               </div>
 
-              <div className="mt-4 flex items-end justify-between">
-                <div>
-                  <div
-                    className="font-serif text-3xl font-bold tabular-nums leading-none"
-                    style={{ color: LEVEL_COLORS[i] }}
-                  >
-                    {fmt(l.avg)}
-                  </div>
-                  <div className="mt-1 text-xs text-[#ab9580]">
-                    average points
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-serif text-xl font-bold text-[#faf5eb] tabular-nums leading-none">
-                    {fmt(l.max)}
-                  </div>
-                  <div className="mt-1 text-xs text-[#ab9580]">best</div>
-                </div>
-              </div>
+//               <div className="mt-4 flex items-end justify-between">
+//                 <div>
+//                   <div
+//                     className="font-serif text-3xl font-bold tabular-nums leading-none"
+//                     style={{ color: LEVEL_COLORS[i] }}
+//                   >
+//                     {fmt(l.avg)}
+//                   </div>
+//                   <div className="mt-1 text-xs text-[#ab9580]">
+//                     average points
+//                   </div>
+//                 </div>
+//                 <div className="text-right">
+//                   <div className="font-serif text-xl font-bold text-[#faf5eb] tabular-nums leading-none">
+//                     {fmt(l.max)}
+//                   </div>
+//                   <div className="mt-1 text-xs text-[#ab9580]">best</div>
+//                 </div>
+//               </div>
 
-              <dl className="mt-4 grid grid-cols-2 gap-y-2 text-xs">
-                <dt className="text-[#ab9580]">Runs that scored</dt>
-                <dd className="text-right font-semibold text-[#ebd9c0] tabular-nums">
-                  {l.scoredRate}%
-                </dd>
-                <dt className="text-[#ab9580]">Average time</dt>
-                <dd className="text-right font-semibold text-[#ebd9c0] tabular-nums">
-                  {formatDuration(l.avgSeconds)}
-                </dd>
-                <dt className="text-[#ab9580]">Total time</dt>
-                <dd className="text-right font-semibold text-[#ebd9c0] tabular-nums">
-                  {formatDuration(l.totalSeconds)}
-                </dd>
-              </dl>
-            </div>
-          );
-        })}
-      </div>
-    </Panel>
-  );
-};
+//               <dl className="mt-4 grid grid-cols-2 gap-y-2 text-xs">
+//                 <dt className="text-[#ab9580]">Runs that scored</dt>
+//                 <dd className="text-right font-semibold text-[#ebd9c0] tabular-nums">
+//                   {l.scoredRate}%
+//                 </dd>
+//                 <dt className="text-[#ab9580]">Average time</dt>
+//                 <dd className="text-right font-semibold text-[#ebd9c0] tabular-nums">
+//                   {formatDuration(l.avgSeconds)}
+//                 </dd>
+//                 <dt className="text-[#ab9580]">Total time</dt>
+//                 <dd className="text-right font-semibold text-[#ebd9c0] tabular-nums">
+//                   {formatDuration(l.totalSeconds)}
+//                 </dd>
+//               </dl>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </Panel>
+//   );
+// };
 
 // ---------- leaderboard ----------
 
@@ -625,7 +625,7 @@ export const AnalyticsOverview: React.FC<{
         />
       </div>
 
-      <LevelPanel levels={a.levels} />
+      {/* <LevelPanel levels={a.levels} /> */}
 
       <div className="grid lg:grid-cols-3 gap-4">
         <Panel title="Top 5 players" note="Highest total score.">
