@@ -694,7 +694,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
     { id: "players", label: "Players & Scores" },
-    { id: "times", label: "Play Time" },
     { id: "registrations", label: "Registrations" },
   ];
 
@@ -790,7 +789,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             />
           </Card>
         )}
-
+        {/* 
         {data && tab === "times" && (
           <Card title="Time spent per level · total time">
             <DataTable
@@ -804,7 +803,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               showSrNo
             />
           </Card>
-        )}
+        )} */}
 
         {data && tab === "registrations" && (
           <Card title="All registrations">
