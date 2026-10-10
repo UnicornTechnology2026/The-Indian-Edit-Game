@@ -516,7 +516,6 @@ const Leaders: React.FC<{ players: GameResultRow[] }> = ({ players }) => {
             </span>
             <span className="block truncate text-xs text-[#ab9580]">
               {dash(p.user_city)}
-              {p.personality ? ` · ${p.personality}` : ""}
             </span>
           </span>
           <span className="text-right">
