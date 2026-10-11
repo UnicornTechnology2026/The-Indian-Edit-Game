@@ -2,43 +2,63 @@ import { RewardGift } from "../types";
 
 export const REWARD_GIFTS: RewardGift[] = [
   {
-    id: "gift-250",
-    name: "₹250 OFF EXCLUSIVE VOUCHER",
-    desc: "Valid on all sustainable handcrafted products and luxury accessories at The Indian Edit flagship collection.",
+    id: "gift-20ml",
+    name: "20 ML FREE WHISKY REWARD",
+    desc: "Congratulations! Unlock a complimentary 20 ML serving of The Indian Edit Super Premium Whisky.",
     description:
-      "Valid on all sustainable handcrafted products and luxury accessories at The Indian Edit flagship collection.",
-    code: "TIE-HERITAGE250",
-    value: "₹250 Voucher",
-    icon: "🎟️",
-  },
-  {
-    id: "gift-500",
-    name: "₹500 OFF PRIVILEGE REWARD",
-    desc: "Special privilege voucher unlocked for achieving master level precision in the Nagpur Edit experience.",
-    description:
-      "Special privilege voucher unlocked for achieving master level precision in the Nagpur Edit experience.",
-    code: "TIE-PRIVILEGE500",
-    value: "₹500 Voucher",
-    icon: "👑",
-  },
-  {
-    id: "gift-glassware",
-    name: "BESPOKE ARTISAN GLASSWARE SET",
-    desc: "A pair of limited-edition crystalline whisky tumblers engraved with the zero mile stone coordinate seal.",
-    description:
-      "A pair of limited-edition crystalline whisky tumblers engraved with the zero mile stone coordinate seal.",
-    code: "TIE-CRYSTALVIP",
-    value: "Complimentary Set",
+      "Redeem your reward for a complimentary 20 ML serving of The Indian Edit Super Premium Whisky. Terms and conditions apply.",
+    code: "TIE-FREE20ML",
+    value: "20 ML Free",
     icon: "🥃",
   },
   {
-    id: "gift-tasting",
-    name: "VIP PRIVATE MASTERCLASS PASS",
-    desc: "Exclusive invitation for two to our private tasting lounge and blending masterclass.",
+    id: "gift-30ml",
+    name: "30 ML FREE WHISKY REWARD",
+    desc: "Congratulations! Unlock a complimentary 30 ML serving of The Indian Edit Super Premium Whisky.",
     description:
-      "Exclusive invitation for two to our private tasting lounge and blending masterclass.",
-    code: "TIE-TASTINGPASS",
-    value: "VIP Lounge Entry",
-    icon: "✨",
+      "Redeem your reward for a complimentary 30 ML serving of The Indian Edit Super Premium Whisky. Terms and conditions apply.",
+    code: "TIE-FREE30ML",
+    value: "30 ML Free",
+    icon: "🥃",
+  },
+  {
+    id: "gift-10ml",
+    name: "10 ML FREE WHISKY REWARD",
+    desc: "Congratulations! Unlock a complimentary 10 ML serving of The Indian Edit Super Premium Whisky.",
+    description:
+      "Redeem your reward for a complimentary 10 ML serving of The Indian Edit Super Premium Whisky. Terms and conditions apply.",
+    code: "TIE-FREE10ML",
+    value: "10 ML Free",
+    icon: "🥃",
+  },
+  {
+    id: "gift-45ml",
+    name: "45 ML FREE WHISKY REWARD",
+    desc: "Congratulations! Unlock a complimentary 45 ML serving of The Indian Edit Super Premium Whisky.",
+    description:
+      "Redeem your reward for a complimentary 45 ML serving of The Indian Edit Super Premium Whisky. Terms and conditions apply.",
+    code: "TIE-FREE45ML",
+    value: "45 ML Free",
+    icon: "🥃",
+  },
+  {
+    id: "gift-60ml",
+    name: "60 ML FREE WHISKY REWARD",
+    desc: "Congratulations! Unlock a complimentary 60 ML serving of The Indian Edit Super Premium Whisky.",
+    description:
+      "Redeem your reward for a complimentary 60 ML serving of The Indian Edit Super Premium Whisky. Terms and conditions apply.",
+    code: "TIE-FREE60ML",
+    value: "60 ML Free",
+    icon: "🥃",
+  },
+  {
+    id: "gift-60ml",
+    name: "60 ML FREE WHISKY REWARD",
+    desc: "Congratulations! Unlock a complimentary 60 ML serving of The Indian Edit Super Premium Whisky.",
+    description:
+      "Redeem your reward for a complimentary 60 ML serving of The Indian Edit Super Premium Whisky. Terms and conditions apply.",
+    code: "TIE-FREE60ML",
+    value: "60 ML Free",
+    icon: "🥃",
   },
 ];

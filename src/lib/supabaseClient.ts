@@ -98,3 +98,31 @@ export async function supabaseSelect<T>(
   }
   return res.json();
 }
+
+// Call a Postgres function (RPC) exposed through PostgREST.
+export async function supabaseRpc<R = unknown>(
+  fn: string,
+  args: Record<string, unknown> = {},
+): Promise<R> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: baseHeaders,
+    body: JSON.stringify(args),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase rpc ${fn} failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<R>;
+}
+
+// True if this mobile number has already registered / played.
+// Requires supabase-one-play-per-user.sql to have been run once.
+export async function isPhoneAlreadyRegistered(
+  phone: string,
+): Promise<boolean> {
+  const result = await supabaseRpc<boolean>("phone_already_registered", {
+    p_phone: phone,
+  });
+  return result === true;
+}

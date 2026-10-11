@@ -17,9 +17,37 @@ interface ScratchRevealProps {
    *  scratch the foil themselves before the coupon appears. */
   allowInstantReveal?: boolean;
   className?: string;
+  /** "gold" = metallic gold foil (default). "glass" = amber/copper glass card
+   *  that matches the bottle (no gold, no artwork). */
+  variant?: "gold" | "glass" | "image";
+  /** "diamond" paints the gold foil only inside a diamond (rhombus), so the
+   *  transparent corners don't count towards the scratched percentage. */
+  shape?: "rect" | "diamond";
+  /** Used by variant="image": the picture painted as the scratch layer
+   *  (PNG with transparent corners works for non-rectangular cards). */
+  coverImage?: HTMLImageElement | null;
+  /** variant="image": vertical position (0–1) of the printed cover text. */
+  coverTextY?: number;
+  /** Diameter of the scratch "coin" in CSS px. */
+  brushSize?: number;
+  /** Text printed on the glass card's scratch layer. */
+  coverTitle?: string;
+  coverSubtitle?: string;
+  /** Called once, on the first touch/click on the scratch layer. */
+  onScratchStart?: () => void;
 }
 
 const BRUSH_SIZE = 52; // px, diameter of the "coin" used to scratch
+
+// Number of sampled pixels that are still covered (alpha > 0).
+function countOpaque(canvas: HTMLCanvasElement): number {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx || !canvas.width || !canvas.height) return 0;
+  const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let n = 0;
+  for (let i = 3; i < data.length; i += 16) if (data[i] > 0) n++;
+  return n;
+}
 
 /**
  * Generic gold-foil scratch card. The customer must rub the gold foil away;
@@ -32,6 +60,14 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
   revealed: revealedProp,
   allowInstantReveal = false,
   className = "",
+  variant = "gold",
+  shape = "rect",
+  coverImage = null,
+  coverTextY = 0.56,
+  brushSize = BRUSH_SIZE,
+  coverTitle = "SCRATCH",
+  coverSubtitle = "TO REVEAL YOUR PRIVILEGE",
+  onScratchStart,
 }) => {
   const [internalRevealed, setInternalRevealed] = useState(false);
   const revealed = revealedProp ?? internalRevealed;
@@ -47,6 +83,10 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
   const lastCheck = useRef(0);
   const firedRef = useRef(false);
   const lastSize = useRef({ w: 0, h: 0 });
+  const startedRef = useRef(false);
+  // Opaque (still-covered) samples right after painting. Used as the 100%
+  // reference so transparent corners of a non-rectangular card don't count.
+  const baselineRef = useRef(0);
 
   const fireReveal = useCallback(() => {
     if (firedRef.current) return;
@@ -73,6 +113,118 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
 
     ctx.globalCompositeOperation = "source-over";
 
+    // Image scratch layer (e.g. the diamond label): draw it to fill the card.
+    if (variant === "image") {
+      ctx.clearRect(0, 0, w, h);
+      if (coverImage && coverImage.complete && coverImage.naturalWidth) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(coverImage, 0, 0, w, h);
+      } else {
+        // Image still loading: plain red, matching the label colour.
+        ctx.fillStyle = "#a31d2b";
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // Subtle embossed gold text so the red foil reads as "scratch me".
+      if (coverTitle) {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(40,0,0,0.55)";
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 1;
+        ctx.fillStyle = "rgba(240,214,140,0.92)";
+        ctx.font = `600 ${Math.round(w * 0.062)}px "Playfair Display", serif`;
+        ctx.fillText(coverTitle, w / 2, h * coverTextY);
+        if (coverSubtitle) {
+          ctx.fillStyle = "rgba(247,228,180,0.85)";
+          ctx.font = `500 ${Math.max(9, Math.round(w * 0.028))}px Poppins, sans-serif`;
+          ctx.fillText(coverSubtitle, w / 2, h * coverTextY + w * 0.062);
+        }
+        ctx.shadowColor = "transparent";
+      }
+      return;
+    }
+
+    // Glass scratch card: amber/copper tones that match the bottle's glass.
+    // No gold foil, no bottle artwork.
+    if (variant === "glass") {
+      const r = Math.min(18, w / 8);
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(0, 0, w, h, r);
+      ctx.clip();
+
+      const base = ctx.createLinearGradient(0, 0, 0, h);
+      base.addColorStop(0, "#5a1e0f");
+      base.addColorStop(0.5, "#8f3a18");
+      base.addColorStop(1, "#47180a");
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, w, h);
+
+      const glow = ctx.createRadialGradient(
+        w / 2,
+        h * 0.45,
+        0,
+        w / 2,
+        h * 0.45,
+        Math.max(w, h) * 0.6,
+      );
+      glow.addColorStop(0, "rgba(255,150,80,0.30)");
+      glow.addColorStop(1, "rgba(255,150,80,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      // fine diagonal texture so it reads as a scratch-off surface
+      ctx.strokeStyle = "rgba(255,235,210,0.06)";
+      ctx.lineWidth = 1;
+      for (let i = -h; i < w; i += 9) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + h, h);
+        ctx.stroke();
+      }
+
+      // inner border
+      ctx.strokeStyle = "rgba(255,225,195,0.45)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(8, 8, w - 16, h - 16, Math.max(r - 6, 4));
+      ctx.stroke();
+
+      // text
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = "#fbe9d2";
+      ctx.font = `bold ${Math.round(w * 0.14)}px Montserrat, sans-serif`;
+      ctx.fillText(coverTitle, w / 2, h / 2 - w * 0.06);
+      ctx.strokeStyle = "rgba(255,225,195,0.55)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.28, h / 2 + w * 0.02);
+      ctx.lineTo(w * 0.72, h / 2 + w * 0.02);
+      ctx.stroke();
+      ctx.font = `600 ${Math.max(8, Math.round(w * 0.05))}px Montserrat, sans-serif`;
+      ctx.fillStyle = "#f1d3b0";
+      ctx.fillText(coverSubtitle, w / 2, h / 2 + w * 0.09);
+      ctx.restore();
+      return;
+    }
+
+    const isDiamond = shape === "diamond";
+    if (isDiamond) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(w / 2, 0);
+      ctx.lineTo(w, h / 2);
+      ctx.lineTo(w / 2, h);
+      ctx.lineTo(0, h / 2);
+      ctx.closePath();
+      ctx.clip();
+    }
+
     const grad = ctx.createLinearGradient(0, 0, w, h);
     grad.addColorStop(0, resolve("--gold-shimmer", "#fff3c4"));
     grad.addColorStop(0.3, resolve("--gold-primary", "#d4af37"));
@@ -84,7 +236,18 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
 
     ctx.strokeStyle = resolve("--gold-light", "#f7e7a9");
     ctx.lineWidth = 3;
-    ctx.strokeRect(10, 10, w - 20, h - 20);
+    if (isDiamond) {
+      const m = Math.max(6, w * 0.05);
+      ctx.beginPath();
+      ctx.moveTo(w / 2, m * 1.4);
+      ctx.lineTo(w - m * 1.4, h / 2);
+      ctx.lineTo(w / 2, h - m * 1.4);
+      ctx.lineTo(m * 1.4, h / 2);
+      ctx.closePath();
+      ctx.stroke();
+    } else {
+      ctx.strokeRect(10, 10, w - 20, h - 20);
+    }
 
     ctx.fillStyle = "rgba(255,255,255,0.15)";
     for (let x = 20; x < w - 20; x += 20) {
@@ -95,15 +258,26 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
       }
     }
 
-    ctx.font = "bold 15px Montserrat, sans-serif";
+    const big = isDiamond ? Math.max(11, Math.round(w * 0.085)) : 15;
+    const small = isDiamond ? Math.max(8, Math.round(w * 0.048)) : 11;
+    ctx.font = `bold ${big}px Montserrat, sans-serif`;
     ctx.fillStyle = "#170f0a";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("✨ SCRATCH TO REVEAL ✨", w / 2, h / 2 - 10);
-    ctx.font = "bold 11px Montserrat, sans-serif";
+    ctx.fillText(
+      isDiamond ? "SCRATCH TO REVEAL" : "✨ SCRATCH TO REVEAL ✨",
+      w / 2,
+      h / 2 - (isDiamond ? small * 0.9 : 10),
+    );
+    ctx.font = `bold ${small}px Montserrat, sans-serif`;
     ctx.fillStyle = "#3d261a";
-    ctx.fillText("YOUR PRIVILEGE REWARD", w / 2, h / 2 + 15);
-  }, []);
+    ctx.fillText(
+      "YOUR PRIVILEGE REWARD",
+      w / 2,
+      h / 2 + (isDiamond ? big * 0.7 : 15),
+    );
+    if (isDiamond) ctx.restore();
+  }, [shape, variant, coverImage, coverTitle, coverSubtitle]);
 
   // Layout effect so the foil is painted before the browser's first paint —
   // the coupon is never visible, not even for a single frame.
@@ -127,6 +301,7 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
       canvas.height = h;
       try {
         paintFoil();
+        baselineRef.current = countOpaque(canvas);
         setFoilFailed(false);
       } catch (err) {
         console.error("Scratch foil failed to paint", err);
@@ -146,14 +321,13 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx || !canvas.width || !canvas.height) return;
 
-    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let transparent = 0;
-    let sampled = 0;
-    for (let i = 3; i < data.length; i += 16) {
-      sampled++;
-      if (data[i] === 0) transparent++;
-    }
-    const pct = sampled ? Math.round((transparent / sampled) * 100) : 0;
+    const base = baselineRef.current;
+    const pct = base
+      ? Math.max(
+          0,
+          Math.min(100, Math.round((1 - countOpaque(canvas) / base) * 100)),
+        )
+      : 0;
     setScratchedPct(pct);
     if (pct >= threshold) fireReveal();
   }, [revealed, threshold, fireReveal]);
@@ -171,7 +345,7 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
     // movement doesn't leave gaps).
     const from = lastPoint.current ?? { x, y };
     ctx.globalCompositeOperation = "destination-out";
-    ctx.lineWidth = BRUSH_SIZE;
+    ctx.lineWidth = brushSize;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -179,7 +353,7 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
     ctx.lineTo(x, y);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(x, y, BRUSH_SIZE / 2, 0, Math.PI * 2);
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
     ctx.fill();
     lastPoint.current = { x, y };
 
@@ -215,6 +389,10 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
           ref={canvasRef}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture?.(e.pointerId);
+            if (!startedRef.current) {
+              startedRef.current = true;
+              onScratchStart?.();
+            }
             isDrawing.current = true;
             lastPoint.current = null;
             scratchAt(e.clientX, e.clientY);

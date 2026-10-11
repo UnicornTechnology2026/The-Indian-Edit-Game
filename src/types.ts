@@ -33,6 +33,8 @@ export interface RewardGift {
   code: string;
   value?: string;
   icon?: string;
+  /** Free whisky quantity (in ml) shown on the scratch-card coupon. */
+  freeMl?: number;
 }
 
 export type CityCategory =

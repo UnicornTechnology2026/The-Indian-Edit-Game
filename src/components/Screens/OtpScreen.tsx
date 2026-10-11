@@ -9,6 +9,7 @@ export const OtpScreen: React.FC = () => {
   const [error, setError] = useState("");
   const [timeLeft, setTimeLeft] = useState(45);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Focus first input on mount
@@ -44,27 +45,55 @@ export const OtpScreen: React.FC = () => {
     }
   };
 
-  const handleVerify = (e?: React.FormEvent) => {
+  const handleVerify = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const code = digits.join("");
-
-    // Accept 123456 or any 6-digit code for interactive demo flow
     if (code.length < 6) {
       setError("Please enter the complete 6-digit code.");
       sound.playWrong();
       return;
     }
-
-    sound.playSuccess();
-    setOtpVerified(true);
-    registerUser();
-    navigateTo("screen-welcome");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: state.userPhone, code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Verification failed. Please try again.");
+        sound.playWrong();
+        return;
+      }
+      sound.playSuccess();
+      setOtpVerified(true);
+      registerUser();
+      navigateTo("screen-welcome");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const autofillDemoCode = () => {
-    setDigits(["1", "2", "3", "4", "5", "6"]);
-    setError("");
+  const handleResend = async () => {
     sound.playClick();
+    setError("");
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: state.userPhone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return setError(data.error || "Could not resend code.");
+      setDigits(["", "", "", "", "", ""]);
+      setTimeLeft(45);
+      inputRefs.current[0]?.focus();
+    } catch {
+      setError("Network error. Please try again.");
+    }
   };
 
   return (
@@ -123,7 +152,7 @@ export const OtpScreen: React.FC = () => {
         </form>
 
         {/* Quick Demo Helper */}
-        <div className="mt-4 flex items-center justify-center gap-2">
+        {/* <div className="mt-4 flex items-center justify-center gap-2">
           <button
             type="button"
             onClick={autofillDemoCode}
@@ -132,7 +161,7 @@ export const OtpScreen: React.FC = () => {
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>Use Demo Code (123456)</span>
           </button>
-        </div>
+        </div> */}
 
         {/* Resend Timer */}
         <div className="mt-6 pt-4 border-t border-[#3d261a] text-xs text-[#a69383]">

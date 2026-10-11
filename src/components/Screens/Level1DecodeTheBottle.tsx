@@ -41,27 +41,8 @@ const HOTSPOTS: Hotspot[] = [
     ],
   },
   {
-    id: "identity",
-    number: 2,
-    label: "THE INDIAN IDENTITY",
-    top: "41%",
-    left: "46%",
-    question:
-      "Which visual idea is most strongly communicated by the central emblem?",
-    answers: [
-      {
-        key: "A",
-        text: "Indian identity with modern luxury",
-        correct: true,
-      },
-      { key: "B", text: "European sports culture", correct: false },
-      { key: "C", text: "Tropical beach culture", correct: false },
-      { key: "D", text: "Generic commercial packaging", correct: false },
-    ],
-  },
-  {
     id: "typography",
-    number: 3,
+    number: 2,
     label: "THE EDIT TYPOGRAPHY",
     top: "53%",
     left: "46%",
@@ -75,7 +56,7 @@ const HOTSPOTS: Hotspot[] = [
   },
   {
     id: "signature",
-    number: 4,
+    number: 3,
     label: "THE SIGNATURE CREST",
     top: "70%",
     left: "46%",
@@ -85,24 +66,6 @@ const HOTSPOTS: Hotspot[] = [
       { key: "B", text: "Blue and Neon Green", correct: false },
       { key: "C", text: "Purple and Plain White", correct: false },
       { key: "D", text: "Orange and Pale Blue", correct: false },
-    ],
-  },
-  {
-    id: "closer",
-    number: 5,
-    label: "EMBOSSED ARTISAN BASE",
-    top: " 90%",
-    left: "46%",
-    question: "What craft style is shown in the heavy crystal glass base?",
-    answers: [
-      {
-        key: "A",
-        text: "Thoughtful bottle craft inspired by heritage",
-        correct: true,
-      },
-      { key: "B", text: "Large-scale plastic production.", correct: false },
-      { key: "C", text: "Single-use plastic packaging", correct: false },
-      { key: "D", text: "Unweighted aluminum can styling", correct: false },
     ],
   },
 ];
