@@ -7,9 +7,64 @@ import { sound } from "../../utils/audio";
 import { ScratchReveal } from "../ScratchCard/ScratchReveal";
 import bannerShape from "../../assets/images/banner-shape.png";
 import bannerTop from "../../assets/images/banner-top.webp";
+import logo from "../../assets/images/editLogo.svg";
 
 // Same hit-area as the diamond artwork (tips sit ~1.6% inside the square).
 const DIAMOND_CLIP = "polygon(50% 1.6%, 98.4% 50%, 50% 98.4%, 1.6% 50%)";
+
+// Golden sunflower emblem (same artwork as the card cover) drawn as SVG so it
+// stays crisp at any size. Petals + dot ring are generated, not hand-placed.
+const SunflowerEmblem: React.FC = () => {
+  const petals = Array.from({ length: 32 }, (_, i) => i * (360 / 32));
+  const dots = Array.from({ length: 32 }, (_, i) => i * (360 / 32) + 360 / 64);
+  return (
+    <svg viewBox="-100 -100 200 200" className="w-full h-full" aria-hidden>
+      <defs>
+        <linearGradient id="petalGold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFE08A" />
+          <stop offset="0.55" stopColor="#F2B731" />
+          <stop offset="1" stopColor="#D9961A" />
+        </linearGradient>
+        <radialGradient id="discGold" cx="0.4" cy="0.35" r="0.8">
+          <stop offset="0" stopColor="#FFD768" />
+          <stop offset="0.6" stopColor="#E8A92A" />
+          <stop offset="1" stopColor="#B87912" />
+        </radialGradient>
+      </defs>
+      {dots.map((a) => (
+        <circle
+          key={`d${a}`}
+          cx="0"
+          cy="-93"
+          r="2.6"
+          fill="#F6C945"
+          transform={`rotate(${a})`}
+        />
+      ))}
+      {petals.map((a) => (
+        <ellipse
+          key={`p${a}`}
+          cx="0"
+          cy="-62"
+          rx="6.4"
+          ry="22"
+          fill="url(#petalGold)"
+          transform={`rotate(${a})`}
+        />
+      ))}
+      <circle r="42" fill="url(#discGold)" stroke="#9A6410" strokeWidth="1.5" />
+      <circle
+        r="29"
+        fill="none"
+        stroke="#FFF1C2"
+        strokeOpacity="0.75"
+        strokeWidth="1.4"
+      />
+      <circle r="17" fill="#E9782A" />
+      <circle r="8" fill="#FFD768" />
+    </svg>
+  );
+};
 
 export const ScratchCardScreen: React.FC = () => {
   const { state, setScratchRevealed } = useGame();
@@ -18,7 +73,8 @@ export const ScratchCardScreen: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   const gift = state.selectedGift || REWARD_GIFTS[0];
-  const freeMl = gift.freeMl ?? 30;
+  const freeMl = gift.freeMl;
+  const rewardDesc = gift.desc;
   const voucherCode = `EDIT-NGP-${(state.userPhone || "7892").slice(-4)}-ROYAL`;
 
   // Preload the red diamond so the scratch foil is painted with the exact
@@ -113,44 +169,48 @@ export const ScratchCardScreen: React.FC = () => {
                 />
 
                 {/* Reward — sits below the elephant */}
-                <div
-                  className="absolute left-0 right-0 flex flex-col items-center justify-center text-center"
-                  style={{ top: "34%", height: "46%" }}
-                >
-                  <div
-                    className="font-['Poppins',sans-serif] uppercase text-[#f3dca4]/90"
-                    style={{ fontSize: "2.9cqw", letterSpacing: "0.32em" }}
-                  >
+                {/* Reward — sits below the elephant */}
+                <div className="absolute inset-x-0 top-[24%] h-[46%] flex flex-col items-center justify-center text-center">
+                  {/* Your Reward */}
+                  <div className="font-['Poppins',sans-serif] uppercase text-[#f3dca4]/90 text-[2.9cqw] tracking-[0.32em]">
                     Your Reward
                   </div>
-                  <div
-                    className="mt-[1.6cqw] font-['Playfair_Display',serif] font-semibold uppercase leading-[1.05] text-[#E2C878]"
-                    style={{
-                      fontSize: "9.5cqw",
-                      textShadow: "0 2px 6px rgba(60,0,0,0.55)",
-                    }}
-                  >
+
+                  {/* Free 20 ML */}
+                  <div className="mt-[1.6cqw] font-['Playfair_Display',serif] font-semibold uppercase leading-[1.05] text-[#E2C878] text-[9.5cqw] [text-shadow:0_2px_6px_rgba(60,0,0,0.55)]">
                     Free {freeMl} ML
                   </div>
-                  <div
-                    className="my-[2.4cqw] h-px w-[34%]"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, transparent, #E2C878, transparent)",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="inline-flex items-center gap-[1.2cqw] cursor-pointer rounded-full border border-[#D9AE5A]/60 bg-[#A3151B]/40 font-['Poppins',sans-serif] font-medium tracking-wide text-[#fff3df] hover:bg-[#E2C878] hover:text-[#8E1017] transition-colors"
-                    style={{ fontSize: "3.1cqw", padding: "1.4cqw 3.6cqw" }}
-                  >
-                    <Copy style={{ width: "1.15em", height: "1.15em" }} />
-                    <span>{copied ? "Copied!" : voucherCode}</span>
-                  </button>
+
+                  {/* Description from rewards.ts */}
+                  <p className="mt-[3.2cqw] w-[78%] font-['Playfair_Display',serif] font-bold leading-snug text-[#F0D58A] text-[3.3cqw] [text-shadow:0_1px_3px_rgba(60,0,0,0.5)]">
+                    {gift.desc}
+                  </p>
+
+                  {/* Divider */}
+                  <div className="mt-[2.4cqw] h-px w-[34%] bg-linear-to-r from-transparent via-[#E2C878] to-transparent" />
                 </div>
               </div>
             </ScratchReveal>
+
+            {/* Spinning sunflower at the bottom tip — always visible */}
+            <motion.div
+              className="absolute left-1/2 pointer-events-none"
+              style={{
+                top: "79.5%",
+                width: "14%",
+                aspectRatio: "1 / 1",
+                x: "-50%",
+              }}
+            >
+              <motion.div
+                className="w-full h-full"
+                style={{ filter: "drop-shadow(0 1px 2px rgba(60,0,0,0.5))" }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              >
+                <SunflowerEmblem />
+              </motion.div>
+            </motion.div>
 
             {/* Elephant — always visible, sits on top of the foil */}
             <img

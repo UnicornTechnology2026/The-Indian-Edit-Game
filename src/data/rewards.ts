@@ -10,6 +10,7 @@ export const REWARD_GIFTS: RewardGift[] = [
     code: "TIE-FREE20ML",
     value: "20 ML Free",
     icon: "🥃",
+    freeMl: 20,
   },
   {
     id: "gift-30ml",
@@ -20,6 +21,7 @@ export const REWARD_GIFTS: RewardGift[] = [
     code: "TIE-FREE30ML",
     value: "30 ML Free",
     icon: "🥃",
+    freeMl: 30,
   },
   {
     id: "gift-10ml",
@@ -30,6 +32,7 @@ export const REWARD_GIFTS: RewardGift[] = [
     code: "TIE-FREE10ML",
     value: "10 ML Free",
     icon: "🥃",
+    freeMl: 10,
   },
   {
     id: "gift-45ml",
@@ -40,6 +43,7 @@ export const REWARD_GIFTS: RewardGift[] = [
     code: "TIE-FREE45ML",
     value: "45 ML Free",
     icon: "🥃",
+    freeMl: 45,
   },
   {
     id: "gift-60ml",
@@ -50,6 +54,7 @@ export const REWARD_GIFTS: RewardGift[] = [
     code: "TIE-FREE60ML",
     value: "60 ML Free",
     icon: "🥃",
+    freeMl: 60,
   },
   {
     id: "gift-60ml",
@@ -60,5 +65,6 @@ export const REWARD_GIFTS: RewardGift[] = [
     code: "TIE-FREE60ML",
     value: "60 ML Free",
     icon: "🥃",
+    freeMl: 60,
   },
 ];
