@@ -5,7 +5,6 @@ import { MapPin, User, Phone } from "lucide-react";
 import { sound } from "../../utils/audio";
 import { PrivacyPolicyModal } from "../Modals/PrivacyPolicyModal";
 import { Check } from "lucide-react"; // add Check to your existing lucide import
-import { isPhoneAlreadyRegistered } from "../../lib/supabaseClient";
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -39,12 +38,9 @@ export const LoginScreen: React.FC = () => {
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
-  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isChecking) return;
     setError("");
 
     if (!name.trim()) {
@@ -64,23 +60,6 @@ export const LoginScreen: React.FC = () => {
       setError("Please accept the Privacy Policy to continue.");
       sound.playWrong();
       return;
-    }
-
-    // One play per registered mobile number.
-    setIsChecking(true);
-    try {
-      const exists = await isPhoneAlreadyRegistered(cleanPhone);
-      if (exists) {
-        sound.playWrong();
-        setAlreadyRegistered(true);
-        return;
-      }
-    } catch (err) {
-      // If the check itself fails (network etc.) let the user continue;
-      // the unique index in the database still blocks a duplicate row.
-      console.error("Registration check failed:", err);
-    } finally {
-      setIsChecking(false);
     }
 
     const chosenCity = city === "Other" ? customCity.trim() || "Nagpur" : city;
@@ -286,64 +265,16 @@ export const LoginScreen: React.FC = () => {
             <motion.div variants={item} className="pt-2">
               <motion.button
                 type="submit"
-                disabled={isChecking}
-                className="w-full py-3.5 px-6 btn-gold normal-case tracking-normal text-sm font-bold flex items-center justify-center gap-2.5 cursor-pointer relative overflow-hidden disabled:opacity-70 disabled:cursor-wait"
+                className="w-full py-3.5 px-6 btn-gold normal-case tracking-normal text-sm font-bold flex items-center justify-center gap-2.5 cursor-pointer relative overflow-hidden"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span>
-                  {isChecking ? "Checking..." : "Verify & Unlock the Edit"}
-                </span>
+                <span>Verify & Unlock the Edit</span>
               </motion.button>
             </motion.div>
           </form>
         </motion.div>
       </motion.div>
-      {/* Already registered notification */}
-      <AnimatePresence>
-        {alreadyRegistered && (
-          <motion.div
-            className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/75 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="already-registered-title"
-          >
-            <motion.div
-              className="gold-card w-full max-w-sm p-6 sm:p-8 text-center"
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] as const }}
-            >
-              <div className="text-4xl mb-3">🔒</div>
-              <h3
-                id="already-registered-title"
-                className="font-serif text-xl sm:text-2xl font-bold text-[#faf6f0]"
-              >
-                You have already registered
-              </h3>
-              <p className="text-sm text-[#e5d8cb] mt-3 leading-relaxed">
-                This mobile number has already played The Indian Edit. If you
-                want to play again, please come and play another day.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  setAlreadyRegistered(false);
-                }}
-                className="mt-6 w-full py-3 btn-gold text-sm font-bold cursor-pointer"
-              >
-                Got it
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <PrivacyPolicyModal
         isOpen={isPolicyOpen}
         onClose={() => setIsPolicyOpen(false)}
