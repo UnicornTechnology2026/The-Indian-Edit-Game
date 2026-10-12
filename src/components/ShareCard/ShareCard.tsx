@@ -3,7 +3,7 @@ import { toPng } from "html-to-image";
 import { Download } from "lucide-react";
 import { useGame } from "../../context/GameContext";
 import { sound } from "../../utils/audio";
-import coverImg from "../../assets/images/indian-edit-cover.png";
+import coverImg from "../../assets/images/instagram_post.jpeg";
 
 // Matches the native size of the new cover image (2:3)
 const CARD_WIDTH = 1024;
@@ -18,6 +18,7 @@ export const ShareCard: React.FC = () => {
   const previewRef = useRef<HTMLDivElement | null>(null);
   const [exporting, setExporting] = useState(false);
   const [scale, setScale] = useState(PREVIEW_MAX_WIDTH / CARD_WIDTH);
+  const CROP = 36;
 
   // Keep the preview scale in sync with the width actually available
   useLayoutEffect(() => {
@@ -40,7 +41,7 @@ export const ShareCard: React.FC = () => {
     personality?.quote?.replace(/^"|"$/g, "") ??
     "Elegance is the quiet harmony of craft and provenance.";
   const totalScore = state.totalScore > 0 ? state.totalScore : 0;
-  const scoreMax = 10000;
+  const scoreMax = 550;
 
   const firstName = (state.userName || "VIP Guest").split(" ")[0];
   const lastInitial = (state.userName || "").trim().split(" ")[1]?.[0];
@@ -63,7 +64,7 @@ Your style. Your story. Your Indian Edit. What's yours?\n\n#TheIndianEdit #India
       });
       const a = document.createElement("a");
       a.href = dataUrl;
-      a.download = `The-Indian-Edit-${(state.userName || "Nagpur").replace(/\s+/g, "-")}-Archetype.png`;
+      a.download = "The-Indian-Edit.png";
       a.click();
     } finally {
       setExporting(false);
@@ -125,49 +126,25 @@ Your style. Your story. Your Indian Edit. What's yours?\n\n#TheIndianEdit #India
               src={coverImg}
               alt=""
               crossOrigin="anonymous"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
+              className="absolute inset-x-0 w-full object-cover"
+              style={{ top: -CROP, height: CARD_HEIGHT + CROP * 2 }}
             />
 
-            {/* Personalised result — sits in the empty dark area of the artwork */}
-            <div
-              className="absolute z-10 flex flex-col items-center text-center"
-              style={{ top: 500, left: 210, width: 700 }}
-            >
-              <div className="text-[18px] tracking-[6px] text-(--gold-light) opacity-80">
-                YOUR ARCHETYPE
-              </div>
-              <div
-                className="font-serif mt-6 text-[72px] font-bold leading-[1.05] tracking-[-0.5px] text-(--cream-white)"
-                style={{ textShadow: "0 2px 18px rgba(0,0,0,0.7)" }}
-              >
-                {archetypeName.replace(/^THE\s+/i, "The ")}
-              </div>
-              <div
-                className="font-serif italic mt-6 max-w-150 text-[28px] leading-snug text-(--gold-light)"
-                style={{ textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}
-              >
-                "{tagline}"
-              </div>
-            </div>
-
             {/* Footer: handle + legal line over a soft dark gradient for legibility */}
+          </div>
+          {/* Score */}
+          <div className="absolute inset-x-0 top-240 z-10 flex flex-col items-center text-center">
+            <div className="text-[20px] tracking-[8px] uppercase text-(--gold-light) opacity-80">
+              Your Score
+            </div>
             <div
-              className="absolute inset-x-0 bottom-0 z-10 pb-8 pt-24 text-center"
-              style={{
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0))",
-              }}
+              className="font-serif mt-3 text-[120px] font-bold leading-none text-(--cream-white)"
+              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.7)" }}
             >
-              {/* <div className="mt-4 text-[12px] text-(--cream-white) opacity-70">
-              Please drink responsibly. For consumption by persons of legal
-              drinking age only.
-            </div> */}
+              {totalScore.toLocaleString("en-IN")}
+              <span className="ml-3 text-[40px] font-normal text-(--gold-light)/70">
+                / {scoreMax.toLocaleString("en-IN")}
+              </span>
             </div>
           </div>
         </div>

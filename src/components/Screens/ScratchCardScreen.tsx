@@ -121,7 +121,7 @@ export const ScratchCardScreen: React.FC = () => {
         {/* Soft gold glow behind the diamond */}
         <motion.div
           aria-hidden
-          className="absolute -inset-[12%] pointer-events-none rounded-full"
+          className="absolute inset-[12%] pointer-events-none rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(212,175,55,0.28) 0%, rgba(163,21,27,0.18) 35%, transparent 68%)",

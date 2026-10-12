@@ -10,8 +10,11 @@ export const SocialPostScreen: React.FC = () => {
 
   const personalityName = state.personality?.name || "THE LUXURY EDITOR";
 
-  const captionText = `Some stories are inherited. Others are reimagined.
-Discover The Indian Edit.\n\n#theindianedit #theindianwhisky #abdl_india #indianWhisky`;
+  const captionText = `Every clue leads to something closer to you.
+
+A journey of discovery. A little mystery. A side of India waiting to be uncovered.
+
+It starts here. Are you ready to unlock your edit?.\n\n#theindianedit #theindianwhisky #abdl_india #indianWhisky`;
 
   const handleCopyCaption = () => {
     navigator.clipboard.writeText(captionText);

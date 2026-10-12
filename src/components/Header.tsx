@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ onShowLeaderboard }) => {
             </span>
           </div>
           {/* Experience Jumper Menu */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="px-3 py-1.5 text-xs font-medium tracking-wide flex items-center gap-1.5 rounded-full border border-[#d4af37]/40 bg-[#22160f] hover:bg-[#2e1e15] text-[#f5d77f] hover:border-[#d4af37] transition-colors shadow-sm"
@@ -144,10 +144,10 @@ export const Header: React.FC<HeaderProps> = ({ onShowLeaderboard }) => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Quick Login Link */}
-          {state.currentScreen !== "screen-login" && !state.otpVerified && (
+          {/* {state.currentScreen !== "screen-login" && !state.otpVerified && (
             <button
               onClick={() => navigateTo("screen-login")}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1a0c06] border border-[#d4af37]/40 text-xs text-[#faf5eb] hover:text-[#f7e7a9] hover:border-[#d4af37] transition-all cursor-pointer"
@@ -155,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({ onShowLeaderboard }) => {
               <KeyRound className="w-3.5 h-3.5 text-[#d4af37]" />
               <span>Login</span>
             </button>
-          )}
+          )} */}
         </div>
       </div>
     </header>
