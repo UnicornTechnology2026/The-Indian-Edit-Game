@@ -38,9 +38,12 @@ export const LoginScreen: React.FC = () => {
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isChecking) return;
     setError("");
 
     if (!name.trim()) {
@@ -60,6 +63,34 @@ export const LoginScreen: React.FC = () => {
       setError("Please accept the Privacy Policy to continue.");
       sound.playWrong();
       return;
+    }
+
+    // One call: the server checks "already registered" and sends the SMS
+    setIsChecking(true);
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: cleanPhone }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 409) {
+        sound.playWrong();
+        setAlreadyRegistered(true);
+        return;
+      }
+      if (!res.ok) {
+        sound.playWrong();
+        setError(data.error || "Could not send the code. Please try again.");
+        return;
+      }
+    } catch {
+      sound.playWrong();
+      setError("Network error. Please try again.");
+      return;
+    } finally {
+      setIsChecking(false);
     }
 
     const chosenCity = city === "Other" ? customCity.trim() || "Nagpur" : city;
