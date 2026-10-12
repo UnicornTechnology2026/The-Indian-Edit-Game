@@ -27,7 +27,7 @@ It starts here. Are you ready to unlock your edit?.\n\n#theindianedit #theindian
     <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 animate-fade-in">
       <div className="text-center mb-8">
         <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#faf6f0] mt-1">
-          Share Your Archetype
+          Share Your Edit Score
         </h2>
         <p className="text-xs text-[#f2ead9 ] mt-1">
           Download your card or copy the caption to post on Instagram.
