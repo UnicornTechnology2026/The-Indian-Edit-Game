@@ -5,6 +5,7 @@ import { MapPin, User, Phone } from "lucide-react";
 import { sound } from "../../utils/audio";
 import { PrivacyPolicyModal } from "../Modals/PrivacyPolicyModal";
 import { Check } from "lucide-react"; // add Check to your existing lucide import
+import bannerRound from "../../assets/images/banner-round.webp";
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -67,6 +68,7 @@ export const LoginScreen: React.FC = () => {
 
     // One call: the server checks "already registered" and sends the SMS
     setIsChecking(true);
+    let sent = false;
     try {
       const res = await fetch("/api/send-otp", {
         method: "POST",
@@ -85,12 +87,14 @@ export const LoginScreen: React.FC = () => {
         setError(data.error || "Could not send the code. Please try again.");
         return;
       }
+      sent = true;
     } catch {
       sound.playWrong();
       setError("Network error. Please try again.");
       return;
     } finally {
-      setIsChecking(false);
+      // On success keep the spinner running until the OTP screen takes over
+      if (!sent) setIsChecking(false);
     }
 
     const chosenCity = city === "Other" ? customCity.trim() || "Nagpur" : city;
@@ -296,11 +300,41 @@ export const LoginScreen: React.FC = () => {
             <motion.div variants={item} className="pt-2">
               <motion.button
                 type="submit"
-                className="w-full py-3.5 px-6 btn-gold normal-case tracking-normal text-sm font-bold flex items-center justify-center gap-2.5 cursor-pointer relative overflow-hidden"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                disabled={isChecking}
+                aria-busy={isChecking}
+                className={`w-full py-3.5 px-6 btn-gold normal-case tracking-normal text-sm font-bold flex items-center justify-center gap-2.5 relative overflow-hidden ${
+                  isChecking ? "cursor-wait opacity-95" : "cursor-pointer"
+                }`}
+                style={
+                  isChecking
+                    ? {
+                        background: "#170f0a",
+                        color: "#f7e7a9",
+                        border: "1px solid rgba(212,175,55,0.6)",
+                      }
+                    : undefined
+                }
+                whileHover={isChecking ? undefined : { scale: 1.02 }}
+                whileTap={isChecking ? undefined : { scale: 0.98 }}
               >
-                <span>Verify & Unlock the Edit</span>
+                {isChecking ? (
+                  <>
+                    <motion.img
+                      src={bannerRound}
+                      alt=""
+                      className="w-7 h-7 object-contain"
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1.2,
+                        ease: "linear",
+                      }}
+                    />
+                    <span>Sending code…</span>
+                  </>
+                ) : (
+                  <span>Verify & Unlock the Edit</span>
+                )}
               </motion.button>
             </motion.div>
           </form>
