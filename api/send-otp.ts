@@ -20,15 +20,17 @@ export default async function handler(req: any, res: any) {
   try {
     // Both checks at the same time
     const [dup, prevRes] = await Promise.all([
-      sb("rpc/phone_already_registered", {
-        method: "POST",
-        body: JSON.stringify({ p_phone: phone }),
-      }),
+      // Is this number already in the registrations table?
+      sb(`registrations?user_phone=eq.${phone}&select=user_phone&limit=1`),
       sb(`otp_codes?phone=eq.${phone}&select=last_sent_at`),
     ]);
 
-    if (dup.ok && (await dup.json()) === true)
-      return res.status(409).json({ error: "This number has already played." });
+    if (!dup.ok) throw new Error(await dup.text());
+    const existing = await dup.json();
+    if (Array.isArray(existing) && existing.length > 0)
+      return res
+        .status(409)
+        .json({ error: "This number is already registered." });
 
     const prev = await prevRes.json();
     if (

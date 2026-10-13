@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence, type Variants } from "motion/react";
 import { useGame } from "../../context/GameContext";
-import { MapPin, User, Phone } from "lucide-react";
+import { MapPin, User, Phone, X } from "lucide-react";
 import { sound } from "../../utils/audio";
 import { PrivacyPolicyModal } from "../Modals/PrivacyPolicyModal";
-import { Check } from "lucide-react"; // add Check to your existing lucide import
 import bannerRound from "../../assets/images/banner-round.webp";
+import { Check } from "lucide-react"; // add Check to your existing lucide import
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -340,6 +341,66 @@ export const LoginScreen: React.FC = () => {
           </form>
         </motion.div>
       </motion.div>
+      {/* Already registered popup */}
+      {createPortal(
+        <AnimatePresence>
+          {alreadyRegistered && (
+            <motion.div
+              className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setAlreadyRegistered(false)}
+            >
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                className="gold-card relative w-full max-w-sm p-6 sm:p-8 text-center"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => {
+                    sound.playClick();
+                    setAlreadyRegistered(false);
+                  }}
+                  className="absolute top-3 right-3 text-[#d4af37] hover:text-[#f7e7a9] cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <img
+                  src={bannerRound}
+                  alt=""
+                  className="w-14 h-14 mx-auto mb-4 object-contain"
+                />
+                <h3 className="font-serif text-xl font-bold text-[#faf6f0] mb-2">
+                  You're already registered
+                </h3>
+                <p className="text-sm text-[#e5d8cb] leading-relaxed mb-6">
+                  This mobile number has already been used to play The Indian
+                  Edit. You can log in again tomorrow.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setAlreadyRegistered(false);
+                  }}
+                  className="w-full py-3 px-6 btn-gold normal-case tracking-normal text-sm font-bold cursor-pointer"
+                >
+                  Got it
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
       <PrivacyPolicyModal
         isOpen={isPolicyOpen}
         onClose={() => setIsPolicyOpen(false)}
