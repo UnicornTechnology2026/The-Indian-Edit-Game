@@ -134,12 +134,16 @@ export const ScratchReveal: React.FC<ScratchRevealProps> = ({
         ctx.shadowBlur = 4;
         ctx.shadowOffsetY = 1;
         ctx.fillStyle = "rgba(240,214,140,0.92)";
+        // coverTextY is the vertical CENTRE of the whole text block
+        // (title + subtitle), so 0.5 puts it dead-centre in the card.
+        const gap = coverSubtitle ? w * 0.062 : 0;
+        const titleY = h * coverTextY - gap / 2;
         ctx.font = `600 ${Math.round(w * 0.062)}px "Playfair Display", serif`;
-        ctx.fillText(coverTitle, w / 2, h * coverTextY);
+        ctx.fillText(coverTitle, w / 2, titleY);
         if (coverSubtitle) {
           ctx.fillStyle = "rgba(247,228,180,0.85)";
           ctx.font = `500 ${Math.max(9, Math.round(w * 0.028))}px Poppins, sans-serif`;
-          ctx.fillText(coverSubtitle, w / 2, h * coverTextY + w * 0.062);
+          ctx.fillText(coverSubtitle, w / 2, titleY + gap);
         }
         ctx.shadowColor = "transparent";
       }

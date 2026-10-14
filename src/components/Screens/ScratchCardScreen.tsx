@@ -155,7 +155,7 @@ export const ScratchCardScreen: React.FC = () => {
               coverImage={shape}
               coverTitle="SCRATCH TO REVEAL"
               coverSubtitle="YOUR REWARD"
-              coverTextY={0.58}
+              coverTextY={0.5}
               brushSize={44}
               className="w-full h-full"
             >
