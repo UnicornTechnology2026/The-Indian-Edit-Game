@@ -104,7 +104,7 @@ export const ScratchCardScreen: React.FC = () => {
       </h2>
 
       <p className="text-xs text-[#f2ead9] mt-1 max-w-sm mx-auto">
-        Rub the gold foil on the diamond to reveal your free whisky coupon.
+        Scratch the diamond to reveal your free whisky coupon.
       </p>
 
       {/* The scratch card — a square box that holds the diamond */}
