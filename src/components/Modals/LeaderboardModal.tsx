@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { supabaseSelect } from "../../lib/supabaseClient";
-import bottleImg from "../../assets/images/leaderboard.png";
+import bottleImg from "../../assets/images/leaderboard.webp";
 
 interface LeaderboardRow {
   user_name: string;
