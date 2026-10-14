@@ -78,11 +78,11 @@ It starts here. Are you ready to unlock your edit?.\n\n#theindianedit #theindian
             <button
               onClick={() => {
                 sound.playClick();
-                navigateTo("screen-upload");
+                navigateTo("screen-scratch");
               }}
               className="w-full py-3 btn-gold text-xs font-bold flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <span>Verify Share & Unlock Scratch Reward</span>
+              <span>Unlock Scratch Reward</span>
             </button>
           </div>
         </div>
