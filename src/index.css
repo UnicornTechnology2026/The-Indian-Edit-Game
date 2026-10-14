@@ -408,3 +408,40 @@
     animation: none;
   }
 }
+
+/* ------------------------------------------------------------------
+   No text cursor / caret over the game UI.
+   Only real form fields keep the text cursor and text selection.
+   ------------------------------------------------------------------ */
+@layer base {
+  html,
+  body,
+  body * {
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+    caret-color: transparent;
+  }
+
+  button,
+  a,
+  [role="button"],
+  summary,
+  select,
+  label[for] {
+    cursor: pointer;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+    -webkit-user-select: text;
+    user-select: text;
+    caret-color: auto;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}

@@ -26,7 +26,7 @@ interface LeaderboardModalProps {
   onClose: () => void;
 }
 
-const PAGE_SIZE = 6; // players per page
+const PAGE_SIZE = 5; // players per page
 const FETCH_LIMIT = 100; // how many top scores to load in total
 
 // Where the leaderboard sits ON the bottle, as a percentage of the bottle
@@ -262,7 +262,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-black/85 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       {/* Refresh / close — pinned to the screen corner, off the bottle */}
@@ -295,7 +295,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           style={{
             // Capped by the 340px max AND the viewport height, so the card
             // always shrinks proportionally (never squashed or stretched).
-            width: `min(100%, 340px, calc((100svh - 24px) * ${ratio}))`,
+            width: `min(100%, 270px, calc((100svh - 24px) * ${ratio}))`,
             aspectRatio: `${ratio}`,
             containerType: "inline-size",
             visibility: bounds ? "visible" : "hidden",
@@ -403,7 +403,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 textShadow: TEXT_SHADOW,
                 borderBottom: "1px solid rgba(212,175,55,0.6)",
                 paddingBottom: "0.6cqw",
-                marginBottom: "1.4cqw",
+                marginBottom: "2.6cqw",
               }}
             >
               <span>Rank</span>
@@ -415,7 +415,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               className="flex-1 min-h-0 grid"
               style={{
                 gridTemplateRows: `repeat(${PAGE_SIZE}, 8cqw)`,
-                rowGap: "1.8cqw",
+                rowGap: "3.5cqw",
                 alignContent: "start",
               }}
             >
