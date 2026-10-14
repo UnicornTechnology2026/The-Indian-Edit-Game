@@ -130,21 +130,20 @@ Your style. Your story. Your Indian Edit. What's yours?\n\n#TheIndianEdit #India
               style={{ top: -CROP, height: CARD_HEIGHT + CROP * 2 }}
             />
 
-            {/* Footer: handle + legal line over a soft dark gradient for legibility */}
-          </div>
-          {/* Score */}
-          <div className="absolute inset-x-0 top-240 z-10 flex flex-col items-center text-center">
-            <div className="text-[20px] tracking-[8px] uppercase text-(--gold-light) opacity-80">
-              Your Score
-            </div>
-            <div
-              className="font-serif mt-3 text-[120px] font-bold leading-none text-(--cream-white)"
-              style={{ textShadow: "0 2px 18px rgba(0,0,0,0.7)" }}
-            >
-              {totalScore.toLocaleString("en-IN")}
-              <span className="ml-3 text-[40px] font-normal text-(--gold-light)/70">
-                / {scoreMax.toLocaleString("en-IN")}
-              </span>
+            {/* Score */}
+            <div className="absolute inset-x-0 top-240 z-10 flex flex-col items-center text-center">
+              <div className="text-[20px] tracking-[8px] uppercase text-(--gold-light) opacity-80">
+                Your Score
+              </div>
+              <div
+                className="font-serif mt-3 text-[120px] font-bold leading-none text-(--cream-white)"
+                style={{ textShadow: "0 2px 18px rgba(0,0,0,0.7)" }}
+              >
+                {totalScore.toLocaleString("en-IN")}
+                <span className="ml-3 text-[40px] font-normal text-(--gold-light)/70">
+                  / {scoreMax.toLocaleString("en-IN")}
+                </span>
+              </div>
             </div>
           </div>
         </div>

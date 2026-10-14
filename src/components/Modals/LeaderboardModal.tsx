@@ -8,8 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { supabaseSelect } from "../../lib/supabaseClient";
-import bottleImg from "../../assets/images/NewBottle.png";
-import bannerTop from "../../assets/images/banner-top.webp";
+import bottleImg from "../../assets/images/leaderboard.png";
 
 interface LeaderboardRow {
   user_name: string;
@@ -30,15 +29,99 @@ interface LeaderboardModalProps {
 const PAGE_SIZE = 6; // players per page
 const FETCH_LIMIT = 100; // how many top scores to load in total
 
-// Where the leaderboard sits on the bottle (percent of the 605x1419 image).
-const PANEL = { top: 32, height: 56, left: 3, right: 8 };
+// Where the leaderboard sits ON the bottle, as a percentage of the bottle
+// itself (not of the PNG canvas). It starts just under the gold "THE INDIAN
+// EDIT" lettering and stops above the engraved "THE INDIAN" at the base.
+const CONTENT = { top: 45.8, height: 46.5, left: 8.5, right: 8.5 };
+
+// Lifts the page-turn row (‹ 1 / 1 ›) up. Bigger number = higher on the bottle,
+// 0 = original position. Unit: 1 = 1% of the bottle's width.
+const PAGINATION_UP = 12;
+
+// Fallback bottle proportions (width / height) until the PNG has loaded.
+const DEFAULT_RATIO = 238 / 550;
+5;
+// ---------------------------------------------------------------------------
+// The bottle PNG has transparent margins. We measure the real bottle (its
+// opaque pixels) once, then size the card to the bottle itself so the text can
+// be placed on the glass with exact percentages and nothing gets squashed.
+// ---------------------------------------------------------------------------
+interface Bounds {
+  nw: number; // natural width of the PNG
+  nh: number; // natural height of the PNG
+  x: number; // bottle bounding box inside the PNG
+  y: number;
+  w: number;
+  h: number;
+}
+
+let boundsCache: Bounds | null = null;
+
+const useBottleBounds = (src: string): Bounds | null => {
+  const [bounds, setBounds] = useState<Bounds | null>(boundsCache);
+
+  useEffect(() => {
+    if (boundsCache) return;
+    const img = new Image();
+    img.onload = () => {
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      let result: Bounds = { nw, nh, x: 0, y: 0, w: nw, h: nh };
+      try {
+        const c = document.createElement("canvas");
+        c.width = nw;
+        c.height = nh;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const { data } = ctx.getImageData(0, 0, nw, nh);
+          let minX = nw,
+            minY = nh,
+            maxX = -1,
+            maxY = -1;
+          for (let y = 0; y < nh; y++) {
+            for (let x = 0; x < nw; x++) {
+              if (data[(y * nw + x) * 4 + 3] > 40) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+              }
+            }
+          }
+          if (maxX > minX && maxY > minY) {
+            result = {
+              nw,
+              nh,
+              x: minX,
+              y: minY,
+              w: maxX - minX + 1,
+              h: maxY - minY + 1,
+            };
+          }
+        }
+      } catch {
+        /* fall back to the whole image */
+      }
+      boundsCache = result;
+      setBounds(result);
+    };
+    img.src = src;
+  }, [src]);
+
+  return bounds;
+};
 
 const GOLD_TEXT: React.CSSProperties = {
   background: "linear-gradient(180deg,#fff2b8 0%,#e6c25a 45%,#9a7420 100%)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   color: "transparent",
+  filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.85))",
 };
+
+// Soft shadow so text stays readable straight on the bottle (no panel behind it).
+const TEXT_SHADOW = "0 1px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6)";
 
 const RANK_COLORS: Record<number, string> = {
   1: "#f5c84c",
@@ -46,21 +129,26 @@ const RANK_COLORS: Record<number, string> = {
   3: "#d98a5b",
 };
 
+// Same width for the header "Rank" column and every row's rank cell so the
+// columns line up exactly.
+const RANK_COL = "12cqw";
+const SIDE_PAD = "3.2cqw";
+
 const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
   const color = RANK_COLORS[rank];
   if (color) {
     return (
       <span
         className="relative inline-flex items-center justify-center"
-        style={{ width: "8cqw", height: "8cqw" }}
+        style={{ width: "6.6cqw", height: "6.6cqw" }}
       >
         <Crown
-          style={{ width: "8cqw", height: "8cqw", color, fill: color }}
+          style={{ width: "6.6cqw", height: "6.6cqw", color, fill: color }}
           strokeWidth={1.2}
         />
         <span
           className="absolute font-serif font-bold"
-          style={{ fontSize: "2.8cqw", color: "#3a1208", top: "2.6cqw" }}
+          style={{ fontSize: "2.4cqw", color: "#3a1208", top: "2.2cqw" }}
         >
           {rank}
         </span>
@@ -71,13 +159,13 @@ const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
     <span
       className="inline-flex items-center justify-center rounded-full font-serif font-bold"
       style={{
-        width: "6.4cqw",
-        height: "6.4cqw",
-        fontSize: "3cqw",
-        paddingTop: "1cqw",
+        width: "5.4cqw",
+        height: "5.4cqw",
+        fontSize: "2.6cqw",
         color: "#f1d27a",
-        border: "0.35cqw solid #d4af37",
-        background: "rgba(30,6,3,0.6)",
+        border: "0.3cqw solid #d4af37",
+        background: "rgba(30,6,3,0.45)",
+        textShadow: TEXT_SHADOW,
       }}
     >
       {rank}
@@ -94,7 +182,7 @@ const Divider: React.FC = () => (
         background: "linear-gradient(90deg,transparent,#d4af37)",
       }}
     />
-    <span style={{ color: "#d4af37", fontSize: "2.4cqw" }}>◆ ❖ ◆</span>
+    <span style={{ color: "#d4af37", fontSize: "2.2cqw" }}>◆ ❖ ◆</span>
     <span
       style={{
         height: 1,
@@ -114,6 +202,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
+  const bounds = useBottleBounds(bottleImg);
 
   const load = () => {
     setLoading(true);
@@ -159,79 +248,99 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   const pageRows = filtered.slice(startIndex, startIndex + PAGE_SIZE);
 
   const navBtn = (disabled: boolean): React.CSSProperties => ({
-    width: "7cqw",
-    height: "7cqw",
+    width: "6cqw",
+    height: "6cqw",
     borderRadius: 999,
     border: "1px solid rgba(212,175,55,0.7)",
-    background: "rgba(35,7,4,0.6)",
+    background: "rgba(20,4,2,0.35)",
     color: "#f1d27a",
     opacity: disabled ? 0.3 : 1,
     cursor: disabled ? "not-allowed" : "pointer",
   });
+
+  const ratio = bounds ? bounds.w / bounds.h : DEFAULT_RATIO;
 
   return (
     <div
       className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
-      <div className="min-h-full flex items-center justify-center pl-4">
+      {/* Refresh / close — pinned to the screen corner, off the bottle */}
+      <div className="fixed top-3 right-3 z-10 flex gap-1.5">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            load();
+          }}
+          title="Refresh"
+          className="p-2 rounded-full bg-black/50 text-[#f1d27a] hover:bg-black/70 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          title="Close"
+          className="p-2 rounded-full bg-black/50 text-[#f1d27a] hover:bg-black/70 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="min-h-full flex items-center justify-center px-4 py-3">
         <div
-          className="relative w-full"
+          className="relative"
           style={{
-            maxWidth: 280,
-            aspectRatio: "605 / 1419",
+            // Capped by the 340px max AND the viewport height, so the card
+            // always shrinks proportionally (never squashed or stretched).
+            width: `min(100%, 340px, calc((100svh - 24px) * ${ratio}))`,
+            aspectRatio: `${ratio}`,
             containerType: "inline-size",
+            visibility: bounds ? "visible" : "hidden",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Bottle */}
+          {/* Bottle — the PNG is cropped to the bottle's own edges */}
           <img
             src={bottleImg}
             alt="The Indian Edit bottle"
-            className="absolute inset-0 w-full h-full select-none pointer-events-none"
+            className="absolute select-none pointer-events-none"
+            style={
+              bounds
+                ? {
+                    maxWidth: "none",
+                    width: `${(bounds.nw / bounds.w) * 100}%`,
+                    height: `${(bounds.nh / bounds.h) * 100}%`,
+                    left: `${(-bounds.x / bounds.w) * 100}%`,
+                    top: `${(-bounds.y / bounds.h) * 100}%`,
+                  }
+                : { inset: 0, width: "100%", height: "100%" }
+            }
             draggable={false}
-          />
-
-          {/* Amber panel that covers the original label, feathered at the edges */}
-          <div
-            className="absolute"
-            style={{
-              top: `${PANEL.top}%`,
-              height: `${PANEL.height}%`,
-              left: `${PANEL.left}%`,
-              right: `${PANEL.right}%`,
-              background:
-                "radial-gradient(ellipse at 50% 40%, #8f3016 0%, #6a2010 45%, #3f150c 100%)",
-              WebkitMaskImage:
-                "linear-gradient(to right,transparent,#000 7%,#000 93%,transparent), linear-gradient(to bottom,transparent,#000 5%,#000 95%,transparent)",
-              maskImage:
-                "linear-gradient(to right,transparent,#000 7%,#000 93%,transparent), linear-gradient(to bottom,transparent,#000 5%,#000 95%,transparent)",
-              WebkitMaskComposite: "source-in",
-              maskComposite: "intersect",
-            }}
           />
 
           {/* Leaderboard content */}
           <div
             className="absolute flex flex-col"
             style={{
-              top: `${PANEL.top + 1.5}%`,
-              height: `${PANEL.height - 3}%`,
-              left: `${PANEL.left + 3}%`,
-              right: `${PANEL.right + 3}%`,
+              top: `${CONTENT.top}%`,
+              height: `${CONTENT.height}%`,
+              left: `${CONTENT.left}%`,
+              right: `${CONTENT.right}%`,
             }}
           >
             {/* Title */}
             <div
               className="flex flex-col items-center"
-              style={{ gap: "0.6cqw" }}
+              style={{ gap: "0.4cqw" }}
             >
-              <img src={bannerTop} alt="" className="h-15 w-30" />
               <h3
                 className="font-serif font-bold uppercase"
                 style={{
-                  fontSize: "7.4cqw",
-                  letterSpacing: "0.02em",
+                  fontSize: "6.6cqw",
+                  letterSpacing: "0.03em",
                   lineHeight: 1,
                   ...GOLD_TEXT,
                 }}
@@ -239,25 +348,25 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 Leaderboard
               </h3>
             </div>
-            <div style={{ margin: "1.2cqw 0 1.8cqw" }}>
+            <div style={{ margin: "1cqw 0 1.6cqw" }}>
               <Divider />
             </div>
             {/* Search */}
             <div
-              className="flex items-center"
+              className="flex items-center shrink-0"
               style={{
-                gap: "1.8cqw",
+                gap: "1.6cqw",
                 height: "8cqw",
-                padding: "5cqw 3.4cqw",
-                marginBottom: "1.8cqw",
+                padding: `4cqw ${SIDE_PAD}`,
+                marginBottom: "1.6cqw",
                 borderRadius: 999,
                 border: "1px solid rgba(212,175,55,0.7)",
-                background: "rgba(35,7,4,0.6)",
+                background: "rgba(20,4,2,0.3)",
               }}
             >
               <Search
                 className="shrink-0"
-                style={{ width: "3.8cqw", height: "3.8cqw", color: "#e6c25a" }}
+                style={{ width: "3.4cqw", height: "3.4cqw", color: "#e6c25a" }}
               />
               <input
                 type="text"
@@ -268,8 +377,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 }}
                 placeholder="Search player"
                 aria-label="Search players"
-                className="flex-1 min-w-0 bg-transparent outline-none font-serif placeholder:text-[#f3d9a4]/50"
-                style={{ fontSize: "3.4cqw", color: "#f7ecd6" }}
+                className="flex-1 min-w-0 bg-transparent outline-none font-serif placeholder:text-[#f3d9a4]/60"
+                style={{ fontSize: "3.2cqw", color: "#f7ecd6" }}
               />
               {query && (
                 <button
@@ -278,34 +387,35 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   className="shrink-0 flex items-center justify-center"
                   style={{ color: "#e6c25a" }}
                 >
-                  <X style={{ width: "3.8cqw", height: "3.8cqw" }} />
+                  <X style={{ width: "3.4cqw", height: "3.4cqw" }} />
                 </button>
               )}
             </div>
             {/* Column headers */}
             <div
-              className="grid font-serif font-bold uppercase"
+              className="grid font-serif font-bold uppercase shrink-0"
               style={{
-                gridTemplateColumns: "13cqw 1fr auto",
-                padding: "0 3cqw",
-                fontSize: "2.4cqw",
+                gridTemplateColumns: `${RANK_COL} 1fr auto`,
+                padding: `0 ${SIDE_PAD}`,
+                fontSize: "2.2cqw",
                 letterSpacing: "0.08em",
                 color: "#e6c25a",
+                textShadow: TEXT_SHADOW,
                 borderBottom: "1px solid rgba(212,175,55,0.6)",
-                marginBottom: "1.6cqw",
-                marginTop: "1cqw",
+                paddingBottom: "0.6cqw",
+                marginBottom: "1.4cqw",
               }}
             >
               <span>Rank</span>
               <span>Player</span>
               <span>Score</span>
             </div>
-            {/* Rows: always 8 slots per page, with clear space between rows */}
+            {/* Rows: always PAGE_SIZE slots per page, with clear space between */}
             <div
               className="flex-1 min-h-0 grid"
               style={{
-                gridTemplateRows: `repeat(${PAGE_SIZE}, 8.4cqw)`,
-                rowGap: "2.4cqw",
+                gridTemplateRows: `repeat(${PAGE_SIZE}, 8cqw)`,
+                rowGap: "1.8cqw",
                 alignContent: "start",
               }}
             >
@@ -325,9 +435,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     gridRow: `1 / span ${PAGE_SIZE}`,
                     gap: "2cqw",
                     color: "#f3d9a4",
+                    textShadow: TEXT_SHADOW,
                   }}
                 >
-                  <p style={{ fontSize: "3.4cqw" }}>{error}</p>
+                  <p style={{ fontSize: "3.2cqw" }}>{error}</p>
                   <button
                     onClick={load}
                     className="rounded-full bg-[#d4af37] text-[#170f0a] font-semibold"
@@ -346,8 +457,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     className="flex items-center justify-center text-center"
                     style={{
                       gridRow: `1 / span ${PAGE_SIZE}`,
-                      fontSize: "3.4cqw",
+                      fontSize: "3.2cqw",
                       color: "#f3d9a4",
+                      textShadow: TEXT_SHADOW,
                     }}
                   >
                     No players found for “{query.trim()}”.
@@ -359,8 +471,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   className="flex items-center justify-center text-center"
                   style={{
                     gridRow: `1 / span ${PAGE_SIZE}`,
-                    fontSize: "3.4cqw",
+                    fontSize: "3.2cqw",
                     color: "#f3d9a4",
+                    textShadow: TEXT_SHADOW,
                   }}
                 >
                   No scores yet. Be the first!
@@ -378,12 +491,12 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                       className="flex items-center"
                       style={{
                         height: "100%",
-                        padding: rank > 3 ? "0 4.6cqw" : "0.5cqw 3cqw",
+                        padding: `4cqw ${SIDE_PAD}`,
                         borderRadius: 999,
-                        border: "1px solid rgba(212,175,55,0.65)",
+                        border: "1px solid rgba(212,175,55,0.6)",
                         background: isFirst
-                          ? "linear-gradient(90deg, rgba(212,175,55,0.45), rgba(90,20,10,0.55))"
-                          : "rgba(35,7,4,0.55)",
+                          ? "linear-gradient(90deg, rgba(212,175,55,0.35), rgba(90,20,10,0.15))"
+                          : "rgba(20,4,2,0.28)",
                         boxShadow: isFirst
                           ? "0 0 12px rgba(212,175,55,0.35)"
                           : "none",
@@ -391,16 +504,17 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     >
                       <span
                         className="flex items-center shrink-0"
-                        style={{ width: rank > 3 ? "11.4cqw" : "13cqw" }}
+                        style={{ width: RANK_COL }}
                       >
                         <RankBadge rank={rank} />
                       </span>
                       <span
                         className="font-serif truncate flex-1 min-w-0"
                         style={{
-                          fontSize: "3.6cqw",
+                          fontSize: "4cqw",
                           color: "#f7ecd6",
                           lineHeight: 1.2,
+                          textShadow: TEXT_SHADOW,
                         }}
                       >
                         {e.name}
@@ -408,9 +522,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                       <span
                         className="font-serif font-bold tabular-nums shrink-0"
                         style={{
-                          fontSize: "3.6cqw",
+                          fontSize: "4cqw",
                           color: "#f1d27a",
                           lineHeight: 1.2,
+                          textShadow: TEXT_SHADOW,
                         }}
                       >
                         {e.total.toLocaleString()}
@@ -422,8 +537,13 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             {/* Pagination */}
             {!loading && !error && filtered.length > 0 && (
               <div
-                className="flex items-center justify-center"
-                style={{ gap: "4cqw", marginBottom: "-1.5cqw" }}
+                className="flex items-center justify-center shrink-0"
+                style={{
+                  gap: "3.5cqw",
+                  paddingTop: "1cqw",
+                  position: "relative",
+                  top: `-${PAGINATION_UP}cqw`,
+                }}
               >
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -432,14 +552,15 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   className="flex items-center justify-center transition-colors"
                   style={navBtn(currentPage <= 1)}
                 >
-                  <ChevronLeft style={{ width: "4cqw", height: "4cqw" }} />
+                  <ChevronLeft style={{ width: "3.6cqw", height: "3.6cqw" }} />
                 </button>
                 <span
                   className="font-serif tabular-nums"
                   style={{
-                    fontSize: "3cqw",
+                    fontSize: "2.8cqw",
                     color: "#f1d27a",
                     letterSpacing: "0.1em",
+                    textShadow: TEXT_SHADOW,
                   }}
                 >
                   {currentPage} / {totalPages}
@@ -451,28 +572,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   className="flex items-center justify-center transition-colors"
                   style={navBtn(currentPage >= totalPages)}
                 >
-                  <ChevronRight style={{ width: "4cqw", height: "4cqw" }} />
+                  <ChevronRight style={{ width: "3.6cqw", height: "3.6cqw" }} />
                 </button>
               </div>
-            )}{" "}
-          </div>
-
-          {/* Refresh / close */}
-          <div className="absolute top-2 right-2 flex gap-1">
-            <button
-              onClick={load}
-              title="Refresh"
-              className="p-2 rounded-full bg-black/50 text-[#f1d27a] hover:bg-black/70 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onClose}
-              title="Close"
-              className="p-2 rounded-full bg-black/50 text-[#f1d27a] hover:bg-black/70 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            )}
           </div>
         </div>
       </div>
