@@ -262,7 +262,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-black/85 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 overflow-y-hidden overflow-x-hidden bg-black/85 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       {/* Refresh / close — pinned to the screen corner, off the bottle */}
